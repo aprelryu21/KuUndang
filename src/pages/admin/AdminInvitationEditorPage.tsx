@@ -43,6 +43,8 @@ import {
   Upload,
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { DriveUploader } from '../../components/DriveUploader';
+import { googleDriveService } from '../../services/googleDriveService';
 
 type EditorTab =
   | 'general'
@@ -145,6 +147,24 @@ export const AdminInvitationEditorPage: React.FC = () => {
       await weddingService.updateGallery(id, gallery);
       await weddingService.updateGifts(id, gifts);
       await weddingService.updateSections(id, sections);
+
+      // Sinkronkan data ke Google Sheets jika Apps Script terhubung
+      if (googleDriveService.isConfigured()) {
+        try {
+          await googleDriveService.saveInvitationToSheets({
+            ...invitation,
+            bride,
+            groom,
+            events,
+            stories,
+            gallery,
+            gifts,
+            sections,
+          });
+        } catch (gasErr) {
+          console.warn('Apps Script sync warning:', gasErr);
+        }
+      }
 
       setSaveStatus('saved');
       showToast('Seluruh perubahan berhasil disimpan! ♡', 'success');
@@ -542,73 +562,51 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                 />
               </div>
 
-              {/* Photo URLs */}
+              {/* Photo URLs with Google Drive Uploader */}
               <div className="pt-3 border-t border-[#EFE8DE] space-y-4">
                 <div>
                   <p className="text-xs font-bold text-[#283D52]">Foto Latar Belakang Setiap Sesi</p>
                   <p className="text-[11px] text-[#768692]">
-                    Sesuaikan foto latar belakang untuk cover pembuka, home hero, rangkaian acara, dan penutup.
+                    Unggah langsung dari HP/Laptop ke Google Drive (folder KUUNDANG) atau masukkan URL foto.
                   </p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[11px] font-medium text-[#283D52] mb-1">
-                      URL Foto Sampul Cover Opening
-                    </label>
-                    <input
-                      type="text"
-                      value={invitation.cover_image}
-                      onChange={(e) => {
-                        setInvitation({ ...invitation, cover_image: e.target.value });
-                        markDirty();
-                      }}
-                      className="w-full px-3 py-2 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs text-[#24313A]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-medium text-[#283D52] mb-1">
-                      URL Foto Home / Hero Section
-                    </label>
-                    <input
-                      type="text"
-                      value={invitation.hero_image}
-                      onChange={(e) => {
-                        setInvitation({ ...invitation, hero_image: e.target.value });
-                        markDirty();
-                      }}
-                      className="w-full px-3 py-2 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs text-[#24313A]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-medium text-[#283D52] mb-1">
-                      URL Foto Latar Rangkaian Acara (Events)
-                    </label>
-                    <input
-                      type="text"
-                      value={invitation.events_image || ''}
-                      placeholder="https://images.unsplash.com/..."
-                      onChange={(e) => {
-                        setInvitation({ ...invitation, events_image: e.target.value });
-                        markDirty();
-                      }}
-                      className="w-full px-3 py-2 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs text-[#24313A]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-medium text-[#283D52] mb-1">
-                      URL Foto Latar Penutup / Footer (Closing)
-                    </label>
-                    <input
-                      type="text"
-                      value={invitation.closing_image || ''}
-                      placeholder="https://images.unsplash.com/..."
-                      onChange={(e) => {
-                        setInvitation({ ...invitation, closing_image: e.target.value });
-                        markDirty();
-                      }}
-                      className="w-full px-3 py-2 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs text-[#24313A]"
-                    />
-                  </div>
+                  <DriveUploader
+                    label="Foto Sampul Cover Opening"
+                    value={invitation.cover_image}
+                    onChange={(url) => {
+                      setInvitation({ ...invitation, cover_image: url });
+                      markDirty();
+                    }}
+                    placeholder="Pilih foto sampul cover..."
+                  />
+                  <DriveUploader
+                    label="Foto Home / Hero Section"
+                    value={invitation.hero_image}
+                    onChange={(url) => {
+                      setInvitation({ ...invitation, hero_image: url });
+                      markDirty();
+                    }}
+                    placeholder="Pilih foto home / hero..."
+                  />
+                  <DriveUploader
+                    label="Foto Latar Rangkaian Acara (Events)"
+                    value={invitation.events_image || ''}
+                    onChange={(url) => {
+                      setInvitation({ ...invitation, events_image: url });
+                      markDirty();
+                    }}
+                    placeholder="Pilih foto latar acara..."
+                  />
+                  <DriveUploader
+                    label="Foto Latar Penutup / Footer (Closing)"
+                    value={invitation.closing_image || ''}
+                    onChange={(url) => {
+                      setInvitation({ ...invitation, closing_image: url });
+                      markDirty();
+                    }}
+                    placeholder="Pilih foto penutup..."
+                  />
                 </div>
               </div>
             </div>
@@ -725,20 +723,16 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#283D52] mb-1">
-                    URL Foto Portrait
-                  </label>
-                  <input
-                    type="text"
-                    value={bride.photo_url}
-                    onChange={(e) => {
-                      setBride({ ...bride, photo_url: e.target.value });
-                      markDirty();
-                    }}
-                    className="w-full px-3 py-2 bg-[#FFFCF7] border border-[#283D52]/15 rounded-xl text-xs"
-                  />
-                </div>
+                <DriveUploader
+                  label="Foto Portrait Mempelai Wanita"
+                  value={bride.photo_url}
+                  onChange={(url) => {
+                    setBride({ ...bride, photo_url: url });
+                    markDirty();
+                  }}
+                  placeholder="Pilih foto mempelai wanita..."
+                  helperText="Format: Foto rasio portrait (3:4 atau 1:1)"
+                />
 
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-[#283D52] mb-1">
@@ -855,20 +849,16 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#283D52] mb-1">
-                    URL Foto Portrait
-                  </label>
-                  <input
-                    type="text"
-                    value={groom.photo_url}
-                    onChange={(e) => {
-                      setGroom({ ...groom, photo_url: e.target.value });
-                      markDirty();
-                    }}
-                    className="w-full px-3 py-2 bg-[#FFFCF7] border border-[#283D52]/15 rounded-xl text-xs"
-                  />
-                </div>
+                <DriveUploader
+                  label="Foto Portrait Mempelai Pria"
+                  value={groom.photo_url}
+                  onChange={(url) => {
+                    setGroom({ ...groom, photo_url: url });
+                    markDirty();
+                  }}
+                  placeholder="Pilih foto mempelai pria..."
+                  helperText="Format: Foto rasio portrait (3:4 atau 1:1)"
+                />
 
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-[#283D52] mb-1">
@@ -1275,22 +1265,17 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-[11px] font-semibold text-[#768692] mb-1">
-                      URL Foto Momen
-                    </label>
-                    <input
-                      type="text"
-                      value={st.photo_url || ''}
-                      onChange={(e) => {
-                        const updated = [...stories];
-                        updated[index].photo_url = e.target.value;
-                        setStories(updated);
-                        markDirty();
-                      }}
-                      className="w-full px-3 py-2 bg-[#FFFCF7] border border-[#283D52]/15 rounded-xl text-xs"
-                    />
-                  </div>
+                  <DriveUploader
+                    label="Foto Momen (Google Drive)"
+                    value={st.photo_url || ''}
+                    onChange={(url) => {
+                      const updated = [...stories];
+                      updated[index].photo_url = url;
+                      setStories(updated);
+                      markDirty();
+                    }}
+                    placeholder="Pilih foto kenangan momen ini..."
+                  />
 
                   <div>
                     <label className="block text-[11px] font-semibold text-[#768692] mb-1">
@@ -1324,42 +1309,43 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
               </p>
             </div>
 
-            {/* Add Photo Form */}
-            <form onSubmit={handleAddGalleryImage} className="p-4 rounded-2xl bg-[#F7F2EA] border border-[#283D52]/10 flex flex-col sm:flex-row gap-3 items-end">
-              <div className="flex-1 w-full">
-                <label className="block text-[11px] font-semibold text-[#768692] mb-1">
-                  URL Foto Baru
-                </label>
-                <input
-                  type="url"
-                  required
-                  placeholder="https://images.unsplash.com/..."
+            {/* Add Photo Form with Google Drive Uploader */}
+            <div className="p-4 rounded-2xl bg-[#F7F2EA] border border-[#283D52]/10 space-y-3">
+              <p className="text-xs font-bold text-[#283D52]">Tambah Foto ke Galeri</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
+                <DriveUploader
+                  label="Pilih Foto dari Perangkat"
                   value={newImageUrl}
-                  onChange={(e) => setNewImageUrl(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#FFFCF7] border border-[#283D52]/15 rounded-xl text-xs"
+                  onChange={(url) => setNewImageUrl(url)}
+                  placeholder="Pilih foto untuk galeri..."
+                  helperText="Tersimpan langsung di Google Drive folder KUUNDANG"
                 />
-              </div>
 
-              <div className="flex-1 w-full">
-                <label className="block text-[11px] font-semibold text-[#768692] mb-1">
-                  Keterangan Foto (Caption)
-                </label>
-                <input
-                  type="text"
-                  placeholder="Contoh: Senja di Medowo"
-                  value={newImageCaption}
-                  onChange={(e) => setNewImageCaption(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#FFFCF7] border border-[#283D52]/15 rounded-xl text-xs"
-                />
-              </div>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-[#283D52] mb-1">
+                      Keterangan Foto (Caption)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Contoh: Senja di Medowo"
+                      value={newImageCaption}
+                      onChange={(e) => setNewImageCaption(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-[#FFFCF7] border border-[#283D52]/15 rounded-xl text-xs text-[#24313A]"
+                    />
+                  </div>
 
-              <button
-                type="submit"
-                className="w-full sm:w-auto px-4 py-2 bg-[#283D52] hover:bg-[#1E2E3E] text-[#FFFCF7] rounded-xl text-xs font-semibold uppercase tracking-wider whitespace-nowrap cursor-pointer"
-              >
-                + Tambah Foto
-              </button>
-            </form>
+                  <button
+                    type="button"
+                    onClick={(e) => handleAddGalleryImage(e as any)}
+                    disabled={!newImageUrl}
+                    className="w-full py-2.5 bg-[#283D52] disabled:opacity-50 hover:bg-[#1E2E3E] text-[#FFFCF7] rounded-xl text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors"
+                  >
+                    + Masukkan ke Grid Galeri
+                  </button>
+                </div>
+              </div>
+            </div>
 
             {/* Grid of gallery photos */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -1599,20 +1585,18 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#283D52] mb-1">
-                  URL File Audio (.mp3 / .m4a)
-                </label>
-                <input
-                  type="text"
-                  value={invitation.music_url}
-                  onChange={(e) => {
-                    setInvitation({ ...invitation, music_url: e.target.value });
-                    markDirty();
-                  }}
-                  className="w-full px-3.5 py-2.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs"
-                />
-              </div>
+              <DriveUploader
+                label="File Musik Latar (.mp3 / .m4a)"
+                value={invitation.music_url}
+                onChange={(url) => {
+                  setInvitation({ ...invitation, music_url: url });
+                  markDirty();
+                }}
+                accept="audio/*,.mp3,.m4a,.wav"
+                fileType="audio"
+                placeholder="Upload file musik MP3 dari perangkat..."
+                helperText="Otomatis disimpan di folder KUUNDANG Google Drive"
+              />
 
               {invitation.music_url && (
                 <div className="p-4 bg-[#F7F2EA] rounded-2xl border border-[#283D52]/10">

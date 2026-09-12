@@ -20,6 +20,7 @@ import {
   INITIAL_DEMO_RSVPS,
 } from '../data/initialDemo';
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
+import { googleDriveService } from './googleDriveService';
 
 const STORAGE_KEYS = {
   INVITATIONS: 'wedding_studio_invitations',
@@ -121,6 +122,20 @@ export const weddingService = {
         }
       } catch (err) {
         console.warn('Supabase getInvitationBySlug error:', err);
+      }
+    }
+
+    // If still not found and Google Apps Script is configured, query Google Apps Script
+    if (!invitation && googleDriveService.isConfigured()) {
+      try {
+        const url = `${googleDriveService.getAppsScriptUrl()}?action=getInvitation&slug=${encodeURIComponent(slug)}`;
+        const res = await fetch(url);
+        const json = await res.json();
+        if (json.success && json.data) {
+          invitation = json.data as Invitation;
+        }
+      } catch (gasErr) {
+        console.warn('Apps Script getInvitationBySlug error:', gasErr);
       }
     }
 
@@ -678,6 +693,19 @@ export const weddingService = {
       }
     }
 
+    // Sync to Google Sheets if configured
+    if (googleDriveService.isConfigured()) {
+      try {
+        fetch(googleDriveService.getAppsScriptUrl(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'submitRSVP', rsvp: newRSVP }),
+        }).catch((e) => console.warn('GAS RSVP sync error:', e));
+      } catch (gasErr) {
+        console.warn('GAS RSVP error:', gasErr);
+      }
+    }
+
     // If message provided, also create a wish
     if (params.message && params.message.trim().length > 3) {
       await this.submitWish({
@@ -748,6 +776,19 @@ export const weddingService = {
         await supabase.from('wishes').insert(newWish);
       } catch (err) {
         console.warn('Supabase Wish sync failed, fallback to local:', err);
+      }
+    }
+
+    // Sync to Google Sheets if configured
+    if (googleDriveService.isConfigured()) {
+      try {
+        fetch(googleDriveService.getAppsScriptUrl(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'submitWish', wish: newWish }),
+        }).catch((e) => console.warn('GAS Wish sync error:', e));
+      } catch (gasErr) {
+        console.warn('GAS Wish error:', gasErr);
       }
     }
 

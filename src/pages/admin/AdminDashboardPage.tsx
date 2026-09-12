@@ -15,8 +15,12 @@ import {
   Copy,
   Clock,
   ArrowUpRight,
+  Folder,
+  Cloud,
+  RefreshCw,
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { googleDriveService } from '../../services/googleDriveService';
 
 export const AdminDashboardPage: React.FC = () => {
   const { showToast } = useToast();
@@ -31,6 +35,9 @@ export const AdminDashboardPage: React.FC = () => {
     totalWishes: 4,
   });
   const [loading, setLoading] = useState(true);
+  const [showConfigModal, setShowConfigModal] = useState(false);
+  const [gasUrlInput, setGasUrlInput] = useState(googleDriveService.getAppsScriptUrl());
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const loadDashboardData = async () => {
     setLoading(true);
@@ -41,6 +48,35 @@ export const AdminDashboardPage: React.FC = () => {
     const st = await weddingService.getStats();
     setStats(st);
     setLoading(false);
+  };
+
+  const handleSaveGasUrl = (e: React.FormEvent) => {
+    e.preventDefault();
+    googleDriveService.setAppsScriptUrl(gasUrlInput.trim());
+    setShowConfigModal(false);
+    showToast('URL Google Apps Script berhasil disimpan!', 'success');
+  };
+
+  const handleSyncAllToGoogle = async () => {
+    if (!googleDriveService.isConfigured()) {
+      setShowConfigModal(true);
+      return;
+    }
+    setIsSyncing(true);
+    try {
+      const allInvs = await weddingService.getAllInvitations();
+      for (const inv of allInvs) {
+        const full = await weddingService.getFullInvitationData(inv.id);
+        if (full) {
+          await googleDriveService.syncInvitationData(full);
+        }
+      }
+      showToast('Semua undangan berhasil disinkronkan ke Google Sheets & Drive!', 'success');
+    } catch (err: any) {
+      showToast('Sinkronisasi gagal: ' + (err?.message || 'Cek URL Apps Script'), 'error');
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   useEffect(() => {
@@ -68,6 +104,54 @@ export const AdminDashboardPage: React.FC = () => {
             <Plus className="w-4 h-4" />
             <span>Kelola Undangan</span>
           </Link>
+        </div>
+      </div>
+
+      {/* Google Apps Script & Drive Integration Banner */}
+      <div className="p-5 rounded-3xl bg-[#F7F2EA] border border-[#283D52]/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-start sm:items-center gap-3.5">
+          <div className="w-10 h-10 rounded-2xl bg-[#283D52]/10 flex items-center justify-center text-[#283D52] shrink-0">
+            <Folder className="w-5 h-5 text-[#C2A56B]" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-bold text-[#283D52]">Google Drive & Sheets Storage</h3>
+              {googleDriveService.isConfigured() ? (
+                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-semibold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Terhubung
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-semibold">
+                  Belum Diatur
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-[#768692] mt-0.5">
+              Menyimpan foto, audio, dan database langsung ke folder Google Drive <strong className="text-[#283D52]">KUUNDANG</strong> & Google Sheets.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <button
+            type="button"
+            onClick={handleSyncAllToGoogle}
+            disabled={isSyncing}
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#FFFCF7] hover:bg-[#EFE8DE] border border-[#283D52]/15 text-[#283D52] text-xs font-semibold uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+            <span>{isSyncing ? 'Menyinkronkan...' : 'Sinkron ke Sheets'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowConfigModal(true)}
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#283D52] hover:bg-[#1E2E3E] text-[#FFFCF7] text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer shadow-xs"
+          >
+            <Cloud className="w-3.5 h-3.5" />
+            <span>Konfigurasi GAS</span>
+          </button>
         </div>
       </div>
 
@@ -235,6 +319,82 @@ export const AdminDashboardPage: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* GAS Configuration Modal */}
+      {showConfigModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#283D52]/60 backdrop-blur-xs animate-fade-in">
+          <div className="w-full max-w-lg bg-[#FFFCF7] rounded-3xl border border-[#283D52]/20 shadow-2xl p-6 space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-[#283D52]/10">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#283D52]/10 flex items-center justify-center text-[#283D52]">
+                  <Cloud className="w-5 h-5 text-[#C2A56B]" />
+                </div>
+                <div>
+                  <h3 className="font-heading text-lg font-bold text-[#283D52]">
+                    Koneksi Google Apps Script
+                  </h3>
+                  <p className="text-[11px] text-[#768692]">
+                    Simpan file ke Drive & sinkronkan data ke Google Sheets
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowConfigModal(false)}
+                className="w-8 h-8 rounded-full bg-[#F7F2EA] hover:bg-[#EFE8DE] flex items-center justify-center text-[#283D52] cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveGasUrl} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#283D52] mb-1.5">
+                  Web App URL Google Apps Script:
+                </label>
+                <input
+                  type="url"
+                  required
+                  placeholder="https://script.google.com/macros/s/.../exec"
+                  value={gasUrlInput}
+                  onChange={(e) => setGasUrlInput(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-[#F7F2EA] border border-[#283D52]/20 rounded-xl text-xs font-mono text-[#283D52] focus:outline-hidden focus:border-[#C2A56B]"
+                />
+                <p className="text-[11px] text-[#768692] mt-1.5 leading-relaxed">
+                  URL didapat setelah klik <strong>Deploy &gt; New deployment &gt; Web app</strong> (Who has access: <strong>Anyone</strong>) di script Google Apps Script.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-[#F7F2EA] border border-[#283D52]/10 text-xs text-[#283D52] space-y-1.5">
+                <p className="font-bold flex items-center gap-1.5 text-[#C2A56B]">
+                  <span>💡</span> Keuntungan Google Apps Script + Drive:
+                </p>
+                <ul className="list-disc pl-4 text-[11px] text-[#768692] space-y-1">
+                  <li>Gratis dan tanpa batasan kuota rumit Supabase.</li>
+                  <li>Foto dan lagu tersimpan rapi di Google Drive Anda pada folder <strong>KUUNDANG</strong>.</li>
+                  <li>Daftar tamu, RSVP, dan ucapan otomatis masuk ke Google Sheets.</li>
+                </ul>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowConfigModal(false)}
+                  className="px-4 py-2 rounded-xl bg-[#F7F2EA] hover:bg-[#EFE8DE] text-[#283D52] text-xs font-semibold cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-[#283D52] hover:bg-[#1E2E3E] text-[#FFFCF7] text-xs font-semibold uppercase tracking-wider cursor-pointer shadow-sm"
+                >
+                  Simpan URL
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

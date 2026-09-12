@@ -14,12 +14,17 @@ export default defineConfig(() => {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.SUPABASE_ANON_KEY ||
     '';
+  const appsScriptUrl =
+    process.env.VITE_APPS_SCRIPT_URL ||
+    process.env.APPS_SCRIPT_URL ||
+    '';
 
   return {
     plugins: [react(), tailwindcss()],
     define: {
       'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(supabaseUrl),
       'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(supabaseAnonKey),
+      'import.meta.env.VITE_APPS_SCRIPT_URL': JSON.stringify(appsScriptUrl),
     },
     resolve: {
       alias: {
