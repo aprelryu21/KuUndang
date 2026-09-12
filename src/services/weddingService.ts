@@ -104,9 +104,26 @@ export const weddingService = {
   async getInvitationBySlug(slug: string): Promise<FullInvitationData | null> {
     initializeLocalStorage();
     const invitations = getLocal<Invitation[]>(STORAGE_KEYS.INVITATIONS, [INITIAL_DEMO_DATA.invitation]);
-    const invitation =
+    let invitation =
       invitations.find((inv) => inv.slug === slug) ||
       (slug === 'shofwan-allya' || slug === 'april-siti' ? invitations[0] : null);
+
+    // If not found in localStorage or Supabase is connected, query Supabase
+    if ((!invitation || isSupabaseConfigured) && isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('invitations')
+          .select('*')
+          .eq('slug', slug)
+          .maybeSingle();
+        if (!error && data) {
+          invitation = data as Invitation;
+        }
+      } catch (err) {
+        console.warn('Supabase getInvitationBySlug error:', err);
+      }
+    }
+
     if (!invitation) return null;
 
     return this.getFullInvitationData(invitation.id, invitation);
@@ -115,7 +132,23 @@ export const weddingService = {
   async getInvitationById(id: string): Promise<FullInvitationData | null> {
     initializeLocalStorage();
     const invitations = getLocal<Invitation[]>(STORAGE_KEYS.INVITATIONS, [INITIAL_DEMO_DATA.invitation]);
-    const invitation = invitations.find((inv) => inv.id === id);
+    let invitation = invitations.find((inv) => inv.id === id);
+
+    if (!invitation && isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('invitations')
+          .select('*')
+          .eq('id', id)
+          .maybeSingle();
+        if (!error && data) {
+          invitation = data as Invitation;
+        }
+      } catch (err) {
+        console.warn('Supabase getInvitationById error:', err);
+      }
+    }
+
     if (!invitation) return null;
 
     return this.getFullInvitationData(invitation.id, invitation);
@@ -123,7 +156,17 @@ export const weddingService = {
 
   async getFullInvitationData(id: string, cachedInv?: Invitation): Promise<FullInvitationData | null> {
     const invitations = getLocal<Invitation[]>(STORAGE_KEYS.INVITATIONS, [INITIAL_DEMO_DATA.invitation]);
-    const invitation = cachedInv || invitations.find((inv) => inv.id === id);
+    let invitation = cachedInv || invitations.find((inv) => inv.id === id);
+
+    if (!invitation && isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase.from('invitations').select('*').eq('id', id).maybeSingle();
+        if (!error && data) invitation = data as Invitation;
+      } catch (err) {
+        console.warn('Supabase getFullInvitationData error:', err);
+      }
+    }
+
     if (!invitation) return null;
 
     const couples = getLocal<Couple[]>(STORAGE_KEYS.COUPLES, [INITIAL_DEMO_DATA.bride, INITIAL_DEMO_DATA.groom]);
@@ -288,6 +331,19 @@ export const weddingService = {
     }));
     setLocal(STORAGE_KEYS.SECTIONS, [...sections, ...newSections]);
 
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('invitations').upsert(newInv);
+        await supabase.from('couples').upsert([newBride, newGroom]);
+        await supabase.from('events').upsert(newEvents);
+        await supabase.from('stories').upsert(newStories);
+        await supabase.from('gallery').upsert(newGallery);
+        await supabase.from('gifts').upsert(newGifts);
+      } catch (err) {
+        console.warn('Supabase createInvitation sync failed:', err);
+      }
+    }
+
     return newInv;
   },
 
@@ -394,6 +450,15 @@ export const weddingService = {
     };
     invitations[index] = updated;
     setLocal(STORAGE_KEYS.INVITATIONS, invitations);
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('invitations').upsert(updated);
+      } catch (err) {
+        console.warn('Supabase updateInvitation sync failed:', err);
+      }
+    }
+
     return updated;
   },
 
@@ -604,6 +669,15 @@ export const weddingService = {
 
     setLocal(STORAGE_KEYS.RSVPS, rsvps);
 
+    // Sync to Supabase if configured
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('rsvps').upsert(newRSVP);
+      } catch (err) {
+        console.warn('Supabase RSVP sync failed, fallback to local:', err);
+      }
+    }
+
     // If message provided, also create a wish
     if (params.message && params.message.trim().length > 3) {
       await this.submitWish({
@@ -631,6 +705,18 @@ export const weddingService = {
 
   async getRSVPs(invitationId: string): Promise<RSVP[]> {
     initializeLocalStorage();
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('rsvps')
+          .select('*')
+          .eq('invitation_id', invitationId)
+          .order('created_at', { ascending: false });
+        if (!error && data && data.length > 0) return data;
+      } catch (err) {
+        console.warn('Supabase getRSVPs error:', err);
+      }
+    }
     const rsvps = getLocal<RSVP[]>(STORAGE_KEYS.RSVPS, INITIAL_DEMO_RSVPS);
     return rsvps.filter((r) => r.invitation_id === invitationId);
   },
@@ -655,6 +741,16 @@ export const weddingService = {
     };
     wishes.unshift(newWish);
     setLocal(STORAGE_KEYS.WISHES, wishes);
+
+    // Sync to Supabase if configured
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('wishes').insert(newWish);
+      } catch (err) {
+        console.warn('Supabase Wish sync failed, fallback to local:', err);
+      }
+    }
+
     return newWish;
   },
 
@@ -670,6 +766,22 @@ export const weddingService = {
 
   async getWishes(invitationId: string, onlyApproved: boolean = true): Promise<Wish[]> {
     initializeLocalStorage();
+    if (isSupabaseConfigured && supabase) {
+      try {
+        let query = supabase
+          .from('wishes')
+          .select('*')
+          .eq('invitation_id', invitationId)
+          .order('created_at', { ascending: false });
+        if (onlyApproved) {
+          query = query.eq('status', 'approved');
+        }
+        const { data, error } = await query;
+        if (!error && data && data.length > 0) return data;
+      } catch (err) {
+        console.warn('Supabase getWishes error:', err);
+      }
+    }
     const wishes = getLocal<Wish[]>(STORAGE_KEYS.WISHES, INITIAL_DEMO_DATA.wishes);
     const filtered = wishes.filter((w) => w.invitation_id === invitationId);
     if (onlyApproved) {
