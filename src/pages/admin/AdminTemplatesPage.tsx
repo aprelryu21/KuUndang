@@ -5,8 +5,10 @@ import { weddingService } from '../../services/weddingService';
 import { Invitation } from '../../types/wedding';
 import { Link } from 'react-router-dom';
 
+import { TemplateId } from '../../types/wedding';
+
 interface TemplateOption {
-  id: 'royal-arch' | 'persona-5';
+  id: TemplateId;
   name: string;
   tagline: string;
   badge: string;
@@ -19,6 +21,46 @@ interface TemplateOption {
 }
 
 const TEMPLATES: TemplateOption[] = [
+  {
+    id: 'javanese-royal',
+    name: 'Adat Jawa Keraton & Gamelan Sakral',
+    tagline: 'Filosofi Kasultanan Jawa, Gapura Gunungan Wayang & Backsound Gamelan',
+    badge: 'ADAT JAWA SAKRAL',
+    accentColor: '#D4AF37',
+    bgGradient: 'from-[#1A1009] via-[#2C1810] to-[#120A05]',
+    borderColor: 'border-[#D4AF37]',
+    description:
+      'Nuansa sakral adat Jawa bernuansa Keraton. Gerbang Gapura Gunungan Wayang Kulit emas, motif Batik Kawung & Parang, alunan backsound Gamelan Jawa (Udan Mas / Kebo Giro), busana Paes Ageng & Jawi Jangkep, serta reroncening adicara panggih.',
+    highlights: [
+      'Gerbang Sakral Gunungan Wayang Kulit Emas dengan efek audio denting Gong Ageng',
+      'Backsound Gamelan Jawa Sakral (Udan Mas / Kebo Giro) dengan floating player',
+      'Ornamen khas Keraton: Batik Kawung, lung-lungan ukir kayu Jepara & aksara Jawa',
+      'Profil Sang Pinanganten busana Paes Ageng & Beskap Jangkep beserta sungkem restu',
+      'Reroncening Adicara (Siraman, Ijab Kabul, Upacara Panggih, Resepsi) + Kalender',
+      'Pasugatan Tali Asih (Amplop Digital), Serat Rawuh (RSVP), & Donga Pangestu',
+    ],
+    tags: ['Adat Jawa', 'Gamelan Sakral', 'Gunungan Wayang', 'Batik Kawung', 'Keraton'],
+  },
+  {
+    id: 'cute-pink-floral',
+    name: 'Pastel Bloom & Bunga Lucu (Pink)',
+    tagline: 'Nuansa Merah Muda Menggemaskan, Kelopak Bunga Berjatuhan & Stiker Lucu',
+    badge: 'LUCU & MENGGEMASKAN',
+    accentColor: '#FF5C8D',
+    bgGradient: 'from-[#FFF0F5] via-[#FFE4EC] to-[#FFD1DC]',
+    borderColor: 'border-[#FF85A2]',
+    description:
+      'Tema manis nan menggemaskan yang dipenuhi palet merah muda ceria, kelopak bunga melayang, stiker washi tape, frame polaroid memo cinta, dan iringan melodi romantis.',
+    highlights: [
+      'Sampul Surat Cinta Romantis dengan stempel lilin pita & bunga merah muda',
+      'Efek Partikel Bunga Mengapung (Daisy, Sakura, Tulip) bertebaran lembut',
+      'Frame Foto Polaroid & Pita Lucu bergaya scrapbook manis',
+      'Rangkaian Acara Lengkap dengan countdown dan tombol Kalender Google',
+      'Kisah Cinta "Our Love Story" bergaya lembaran memo ceria',
+      'Buku Tamu Doa Restu & Amplop Digital Manis berornamen bunga',
+    ],
+    tags: ['Merah Muda', 'Bunga Lucu', 'Scrapbook', 'Sweet & Cute', 'Pastel Bloom'],
+  },
   {
     id: 'royal-arch',
     name: 'The Royal Navy & Gold Arch',
@@ -62,7 +104,7 @@ const TEMPLATES: TemplateOption[] = [
 export const AdminTemplatesPage: React.FC = () => {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [selectedInvId, setSelectedInvId] = useState<string>('');
-  const [activeTemplate, setActiveTemplate] = useState<'royal-arch' | 'persona-5'>('royal-arch');
+  const [activeTemplate, setActiveTemplate] = useState<TemplateId>('royal-arch');
   const [, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successToast, setSuccessToast] = useState<string | null>(null);
@@ -91,7 +133,7 @@ export const AdminTemplatesPage: React.FC = () => {
     }
   };
 
-  const handleApplyTemplate = async (templateId: 'royal-arch' | 'persona-5') => {
+  const handleApplyTemplate = async (templateId: TemplateId) => {
     if (!selectedInvId) return;
     setSaving(true);
     try {
@@ -142,13 +184,13 @@ export const AdminTemplatesPage: React.FC = () => {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EFE8DE] text-xs font-semibold text-[#C2A56B] mb-2">
             <Palette className="w-3.5 h-3.5" />
-            <span>Koleksi 2 Tema Undangan</span>
+            <span>Koleksi 4 Tema Undangan</span>
           </div>
           <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#283D52]">
             Katalog Tema Desain Undangan
           </h1>
           <p className="text-xs sm:text-sm text-[#768692] mt-1 max-w-xl">
-            Pilih antara keanggunan klasik bangsawan kerajaan Jawa (The Royal Navy & Gold Arch) atau gaya cyber-RPG Persona 5 yang revolusioner.
+            Pilih antara sakralnya Adat Jawa Kasultanan &amp; Gamelan, manisnya nuansa merah muda bunga lucu, keanggunan klasik Royal Arch bangsawan, atau gaya cyber-RPG Persona 5 yang revolusioner.
           </p>
         </div>
 
@@ -165,7 +207,15 @@ export const AdminTemplatesPage: React.FC = () => {
             >
               {invitations.map((inv) => (
                 <option key={inv.id} value={inv.id}>
-                  {inv.title} ({inv.template_id === 'persona-5' ? 'Persona 5' : 'Royal Arch'})
+                  {inv.title} (
+                  {inv.template_id === 'persona-5'
+                    ? 'Persona 5'
+                    : inv.template_id === 'javanese-royal'
+                    ? 'Adat Jawa'
+                    : inv.template_id === 'cute-pink-floral'
+                    ? 'Bunga Lucu (Pink)'
+                    : 'Royal Arch'}
+                  )
                 </option>
               ))}
             </select>
@@ -201,20 +251,30 @@ export const AdminTemplatesPage: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* 2 Templates Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* 4 Templates Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {TEMPLATES.map((tmpl) => {
           const isCurrentActive = activeTemplate === tmpl.id;
           const isP5 = tmpl.id === 'persona-5';
+          const isJawa = tmpl.id === 'javanese-royal';
+          const isCute = tmpl.id === 'cute-pink-floral';
 
           return (
             <div
               key={tmpl.id}
-              className={`rounded-3xl border-2 transition-all p-6 sm:p-8 flex flex-col justify-between ${
+              className={`rounded-3xl border-2 transition-all p-5 sm:p-6 flex flex-col justify-between ${
                 isCurrentActive
                   ? isP5
                     ? 'bg-[#141418] border-[#E60012] shadow-xl text-white'
+                    : isJawa
+                    ? 'bg-[#24160E] border-[#D4AF37] shadow-xl text-[#FAF6EE]'
+                    : isCute
+                    ? 'bg-[#FFF0F5] border-[#FF5C8D] shadow-xl text-[#4A2E35]'
                     : 'bg-[#F7F2EA] border-[#C2A56B] shadow-xl text-[#283D52]'
+                  : isJawa
+                  ? 'bg-[#1A1009] border-[#D4AF37]/30 hover:border-[#D4AF37]/60 shadow-xs text-[#FAF6EE]'
+                  : isCute
+                  ? 'bg-[#FFF5F8] border-[#FFA3B8]/40 hover:border-[#FF5C8D]/60 shadow-xs text-[#4A2E35]'
                   : 'bg-[#FFFCF7] border-[#283D52]/10 hover:border-[#283D52]/30 shadow-xs text-[#283D52]'
               }`}
             >
@@ -223,62 +283,80 @@ export const AdminTemplatesPage: React.FC = () => {
                 <div className="flex items-center justify-between mb-4">
                   <span
                     className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full ${
-                      isP5 ? 'bg-[#E60012] text-white -skew-x-6' : 'bg-[#EFE8DE] text-[#C2A56B]'
+                      isP5
+                        ? 'bg-[#E60012] text-white -skew-x-6'
+                        : isJawa
+                        ? 'bg-[#D4AF37] text-[#1A1009]'
+                        : isCute
+                        ? 'bg-[#FF5C8D] text-white'
+                        : 'bg-[#EFE8DE] text-[#C2A56B]'
                     }`}
                   >
                     {tmpl.badge}
                   </span>
                   {isCurrentActive && (
-                    <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-bold uppercase tracking-wider">
+                    <span className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-bold uppercase tracking-wider">
                       <Check className="w-3 h-3" />
-                      <span>Aktif Digunakan</span>
+                      <span>Aktif</span>
                     </span>
                   )}
                 </div>
 
-                <h3 className="font-heading text-2xl font-bold tracking-tight">{tmpl.name}</h3>
+                <h3 className="font-heading text-xl font-bold tracking-tight">{tmpl.name}</h3>
                 <p className="text-xs text-[#768692] font-medium mt-1">{tmpl.tagline}</p>
 
                 {/* Card Banner Preview */}
                 <div
-                  className={`mt-5 w-full h-44 rounded-2xl bg-gradient-to-br ${tmpl.bgGradient} p-5 flex flex-col justify-between border relative overflow-hidden text-white shadow-inner ${
-                    isP5 ? 'border-[#E60012]' : 'border-[#C2A56B]/40'
+                  className={`mt-4 w-full h-40 rounded-2xl bg-gradient-to-br ${tmpl.bgGradient} p-4 flex flex-col justify-between border relative overflow-hidden shadow-inner ${
+                    isP5
+                      ? 'border-[#E60012] text-white'
+                      : isJawa
+                      ? 'border-[#D4AF37] text-white'
+                      : isCute
+                      ? 'border-[#FF85A2] text-[#4A2E35]'
+                      : 'border-[#C2A56B]/40 text-white'
                   }`}
                 >
                   <div className="flex justify-between items-center text-xs font-mono">
-                    <span className="text-white/70">April & Siti Wedding</span>
+                    <span className={isCute ? 'text-[#8A505F]' : 'text-white/70'}>April & Siti Wedding</span>
                     <span style={{ color: tmpl.accentColor }} className="font-bold">
                       17.09.2021
                     </span>
                   </div>
 
                   <div className="text-center my-auto">
-                    <p className="text-[10px] uppercase tracking-widest text-white/70">The Wedding Of</p>
-                    <h4 className="text-xl font-bold mt-1">April Pratama & Siti Nurjannah</h4>
+                    <p className={`text-[9px] uppercase tracking-widest ${isCute ? 'text-[#FF5C8D] font-bold' : 'text-white/70'}`}>
+                      {isJawa ? 'Serat Ulem Palakrama' : isCute ? 'Undangan Manis & Ceria' : 'The Wedding Of'}
+                    </p>
+                    <h4 className="text-base sm:text-lg font-bold mt-0.5">April Pratama & Siti Nurjannah</h4>
                   </div>
 
                   <div className="flex justify-between items-center text-[11px]">
-                    <span className="text-white/60">Tamu Terhormat</span>
-                    <span className="px-2 py-0.5 rounded-md bg-white/20 text-white font-semibold">
-                      Buka Undangan
+                    <span className={isCute ? 'text-[#8A505F]' : 'text-white/60'}>Tamu Terhormat</span>
+                    <span
+                      className={`px-2 py-0.5 rounded-md text-xs font-semibold ${
+                        isCute ? 'bg-[#FF5C8D] text-white' : 'bg-white/20 text-white'
+                      }`}
+                    >
+                      {isJawa ? 'Bikak Ulem' : 'Buka Undangan'}
                     </span>
                   </div>
                 </div>
 
-                <p className="text-xs mt-5 leading-relaxed text-[#768692]">{tmpl.description}</p>
+                <p className="text-xs mt-4 leading-relaxed text-[#768692]">{tmpl.description}</p>
 
                 {/* Highlights List */}
-                <div className="mt-5 space-y-2">
+                <div className="mt-4 space-y-1.5">
                   <p className="text-[11px] font-bold uppercase tracking-wider text-[#768692]">
-                    Fitur & Visual Highlights:
+                    Fitur &amp; Visual Highlights:
                   </p>
-                  <ul className="space-y-1.5">
-                    {tmpl.highlights.map((h, i) => (
+                  <ul className="space-y-1">
+                    {tmpl.highlights.slice(0, 4).map((h, i) => (
                       <li key={i} className="text-xs flex items-start gap-2">
                         <span style={{ color: tmpl.accentColor }} className="font-bold">
                           ✓
                         </span>
-                        <span>{h}</span>
+                        <span className="line-clamp-1">{h}</span>
                       </li>
                     ))}
                   </ul>
@@ -286,28 +364,32 @@ export const AdminTemplatesPage: React.FC = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="mt-8 pt-6 border-t border-current/10 flex flex-col sm:flex-row items-center gap-3">
+              <div className="mt-6 pt-4 border-t border-current/10 flex flex-col gap-2">
                 <button
                   type="button"
                   disabled={saving || isCurrentActive}
                   onClick={() => handleApplyTemplate(tmpl.id)}
-                  className={`w-full sm:flex-1 py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                     isCurrentActive
                       ? 'bg-emerald-600 text-white cursor-default'
                       : isP5
                       ? 'bg-[#E60012] hover:bg-[#FF0019] text-white -skew-x-3 shadow-md'
+                      : isJawa
+                      ? 'bg-[#D4AF37] hover:bg-[#E5C158] text-[#1A1009] shadow-md'
+                      : isCute
+                      ? 'bg-[#FF5C8D] hover:bg-[#E03164] text-white shadow-md'
                       : 'bg-[#283D52] hover:bg-[#1E2E3E] text-[#FFFCF7] shadow-md'
                   }`}
                 >
                   {isCurrentActive ? (
                     <>
-                      <Check className="w-4 h-4" />
+                      <Check className="w-3.5 h-3.5" />
                       <span>Tema Terpilih</span>
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-4 h-4" />
-                      <span>Terapkan ke Undangan Ini</span>
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Terapkan</span>
                     </>
                   )}
                 </button>
@@ -317,9 +399,9 @@ export const AdminTemplatesPage: React.FC = () => {
                   <Link
                     to={`/preview/${selectedInvitation.id}?template=${tmpl.id}`}
                     target="_blank"
-                    className="w-full sm:w-auto py-3 px-4 rounded-xl border border-current/20 hover:bg-black/5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
+                    className="w-full py-2 px-3 rounded-xl border border-current/20 hover:bg-black/5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors"
                   >
-                    <Eye className="w-4 h-4" />
+                    <Eye className="w-3.5 h-3.5" />
                     <span>Lihat Preview</span>
                   </Link>
                 )}

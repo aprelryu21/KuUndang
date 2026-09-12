@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play, Pause, Volume2, VolumeX, Music, Flame, Zap } from 'lucide-react';
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface Persona5AudioPlayerProps {
-  musicUrl: string;
+  musicUrl?: string;
   musicTitle?: string;
   musicArtist?: string;
   autoPlay?: boolean;
 }
 
+// Verified working audio URLs
 export const PERSONA5_DEFAULT_MUSIC = {
-  url: 'https://upload.wikimedia.org/wikipedia/commons/transcoded/f/fe/Kevin_MacLeod_-_Acid_Jazz.ogg/Kevin_MacLeod_-_Acid_Jazz.ogg.mp3',
+  url: 'https://upload.wikimedia.org/wikipedia/commons/transcoded/2/26/Kevin_MacLeod_-_AcidJazz.ogg/Kevin_MacLeod_-_AcidJazz.ogg.mp3',
+  oggUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/26/Kevin_MacLeod_-_AcidJazz.ogg',
+  backupUrl: 'https://upload.wikimedia.org/wikipedia/commons/transcoded/5/59/Kevin_MacLeod_-_Canon_in_D_Major.ogg/Kevin_MacLeod_-_Canon_in_D_Major.ogg.mp3',
   title: 'Beneath The Mask (Tokyo Acid Jazz Lounge)',
   artist: 'The Phantom Thieves / Acid Jazz Groove',
 };
@@ -21,30 +25,82 @@ export const Persona5AudioPlayer: React.FC<Persona5AudioPlayerProps> = ({
   musicArtist = PERSONA5_DEFAULT_MUSIC.artist,
   autoPlay = false,
 }) => {
+  const { t } = useLanguage();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  const effectiveUrl =
+    musicUrl && !musicUrl.includes('Kevin_MacLeod_-_Acid_Jazz.ogg')
+      ? musicUrl
+      : PERSONA5_DEFAULT_MUSIC.url;
+
+  // Auto-play trigger when cover opens or when user toggles
   useEffect(() => {
     if (autoPlay && audioRef.current) {
-      audioRef.current
-        .play()
-        .then(() => setIsPlaying(true))
-        .catch(() => {
-          // Autoplay blocked by browser policy until interaction
-          setIsPlaying(false);
-        });
+      const el = audioRef.current;
+      const playPromise = el.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+          })
+          .catch((err) => {
+            console.warn('Persona5 audio autoplay deferred:', err);
+            setIsPlaying(false);
+          });
+      }
     }
   }, [autoPlay]);
 
+  // Keep state synchronized with actual HTML audio events
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleError = () => {
+      console.warn('Persona 5 primary audio failed, switching to backup track...');
+      if (el.src !== PERSONA5_DEFAULT_MUSIC.backupUrl) {
+        el.src = PERSONA5_DEFAULT_MUSIC.backupUrl;
+        el.play().catch(() => {});
+      }
+    };
+
+    el.addEventListener('play', handlePlay);
+    el.addEventListener('pause', handlePause);
+    el.addEventListener('playing', handlePlay);
+    el.addEventListener('error', handleError);
+
+    return () => {
+      el.removeEventListener('play', handlePlay);
+      el.removeEventListener('pause', handlePause);
+      el.removeEventListener('playing', handlePlay);
+      el.removeEventListener('error', handleError);
+    };
+  }, []);
+
   const togglePlay = () => {
     if (!audioRef.current) return;
+    const el = audioRef.current;
+
     if (isPlaying) {
-      audioRef.current.pause();
+      el.pause();
       setIsPlaying(false);
     } else {
-      audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+      const playPromise = el.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => setIsPlaying(true))
+          .catch((err) => {
+            console.warn('Audio play request failed:', err);
+            // Attempt backup source if failed
+            el.src = PERSONA5_DEFAULT_MUSIC.backupUrl;
+            el.play().then(() => setIsPlaying(true)).catch(() => {});
+          });
+      }
     }
   };
 
@@ -55,11 +111,23 @@ export const Persona5AudioPlayer: React.FC<Persona5AudioPlayerProps> = ({
     setIsMuted(!isMuted);
   };
 
-  const effectiveUrl = musicUrl || PERSONA5_DEFAULT_MUSIC.url;
+  const p5SoundtrackLabel = t.p5?.soundtrack || 'P5 SOUNDTRACK';
+  const p5PlayingLabel = t.p5?.playing || 'PLAYING';
+  const p5PausedLabel = t.p5?.paused || 'PAUSED';
 
   return (
     <div className="fixed bottom-20 sm:bottom-6 left-3 sm:left-6 z-40 select-none">
-      <audio ref={audioRef} src={effectiveUrl} loop />
+      <audio
+        id="p5-audio-element"
+        ref={audioRef}
+        src={effectiveUrl}
+        preload="auto"
+        loop
+      >
+        <source src={effectiveUrl} type="audio/mpeg" />
+        <source src={PERSONA5_DEFAULT_MUSIC.oggUrl} type="audio/ogg" />
+        <source src={PERSONA5_DEFAULT_MUSIC.backupUrl} type="audio/mpeg" />
+      </audio>
 
       <div className="flex items-center gap-2">
         {/* Main Floating Button */}
@@ -69,7 +137,7 @@ export const Persona5AudioPlayer: React.FC<Persona5AudioPlayerProps> = ({
           whileTap={{ scale: 0.95 }}
           onClick={togglePlay}
           className="relative flex items-center gap-2 px-3.5 py-2.5 bg-[#000000] border-2 border-[#FFFFFF] hover:border-[#E60012] text-white shadow-[4px_4px_0px_0px_#E60012] -skew-x-6 cursor-pointer group"
-          title={isPlaying ? 'Jeda Musik' : 'Putar Musik'}
+          title={isPlaying ? 'Jeda Musik / Pause' : 'Putar Musik / Play'}
         >
           {/* Equalizer animation when playing */}
           {isPlaying ? (
@@ -84,10 +152,10 @@ export const Persona5AudioPlayer: React.FC<Persona5AudioPlayerProps> = ({
 
           <div className="text-left font-mono skew-x-6">
             <span className="text-[9px] text-[#FFF000] block uppercase font-bold tracking-wider leading-tight">
-              P5 SOUNDTRACK
+              {p5SoundtrackLabel}
             </span>
             <span className="text-[11px] font-black uppercase text-white block max-w-[130px] truncate">
-              {isPlaying ? 'PLAYING' : 'PAUSED'}
+              {isPlaying ? p5PlayingLabel : p5PausedLabel}
             </span>
           </div>
         </motion.button>
@@ -119,7 +187,7 @@ export const Persona5AudioPlayer: React.FC<Persona5AudioPlayerProps> = ({
               <button
                 type="button"
                 onClick={toggleMute}
-                className="text-white hover:text-[#E60012]"
+                className="text-white hover:text-[#E60012] cursor-pointer"
               >
                 {isMuted ? <VolumeX className="w-3.5 h-3.5 text-[#E60012]" /> : <Volume2 className="w-3.5 h-3.5 text-[#FFF000]" />}
               </button>

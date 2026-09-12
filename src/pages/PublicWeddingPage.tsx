@@ -18,6 +18,8 @@ import { GiftSection } from '../components/public-wedding/GiftSection';
 import { ClosingSection } from '../components/public-wedding/ClosingSection';
 import { FloatingNav } from '../components/public-wedding/FloatingNav';
 import { Persona5WeddingView } from '../components/templates/persona5/Persona5WeddingView';
+import { JavaneseWeddingView } from '../components/templates/javanese/JavaneseWeddingView';
+import { CuteFloralWeddingView } from '../components/templates/cute-floral/CuteFloralWeddingView';
 import { LanguageSwitcher } from '../components/common/LanguageSwitcher';
 import { AdminLoginModal } from '../components/admin/AdminLoginModal';
 import { Heart, ArrowLeft, Eye, RefreshCw } from 'lucide-react';
@@ -43,7 +45,7 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
   // Global keyboard shortcut to open Admin Login Modal (Ctrl + Shift + A or Cmd + Shift + A or Alt + Shift + A)
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      const isAKey = e.key.toLowerCase() === 'a' || e.code === 'KeyA';
+      const isAKey = (e.key || '').toLowerCase() === 'a' || e.code === 'KeyA';
       const isCtrlShift = (e.ctrlKey || e.metaKey) && e.shiftKey && isAKey;
       const isAltShift = e.altKey && e.shiftKey && isAKey;
       const isCtrlAlt = e.ctrlKey && e.altKey && isAKey;
@@ -99,6 +101,11 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
   useEffect(() => {
     loadData();
     window.scrollTo(0, 0);
+
+    // Ensure clean URL without leftover #hashes like #pilihan-tema
+    if (window.location.hash) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
   }, [slug, id, isPreview, guestCode]);
 
   // Handle open invitation
@@ -252,12 +259,56 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
     .filter((s) => s.enabled && s.section_key !== 'cover')
     .sort((a, b) => a.sort_order - b.sort_order);
 
-  // Check template: query parameter override (?template=persona-5) or database setting
+  // Check template: query parameter override (?template=cute-pink-floral or ?template=javanese-royal or ?template=persona-5) or database setting
   const templateQuery = searchParams.get('template');
-  const activeTemplate =
-    templateQuery === 'persona-5' || templateQuery === 'persona-3' || templateQuery === 'royal-arch'
-      ? (templateQuery === 'persona-3' ? 'persona-5' : templateQuery)
-      : invitation.template_id || 'royal-arch';
+  const normalizedQuery =
+    templateQuery === 'javanese-royal' || templateQuery === 'jawa' || templateQuery === 'adat-jawa'
+      ? 'javanese-royal'
+      : templateQuery === 'persona-5' || templateQuery === 'persona-3'
+      ? 'persona-5'
+      : templateQuery === 'cute-pink-floral' ||
+        templateQuery === 'cute-pink' ||
+        templateQuery === 'cute' ||
+        templateQuery === 'pastel-pop' ||
+        templateQuery === 'pink'
+      ? 'cute-pink-floral'
+      : templateQuery;
+
+  const activeTemplate = normalizedQuery || invitation.template_id || 'royal-arch';
+
+  // Render Javanese Royal Heritage Template
+  if (activeTemplate === 'javanese-royal') {
+    return (
+      <div className="relative min-h-screen bg-[#1A1009]">
+        {/* Admin Preview Mode Floating Bar */}
+        {isPreview && (
+          <div className="fixed top-0 inset-x-0 z-50 bg-[#24160E] text-[#FAF6EE] border-b-2 border-[#D4AF37] px-4 py-2 flex items-center justify-between text-xs shadow-md">
+            <div className="flex items-center gap-2 font-serif">
+              <Eye className="w-4 h-4 text-[#D4AF37]" />
+              <span>
+                PREVIEW [TEMA ADAT JAWA SAKRAL & GAMELAN] — {invitation.title} ({(invitation.status || 'published').toUpperCase()})
+              </span>
+            </div>
+            <Link
+              to={`/admin/invitations/${invitation.id}/edit`}
+              className="flex items-center gap-1.5 px-3 py-1 bg-[#D4AF37] text-[#1A1009] rounded-lg font-serif font-bold text-[11px] hover:bg-[#E5C158] transition-colors"
+            >
+              <ArrowLeft className="w-3 h-3" />
+              <span>Pengaturan Undangan</span>
+            </Link>
+          </div>
+        )}
+
+        <JavaneseWeddingView
+          data={data}
+          guest={guest}
+          guestName={guestName}
+          isPreview={isPreview}
+          onRefreshData={loadData}
+        />
+      </div>
+    );
+  }
 
   // Render Persona 5 Template
   if (activeTemplate === 'persona-5') {
@@ -269,7 +320,7 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
             <div className="flex items-center gap-2 font-mono">
               <Eye className="w-4 h-4 text-[#FFF000]" />
               <span>
-                PREVIEW [PERSONA 5 STYLISTIC TEMPLATE] — {invitation.title} ({invitation.status.toUpperCase()})
+                PREVIEW [PERSONA 5 STYLISTIC TEMPLATE] — {invitation.title} ({(invitation.status || 'published').toUpperCase()})
               </span>
             </div>
             <Link
@@ -293,6 +344,40 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
     );
   }
 
+  // Render Cute Pink Floral (Pastel Bloom) Template
+  if (activeTemplate === 'cute-pink-floral') {
+    return (
+      <div className="relative min-h-screen bg-[#FFF0F5]">
+        {/* Admin Preview Mode Floating Bar */}
+        {isPreview && (
+          <div className="fixed top-0 inset-x-0 z-50 bg-[#FFE4EC] text-[#4A2E35] border-b-2 border-[#FF85A2] px-4 py-2 flex items-center justify-between text-xs shadow-md">
+            <div className="flex items-center gap-2 font-sans font-bold">
+              <Eye className="w-4 h-4 text-[#FF5C8D]" />
+              <span>
+                PREVIEW [TEMA MERAH MUDA CERIA &amp; BUNGA LUCU] — {invitation.title} ({(invitation.status || 'published').toUpperCase()})
+              </span>
+            </div>
+            <Link
+              to={`/admin/invitations/${invitation.id}/edit`}
+              className="flex items-center gap-1.5 px-3 py-1 bg-[#FF5C8D] text-white rounded-full font-sans font-bold text-[11px] hover:bg-[#E03164] transition-colors"
+            >
+              <ArrowLeft className="w-3 h-3" />
+              <span>Pengaturan Undangan</span>
+            </Link>
+          </div>
+        )}
+
+        <CuteFloralWeddingView
+          data={data}
+          guest={guest}
+          guestName={guestName}
+          isPreview={isPreview}
+          onRefreshData={loadData}
+        />
+      </div>
+    );
+  }
+
   return (
     <div style={themeStyle} className="relative min-h-screen bg-[#F7F2EA] text-[#24313A]">
       {/* Admin Preview Mode Floating Bar */}
@@ -300,7 +385,7 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
         <div className="fixed top-0 inset-x-0 z-50 bg-[#283D52] text-[#FFFCF7] px-4 py-2 flex items-center justify-between text-xs shadow-md">
           <div className="flex items-center gap-2 font-medium">
             <Eye className="w-4 h-4 text-[#DFBFC1]" />
-            <span>MODAL PREVIEW — Undangan: {invitation.title} ({invitation.status.toUpperCase()})</span>
+            <span>MODAL PREVIEW — Undangan: {invitation.title} ({(invitation.status || 'published').toUpperCase()})</span>
           </div>
           <Link
             to={`/admin/invitations/${invitation.id}/edit`}

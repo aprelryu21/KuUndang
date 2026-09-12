@@ -426,6 +426,8 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                   >
                     <option value="royal-arch">The Royal Navy & Gold Arch (Klasik Ningrat)</option>
                     <option value="persona-5">Phantom Crimson & Black (Persona 5 Theme)</option>
+                    <option value="javanese-royal">Adat Jawa Keraton & Gamelan Sakral</option>
+                    <option value="cute-pink-floral">Pastel Bloom & Bunga Lucu (Pink & Floral Style)</option>
                   </select>
                 </div>
               </div>
@@ -456,7 +458,7 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                     onChange={(e) => {
                       setInvitation({
                         ...invitation,
-                        slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''),
+                        slug: (e.target.value || '').toLowerCase().replace(/[^a-z0-9-]/g, ''),
                       });
                       markDirty();
                     }}
@@ -1641,7 +1643,7 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Template 1: Royal Arch */}
                 <div
                   onClick={() => {
@@ -1727,6 +1729,94 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                     )}
                   </div>
                 </div>
+
+                {/* Template 3: Adat Jawa Kasultanan */}
+                <div
+                  onClick={() => {
+                    setInvitation({ ...invitation, template_id: 'javanese-royal' });
+                    markDirty();
+                  }}
+                  className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                    invitation.template_id === 'javanese-royal'
+                      ? 'bg-[#24160E] text-[#FAF6EE] border-[#D4AF37] shadow-md ring-2 ring-[#D4AF37]/40'
+                      : 'bg-[#FFFCF7]/70 border-[#283D52]/15 hover:border-[#283D52]/40'
+                  }`}
+                >
+                  <div className="w-full h-24 rounded-xl bg-[#1A1009] p-3 text-[#FAF6EE] flex flex-col justify-between mb-3 border-2 border-[#D4AF37] relative overflow-hidden font-serif">
+                    <span className="text-[9px] uppercase font-bold tracking-widest px-2 py-0.5 bg-[#D4AF37] text-[#1A1009] rounded-md w-fit font-sans">
+                      ADAT JAWA SAKRAL
+                    </span>
+                    <div className="text-center">
+                      <p className="text-xs text-[#E5C158] tracking-wider">ꦱꦼꦫꦠ꧀ꦲꦸꦊꦩ꧀</p>
+                      <p className="text-sm font-bold text-[#FAF6EE]">
+                        April <span className="text-[#D4AF37]">&</span> Siti
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[8px] text-[#D4AF37] uppercase font-sans">
+                        Gamelan & Gunungan
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className={`font-bold text-sm ${invitation.template_id === 'javanese-royal' ? 'text-[#E5C158]' : 'text-[#283D52]'}`}>
+                        Adat Jawa Keraton & Gamelan
+                      </h3>
+                      <p className={`text-[11px] mt-0.5 ${invitation.template_id === 'javanese-royal' ? 'text-[#FAF6EE]/80' : 'text-[#768692]'}`}>
+                        Sakral & elegan: Gunungan Wayang emas, batik kawung, & backsound gamelan.
+                      </p>
+                    </div>
+                    {invitation.template_id === 'javanese-royal' && (
+                      <CheckCircle2 className="w-5 h-5 text-[#D4AF37] shrink-0" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Template 4: Pastel Bloom & Bunga Lucu (Pink) */}
+                <div
+                  onClick={() => {
+                    setInvitation({ ...invitation, template_id: 'cute-pink-floral' });
+                    markDirty();
+                  }}
+                  className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                    invitation.template_id === 'cute-pink-floral'
+                      ? 'bg-[#FFF0F5] text-[#4A2E35] border-[#FF5C8D] shadow-md ring-2 ring-[#FF85A2]/40'
+                      : 'bg-[#FFFCF7]/70 border-[#283D52]/15 hover:border-[#283D52]/40'
+                  }`}
+                >
+                  <div className="w-full h-24 rounded-xl bg-[#FFE4EC] p-3 text-[#4A2E35] flex flex-col justify-between mb-3 border-2 border-[#FFA3B8] relative overflow-hidden font-sans">
+                    <span className="text-[9px] uppercase font-bold tracking-widest px-2 py-0.5 bg-[#FF5C8D] text-white rounded-full w-fit">
+                      🌸 LUCU &amp; MANIS
+                    </span>
+                    <div className="text-center">
+                      <p className="text-[9px] text-[#FF5C8D] font-bold">🌸 UNDANGAN MANIS 🌸</p>
+                      <p className="text-sm font-bold text-[#E03164]">
+                        April <span className="text-[#FF5C8D]">&amp;</span> Siti
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[8px] text-[#8A505F] uppercase font-sans font-semibold">
+                        Bunga &amp; Pita Pink
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className={`font-bold text-sm ${invitation.template_id === 'cute-pink-floral' ? 'text-[#E03164]' : 'text-[#283D52]'}`}>
+                        Pastel Bloom &amp; Bunga Lucu
+                      </h3>
+                      <p className={`text-[11px] mt-0.5 ${invitation.template_id === 'cute-pink-floral' ? 'text-[#4A2E35]' : 'text-[#768692]'}`}>
+                        Ceria &amp; menggemaskan: warna merah muda, kelopak bunga, stiker lucu &amp; memo.
+                      </p>
+                    </div>
+                    {invitation.template_id === 'cute-pink-floral' && (
+                      <CheckCircle2 className="w-5 h-5 text-[#FF5C8D] shrink-0" />
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Quick Preview Button */}
@@ -1736,6 +1826,10 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                   <strong className="text-[#283D52]">
                     {invitation.template_id === 'persona-5'
                       ? 'Phantom Crimson & Black (Persona 5)'
+                      : invitation.template_id === 'javanese-royal'
+                      ? 'Adat Jawa Keraton & Gamelan Sakral'
+                      : invitation.template_id === 'cute-pink-floral'
+                      ? 'Pastel Bloom & Bunga Lucu (Pink)'
                       : 'The Royal Navy & Gold Arch'}
                   </strong>
                 </span>

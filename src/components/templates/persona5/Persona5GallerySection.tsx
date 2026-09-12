@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Eye, X, ChevronLeft, ChevronRight, Zap, Star } from 'lucide-react';
+import { Eye, X, ChevronLeft, ChevronRight, Zap } from 'lucide-react';
 import { GalleryItem } from '../../../types/wedding';
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface Persona5GallerySectionProps {
   gallery: GalleryItem[];
 }
 
 export const Persona5GallerySection: React.FC<Persona5GallerySectionProps> = ({ gallery }) => {
+  const { t } = useLanguage();
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
 
   const playPhotoSfx = () => {
     try {
-      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const AudioContextClass =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!AudioContextClass) return;
       const ctx = new AudioContextClass();
       const osc = ctx.createOscillator();
@@ -52,6 +56,8 @@ export const Persona5GallerySection: React.FC<Persona5GallerySectionProps> = ({ 
     setSelectedIdx((selectedIdx + 1) % gallery.length);
   };
 
+  const p5Translations = t.p5;
+
   return (
     <section id="p5-gallery" className="py-20 sm:py-28 bg-[#0D0D0D] text-[#FFFFFF] relative overflow-hidden border-t-4 border-[#FFFFFF]">
       {/* Background Graphic Accents */}
@@ -70,13 +76,19 @@ export const Persona5GallerySection: React.FC<Persona5GallerySectionProps> = ({ 
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#E60012] text-white text-xs font-black uppercase tracking-[0.2em] -skew-x-12 mb-3">
             <Zap className="w-3.5 h-3.5 text-[#FFF000] skew-x-12" />
-            <span className="skew-x-12">ALL-OUT ATTACK FINISHING TOUCH</span>
+            <span className="skew-x-12">
+              {p5Translations?.galleryHeader || 'ALL-OUT ATTACK FINISHING TOUCH'}
+            </span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-black uppercase italic tracking-tight text-[#FFFFFF]">
-            THE SHOW&apos;S <span className="text-[#E60012] not-italic">OVER!</span>
+            {p5Translations?.theShowsOver ? (
+              p5Translations.theShowsOver
+            ) : (
+              <>THE SHOW&apos;S <span className="text-[#E60012] not-italic">OVER!</span></>
+            )}
           </h2>
           <p className="text-xs sm:text-sm font-mono text-[#FFFFFF]/70 mt-2">
-            Galeri Dokumentasi Kenangan & Potret Romantis Mempelai
+            {p5Translations?.gallerySubtitle || 'Galeri Dokumentasi Kenangan & Potret Romantis Mempelai'}
           </p>
         </div>
 
@@ -158,54 +170,48 @@ export const Persona5GallerySection: React.FC<Persona5GallerySectionProps> = ({ 
               type="button"
               onClick={closeLightbox}
               className="absolute top-4 sm:top-6 right-4 sm:right-6 z-20 p-2.5 bg-[#E60012] text-white border-2 border-white -skew-x-6 hover:bg-[#FF0019] shadow-[3px_3px_0px_0px_#FFFFFF] transition-transform hover:scale-110 cursor-pointer"
-              title="Tutup (Esc)"
             >
-              <X className="w-6 h-6 skew-x-6" />
+              <X className="w-5 h-5 skew-x-6" />
             </button>
 
-            {/* Prev Button */}
+            {/* Previous Button */}
             <button
               type="button"
               onClick={prevImage}
-              className="absolute left-2 sm:left-6 z-20 p-3 sm:p-4 bg-black/90 text-white border-2 border-[#E60012] -skew-x-6 hover:bg-[#E60012] shadow-[4px_4px_0px_0px_#FFFFFF] transition-all hover:scale-105 cursor-pointer"
+              className="absolute left-3 sm:left-8 z-20 p-3 bg-black/80 hover:bg-[#E60012] border-2 border-white text-white -skew-x-6 transition-colors cursor-pointer"
             >
-              <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8 skew-x-6" />
+              <ChevronLeft className="w-6 h-6 skew-x-6" />
             </button>
+
+            {/* Main Lightbox Frame */}
+            <motion.div
+              key={selectedIdx}
+              initial={{ scale: 0.85, rotate: -2 }}
+              animate={{ scale: 1, rotate: 0 }}
+              exit={{ scale: 0.85, rotate: 2 }}
+              transition={{ type: 'spring', damping: 20 }}
+              className="relative max-w-4xl max-h-[80vh] bg-black border-4 border-white p-2 sm:p-3 -skew-x-2 shadow-[12px_12px_0px_0px_#E60012]"
+            >
+              <img
+                src={gallery[selectedIdx].image_url}
+                alt={gallery[selectedIdx].caption || 'Finisher Snapshot'}
+                className="max-h-[70vh] w-auto max-w-full object-contain mx-auto"
+              />
+              {gallery[selectedIdx].caption && (
+                <p className="mt-3 text-center text-xs sm:text-sm font-mono font-bold uppercase text-[#FFF000] tracking-wider">
+                  {gallery[selectedIdx].caption}
+                </p>
+              )}
+            </motion.div>
 
             {/* Next Button */}
             <button
               type="button"
               onClick={nextImage}
-              className="absolute right-2 sm:right-6 z-20 p-3 sm:p-4 bg-black/90 text-white border-2 border-[#E60012] -skew-x-6 hover:bg-[#E60012] shadow-[4px_4px_0px_0px_#FFFFFF] transition-all hover:scale-105 cursor-pointer"
+              className="absolute right-3 sm:right-8 z-20 p-3 bg-black/80 hover:bg-[#E60012] border-2 border-white text-white -skew-x-6 transition-colors cursor-pointer"
             >
-              <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8 skew-x-6" />
+              <ChevronRight className="w-6 h-6 skew-x-6" />
             </button>
-
-            {/* Main Image with Persona 5 Finisher Cut */}
-            <motion.div
-              initial={{ scale: 0.85, rotate: -2 }}
-              animate={{ scale: 1, rotate: 0 }}
-              exit={{ scale: 0.85, opacity: 0 }}
-              transition={{ type: 'spring', damping: 20 }}
-              className="relative max-w-4xl max-h-[80vh] p-2 sm:p-3 bg-[#000000] border-4 border-white shadow-[16px_16px_0px_0px_#E60012] -skew-x-1"
-            >
-              <img
-                src={gallery[selectedIdx].image_url}
-                alt={gallery[selectedIdx].caption || 'Wedding Photo'}
-                className="max-h-[68vh] sm:max-h-[72vh] w-auto mx-auto object-contain"
-              />
-
-              {gallery[selectedIdx].caption && (
-                <div className="p-3 text-center bg-[#141418] border-t-2 border-white/30 flex items-center justify-between gap-4">
-                  <span className="text-[11px] font-mono text-[#FFF000] font-black uppercase tracking-widest">
-                    PHOTO {selectedIdx + 1} / {gallery.length}
-                  </span>
-                  <p className="text-xs sm:text-sm font-mono uppercase text-white font-bold truncate">
-                    {gallery[selectedIdx].caption}
-                  </p>
-                </div>
-              )}
-            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

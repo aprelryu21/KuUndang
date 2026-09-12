@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Heart, ShieldAlert, KeyRound, ExternalLink, Zap, Flame, Star } from 'lucide-react';
+import { Zap, Flame } from 'lucide-react';
 import { Invitation, Guest } from '../../../types/wedding';
+import { useLanguage } from '../../../context/LanguageContext';
+import { Persona5LanguageSwitcher } from './Persona5LanguageSwitcher';
 
 interface Persona5OpeningCoverProps {
   invitation: Invitation;
@@ -14,15 +16,32 @@ interface Persona5OpeningCoverProps {
 export const Persona5OpeningCover: React.FC<Persona5OpeningCoverProps> = ({
   invitation,
   guestName,
+  guest,
   onOpen,
   onOpenAdminModal,
 }) => {
+  const { t } = useLanguage();
   const [customName, setCustomName] = useState(guestName || '');
   const [isSlashing, setIsSlashing] = useState(false);
 
+  // Secret badge click count for admin modal (3 clicks within 2s)
+  const secretClicksRef = useRef<number[]>([]);
+  const handleSecretBadgeClick = () => {
+    const now = Date.now();
+    secretClicksRef.current = [...secretClicksRef.current.filter((time) => now - time < 2000), now];
+    if (secretClicksRef.current.length >= 3) {
+      secretClicksRef.current = [];
+      if (onOpenAdminModal) {
+        onOpenAdminModal();
+      }
+    }
+  };
+
   const playSlashSfx = () => {
     try {
-      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const AudioContextClass =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!AudioContextClass) return;
       const ctx = new AudioContextClass();
       const osc = ctx.createOscillator();
@@ -49,10 +68,23 @@ export const Persona5OpeningCover: React.FC<Persona5OpeningCoverProps> = ({
     setIsSlashing(true);
     playSlashSfx();
 
+    // Trigger audio synchronously within direct click gesture
+    const bgAudio = document.getElementById('p5-audio-element') as HTMLAudioElement | null;
+    if (bgAudio) {
+      bgAudio.play().catch((err) => {
+        console.warn('Audio play on cover open deferred:', err);
+      });
+    }
+
     setTimeout(() => {
-      onOpen(customName.trim() || guestName || 'Tamu Terhormat');
+      onOpen(customName.trim() || guestName || t.honoredGuest || 'Tamu Terhormat');
     }, 650);
   };
+
+  const p5Translations = t.p5;
+  const callingCardBadge = p5Translations?.callingCardTag || '★ CALLING CARD ★';
+  const takeYourHeartBtn = p5Translations?.takeYourHeart || 'BUKA KARTU UNDANGAN // TAKE YOUR HEART';
+  const recipientTag = p5Translations?.recipientTag || 'TO THE HONORED RECIPIENT';
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-[#0D0D0D] text-[#FFFFFF] flex flex-col justify-between select-none">
@@ -86,7 +118,7 @@ export const Persona5OpeningCover: React.FC<Persona5OpeningCoverProps> = ({
         </div>
       </div>
 
-      {/* Top Header Bar: Secret Admin Entry & Infiltration Tag */}
+      {/* Top Header Bar: Stylized protocol tag on left, Language switcher on right (Studio access button removed) */}
       <header className="relative z-20 px-4 sm:px-8 pt-4 sm:pt-6 flex items-center justify-between">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#000000] border-2 border-[#E60012] -skew-x-12 shadow-lg">
           <Flame className="w-4 h-4 text-[#FFF000] animate-pulse skew-x-12" />
@@ -95,17 +127,10 @@ export const Persona5OpeningCover: React.FC<Persona5OpeningCoverProps> = ({
           </span>
         </div>
 
-        {onOpenAdminModal && (
-          <button
-            type="button"
-            onClick={onOpenAdminModal}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-[#0D0D0D] hover:bg-[#E60012] border border-[#FFFFFF]/30 text-[11px] font-mono text-[#FFFFFF] tracking-wider transition-colors cursor-pointer shadow-md -skew-x-6 group"
-            title="Akses Admin Studio"
-          >
-            <KeyRound className="w-3.5 h-3.5 text-[#FFF000] group-hover:text-white skew-x-6" />
-            <span className="skew-x-6 font-bold">STUDIO ACCESS</span>
-          </button>
-        )}
+        {/* Persona 5 Styled Language Switcher */}
+        <div className="relative">
+          <Persona5LanguageSwitcher variant="cover" />
+        </div>
       </header>
 
       {/* Main Calling Card Centerpiece */}
@@ -116,10 +141,15 @@ export const Persona5OpeningCover: React.FC<Persona5OpeningCoverProps> = ({
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           className="relative bg-[#000000] border-4 border-[#FFFFFF] p-6 sm:p-8 shadow-[12px_12px_0px_0px_#E60012] -skew-x-2"
         >
-          {/* Jagged Corner Badges */}
-          <div className="absolute -top-4 left-4 bg-[#E60012] text-[#FFFFFF] text-[11px] font-black uppercase tracking-[0.25em] px-3 py-1 -skew-x-12 border-2 border-white shadow-md">
-            ★ CALLING CARD ★
-          </div>
+          {/* Jagged Corner Badges - Secret triple-click on badge opens admin modal discreetly */}
+          <button
+            type="button"
+            onClick={handleSecretBadgeClick}
+            className="absolute -top-4 left-4 bg-[#E60012] text-[#FFFFFF] text-[11px] font-black uppercase tracking-[0.25em] px-3 py-1 -skew-x-12 border-2 border-white shadow-md cursor-default text-left"
+            title="Protocol Badge"
+          >
+            {callingCardBadge}
+          </button>
 
           <div className="absolute -bottom-3 right-4 bg-[#FFF000] text-[#000000] text-[10px] font-black tracking-widest px-2.5 py-0.5 skew-x-6 border border-black">
             CONFIDANT: RANK 10
@@ -128,7 +158,7 @@ export const Persona5OpeningCover: React.FC<Persona5OpeningCoverProps> = ({
           {/* Subtitle / Calling Card Header */}
           <div className="mt-2 mb-4">
             <p className="text-xs font-mono font-bold tracking-[0.3em] text-[#FFF000] uppercase">
-              TO THE HONORED RECIPIENT
+              {recipientTag}
             </p>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter text-[#FFFFFF] mt-1 uppercase italic leading-none">
               TAKE YOUR <span className="text-[#E60012] bg-[#FFFFFF] px-2 py-0.5 not-italic inline-block -rotate-2">HEART</span>
@@ -138,7 +168,7 @@ export const Persona5OpeningCover: React.FC<Persona5OpeningCoverProps> = ({
           {/* Bride & Groom Staged Names */}
           <div className="my-5 py-4 border-y-2 border-dashed border-[#FFFFFF]/30 relative">
             <div className="text-xs font-mono tracking-widest text-[#FFFFFF]/70 uppercase mb-1">
-              THE WEDDING HEIST OF
+              {t.weddingOf.toUpperCase()}
             </div>
             <div className="flex items-center justify-center gap-3 text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-[#FFFFFF] uppercase">
               <span className="bg-[#E60012] text-white px-2 py-0.5 -skew-x-6 shadow-sm">
@@ -150,34 +180,35 @@ export const Persona5OpeningCover: React.FC<Persona5OpeningCoverProps> = ({
               </span>
             </div>
             <p className="text-xs font-mono tracking-widest text-[#FFF000] mt-2 font-bold">
-              17 . 09 . 2021 // SHIBUYA & SIDOARJO
+              {p5Translations?.dateFormat || '17 . 09 . 2021 // SHIBUYA & SIDOARJO'}
             </p>
           </div>
 
           {/* Personalized Invitee Box */}
           <div className="bg-[#1A1A1E] border-2 border-[#E60012] p-4 text-left my-4 relative">
             <div className="flex items-center justify-between text-[11px] font-mono text-[#FFFFFF]/60 uppercase mb-1">
-              <span>TARGET INVITEE:</span>
-              <span className="text-[#FFF000] font-bold">STATUS: CONFIRMED</span>
+              <span>{t.guestNameLabel.toUpperCase()}:</span>
+              <span className="text-[#FFF000] font-bold">STATUS: {t.attending.toUpperCase()}</span>
             </div>
             <div className="text-lg sm:text-xl font-black text-[#FFFFFF] tracking-wide uppercase">
-              {guestName || 'TAMU TERHORMAT'}
+              {guestName || t.honoredGuest}
             </div>
             <p className="text-[11px] text-[#FFFFFF]/80 font-mono mt-1.5 leading-relaxed">
-              &quot;Kami dari Phantom Thieves of Hearts mengumumkan bahwa pada hari suci pernikahan kami, kami akan mencuri kehadiran dan doa restu Anda.&quot;
+              {t.closingHonorMessage ||
+                'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Anda berkenan hadir dan memberikan doa restu.'}
             </p>
 
             {/* Optional Input to customize name */}
             <div className="mt-3 pt-2 border-t border-white/10">
               <label htmlFor="p5-guest-input" className="block text-[10px] font-mono text-[#FFF000] uppercase mb-1">
-                UBAH NAMA ANDA (JIKA PERLU):
+                {p5Translations?.openPrompt || 'UBAH NAMA ANDA (JIKA PERLU):'}
               </label>
               <input
                 id="p5-guest-input"
                 type="text"
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
-                placeholder="Masukkan nama Anda..."
+                placeholder={t.guestNamePlaceholder}
                 className="w-full px-3 py-1.5 bg-[#000000] border border-[#FFFFFF]/40 text-[#FFFFFF] text-xs font-mono focus:border-[#E60012] focus:outline-none"
               />
             </div>
@@ -192,7 +223,7 @@ export const Persona5OpeningCover: React.FC<Persona5OpeningCoverProps> = ({
             className="w-full mt-2 py-3.5 sm:py-4 bg-[#E60012] hover:bg-[#FF0019] text-[#FFFFFF] text-base sm:text-lg font-black uppercase tracking-wider border-2 border-[#FFFFFF] shadow-[6px_6px_0px_0px_#FFFFFF] transition-all cursor-pointer flex items-center justify-center gap-3 -skew-x-6 group"
           >
             <Zap className="w-5 h-5 text-[#FFF000] group-hover:scale-125 transition-transform skew-x-6" />
-            <span className="skew-x-6">BUKA UNDANGAN // ALL-OUT ATTACK</span>
+            <span className="skew-x-6">{takeYourHeartBtn}</span>
           </motion.button>
         </motion.div>
       </main>

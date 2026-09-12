@@ -8,6 +8,7 @@ import {
   RSVP,
   SectionSetting,
   StoryItem,
+  TemplateId,
   ThemeConfig,
   WeddingEvent,
   Wish,
@@ -183,7 +184,7 @@ export const weddingService = {
     groom_nickname: string;
     slug: string;
     wedding_date: string;
-    template_id?: 'royal-arch' | 'persona-5';
+    template_id?: TemplateId;
     theme_config?: Partial<ThemeConfig>;
   }): Promise<Invitation> {
     initializeLocalStorage();
@@ -191,8 +192,8 @@ export const weddingService = {
     const newInv: Invitation = {
       id,
       template_id: params.template_id || 'royal-arch',
-      title: params.title || `The Wedding of ${params.groom_nickname} & ${params.bride_nickname}`,
-      slug: params.slug || `${params.groom_nickname.toLowerCase()}-${params.bride_nickname.toLowerCase()}`,
+      title: params.title || `The Wedding of ${params.groom_nickname || 'Groom'} & ${params.bride_nickname || 'Bride'}`,
+      slug: params.slug || `${(params.groom_nickname || 'groom').toLowerCase()}-${(params.bride_nickname || 'bride').toLowerCase()}`,
       wedding_date: params.wedding_date || '2026-10-10',
       status: 'draft',
       opening_title: 'THE WEDDING OF',
@@ -514,8 +515,9 @@ export const weddingService = {
   async getGuestByCode(invitationId: string, code: string): Promise<Guest | null> {
     initializeLocalStorage();
     const guests = getLocal<Guest[]>(STORAGE_KEYS.GUESTS, INITIAL_DEMO_GUESTS);
+    const searchCode = (code || '').trim().toLowerCase();
     const found = guests.find(
-      (g) => g.invitation_id === invitationId && g.guest_code.toLowerCase() === code.toLowerCase()
+      (g) => g.invitation_id === invitationId && (g.guest_code || '').toLowerCase() === searchCode
     );
     return found || null;
   },
@@ -552,8 +554,9 @@ export const weddingService = {
   async markGuestOpened(invitationId: string, code: string): Promise<void> {
     initializeLocalStorage();
     const guests = getLocal<Guest[]>(STORAGE_KEYS.GUESTS, INITIAL_DEMO_GUESTS);
+    const searchCode = (code || '').trim().toLowerCase();
     const index = guests.findIndex(
-      (g) => g.invitation_id === invitationId && g.guest_code.toLowerCase() === code.toLowerCase()
+      (g) => g.invitation_id === invitationId && (g.guest_code || '').toLowerCase() === searchCode
     );
     if (index !== -1 && !guests[index].opened_at) {
       guests[index].opened_at = new Date().toISOString();
@@ -574,11 +577,12 @@ export const weddingService = {
     const rsvps = getLocal<RSVP[]>(STORAGE_KEYS.RSVPS, INITIAL_DEMO_RSVPS);
 
     // Prevent duplicate spam from same guest
+    const targetName = (params.guest_name || '').trim().toLowerCase();
     const existingIndex = rsvps.findIndex(
       (r) =>
         r.invitation_id === params.invitation_id &&
         ((params.guest_id && r.guest_id === params.guest_id) ||
-          r.guest_name.toLowerCase().trim() === params.guest_name.toLowerCase().trim())
+          (r.guest_name || '').trim().toLowerCase() === targetName)
     );
 
     const newRSVP: RSVP = {

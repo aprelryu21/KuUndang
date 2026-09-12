@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { Send, Check, Copy, Heart, MessageSquare, Shield, Zap, Star, Gift, Flame } from 'lucide-react';
+import { Check, Copy, MessageSquare, Flame, Gift, Send, Zap } from 'lucide-react';
 import { GiftAccount, Wish } from '../../../types/wedding';
 import { weddingService } from '../../../services/weddingService';
 import { useToast } from '../../../context/ToastContext';
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface Persona5RSVPAndWishesProps {
   invitationId: string;
@@ -23,6 +23,8 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
   onRefreshData,
 }) => {
   const { showToast } = useToast();
+  const { t, language } = useLanguage();
+  const p5Translations = t.p5;
 
   // RSVP States
   const [rsvpName, setRsvpName] = useState(defaultGuestName || '');
@@ -43,14 +45,14 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
   const handleCopyAccount = (id: string, num: string) => {
     navigator.clipboard.writeText(num);
     setCopiedId(id);
-    showToast('Nomor rekening berhasil disalin! ♡', 'success');
+    showToast(t.numberCopied || 'Nomor rekening berhasil disalin! ♡', 'success');
     setTimeout(() => setCopiedId(null), 3000);
   };
 
   const handleRSVPSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!rsvpName.trim()) {
-      showToast('Harap masukkan nama Anda', 'error');
+      showToast(t.nameRequired || 'Harap masukkan nama Anda', 'error');
       return;
     }
 
@@ -66,10 +68,10 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
       });
 
       setRsvpSubmitted(true);
-      showToast('Status konfirmasi kehadiran berhasil dikirim!', 'success');
+      showToast(t.rsvpSuccess || 'Status konfirmasi kehadiran berhasil dikirim!', 'success');
       if (onRefreshData) onRefreshData();
     } catch {
-      showToast('Gagal mengirim RSVP, silakan coba lagi', 'error');
+      showToast(t.rsvpError || 'Gagal mengirim RSVP, silakan coba lagi', 'error');
     } finally {
       setIsSubmittingRSVP(false);
     }
@@ -78,7 +80,7 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
   const handleWishSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!wishName.trim() || !wishMessage.trim()) {
-      showToast('Harap lengkapi nama dan doa restu Anda', 'error');
+      showToast(t.nameRequired || 'Harap lengkapi nama dan doa restu Anda', 'error');
       return;
     }
 
@@ -92,10 +94,10 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
       });
 
       setWishMessage('');
-      showToast('Doa restu Anda berhasil dikirim ke Phan-Site!', 'success');
+      showToast(t.wishSuccess || 'Doa restu Anda berhasil dikirim!', 'success');
       if (onRefreshData) onRefreshData();
     } catch {
-      showToast('Gagal mengirim ucapan, silakan coba lagi', 'error');
+      showToast(t.wishError || 'Gagal mengirim ucapan, silakan coba lagi', 'error');
     } finally {
       setIsSubmittingWish(false);
     }
@@ -120,13 +122,20 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#E60012] text-white text-xs font-black uppercase tracking-[0.2em] -skew-x-12 mb-3">
               <Gift className="w-3.5 h-3.5 text-[#FFF000] skew-x-12" />
-              <span className="skew-x-12">VELVET ROOM DIGITAL TRIBUTE</span>
+              <span className="skew-x-12">
+                {p5Translations?.tributeHeader || 'VELVET ROOM DIGITAL TRIBUTE'}
+              </span>
             </div>
             <h2 className="text-3xl sm:text-5xl font-black uppercase italic tracking-tight text-[#FFFFFF]">
-              AMPLOP DIGITAL & <span className="text-[#E60012] not-italic">TANDA KASIH</span>
+              {t.weddingGift ? (
+                t.weddingGift.toUpperCase()
+              ) : (
+                <>AMPLOP DIGITAL & <span className="text-[#E60012] not-italic">TANDA KASIH</span></>
+              )}
             </h2>
             <p className="text-xs sm:text-sm font-mono text-[#FFFFFF]/70 mt-2 max-w-xl mx-auto">
-              Doa restu Anda adalah hadiah terindah. Bagi yang ingin memberikan tanda kasih secara cashless:
+              {t.giftDescription ||
+                'Doa restu Anda adalah hadiah terindah. Bagi yang ingin memberikan tanda kasih secara cashless:'}
             </p>
           </div>
 
@@ -150,7 +159,7 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
 
                   <div className="space-y-1 my-3">
                     <p className="text-[11px] font-mono text-[#FFFFFF]/60 uppercase">
-                      NOMOR REKENING:
+                      {t.accountNumber || 'NOMOR REKENING'}:
                     </p>
                     <div className="text-xl sm:text-2xl font-mono font-black text-white tracking-widest">
                       {gf.account_number}
@@ -168,12 +177,12 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
                     {isCopied ? (
                       <>
                         <Check className="w-3.5 h-3.5 text-[#FFF000] skew-x-6" />
-                        <span className="skew-x-6 text-[#FFF000]">BERHASIL DISALIN!</span>
+                        <span className="skew-x-6 text-[#FFF000]">{t.numberCopied || 'BERHASIL DISALIN!'}</span>
                       </>
                     ) : (
                       <>
                         <Copy className="w-3.5 h-3.5 skew-x-6" />
-                        <span className="skew-x-6">SALIN NOMOR REKENING</span>
+                        <span className="skew-x-6">{t.copyNumber || 'SALIN NOMOR REKENING'}</span>
                       </>
                     )}
                   </button>
@@ -188,10 +197,16 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FFF000] text-black text-xs font-black uppercase tracking-[0.2em] -skew-x-12 mb-3">
               <Zap className="w-3.5 h-3.5 text-black skew-x-12" />
-              <span className="skew-x-12">TACTICAL BATTLE COMMAND</span>
+              <span className="skew-x-12">
+                {p5Translations?.tacticalBattle || 'TACTICAL BATTLE COMMAND'}
+              </span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-black uppercase italic tracking-tight text-[#FFFFFF]">
-              KONFIRMASI KEHADIRAN <span className="text-[#E60012] not-italic">// RSVP</span>
+              {p5Translations?.rsvpTitle ? (
+                p5Translations.rsvpTitle
+              ) : (
+                <>KONFIRMASI KEHADIRAN <span className="text-[#E60012] not-italic">// RSVP</span></>
+              )}
             </h2>
           </div>
 
@@ -205,14 +220,15 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
                   MISSION LOG REGISTERED!
                 </h3>
                 <p className="text-xs font-mono text-[#FFFFFF]/80 max-w-md mx-auto">
-                  Terima kasih atas konfirmasi kehadiran Anda. Kami menantikan kehadiran Anda di hari bahagia kami!
+                  {t.rsvpSuccessMessage ||
+                    'Terima kasih atas konfirmasi kehadiran Anda. Kami menantikan kehadiran Anda di hari bahagia kami!'}
                 </p>
               </div>
             ) : (
               <form onSubmit={handleRSVPSubmit} className="space-y-4 text-left">
                 <div>
                   <label htmlFor="p5-rsvp-name" className="block text-xs font-mono font-bold text-[#FFF000] uppercase mb-1">
-                    NAMA LENGKAP TAMU:
+                    {t.yourName || 'NAMA LENGKAP TAMU'}:
                   </label>
                   <input
                     id="p5-rsvp-name"
@@ -220,7 +236,7 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
                     value={rsvpName}
                     onChange={(e) => setRsvpName(e.target.value)}
                     required
-                    placeholder="Contoh: Bpk. Ahmad Pratama"
+                    placeholder={t.guestNamePlaceholder || 'Contoh: Bpk. Ahmad Pratama'}
                     className="w-full px-3.5 py-2.5 bg-black border-2 border-white/40 text-white text-xs font-mono focus:border-[#E60012] focus:outline-none"
                   />
                 </div>
@@ -228,7 +244,7 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
                 {/* Persona 5 Battle Action Selector */}
                 <div>
                   <label className="block text-xs font-mono font-bold text-[#FFF000] uppercase mb-2">
-                    PILIH TINDAKAN PERTEMPURAN (ACTION):
+                    {p5Translations?.battleAction || 'PILIH TINDAKAN PERTEMPURAN (ACTION):'}
                   </label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
@@ -241,7 +257,7 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
                       }`}
                     >
                       <span className="skew-x-6 inline-block">
-                        ⚔ ALL-OUT ATTACK (HADIR)
+                        {p5Translations?.allOutAttackHadir || '⚔ ALL-OUT ATTACK (HADIR)'}
                       </span>
                     </button>
 
@@ -255,7 +271,7 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
                       }`}
                     >
                       <span className="skew-x-6 inline-block">
-                        🛡 ESCAPE (BERHALANGAN)
+                        {p5Translations?.escapeBerhalangan || '🛡 ESCAPE (BERHALANGAN)'}
                       </span>
                     </button>
                   </div>
@@ -264,7 +280,7 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
                 {attendance === 'attending' && (
                   <div>
                     <label htmlFor="p5-rsvp-guest-count" className="block text-xs font-mono font-bold text-[#FFF000] uppercase mb-1">
-                      JUMLAH PERSONIL (TAMU):
+                      {t.guestCount || 'JUMLAH PERSONIL (TAMU)'}:
                     </label>
                     <select
                       id="p5-rsvp-guest-count"
@@ -272,24 +288,24 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
                       onChange={(e) => setGuestCount(Number(e.target.value))}
                       className="w-full px-3.5 py-2.5 bg-black border-2 border-white/40 text-white text-xs font-mono focus:border-[#E60012] focus:outline-none"
                     >
-                      <option value={1}>1 Orang</option>
-                      <option value={2}>2 Orang</option>
-                      <option value={3}>3 Orang</option>
-                      <option value={4}>4 Orang</option>
+                      <option value={1}>1 {t.person || 'Orang'}</option>
+                      <option value={2}>2 {t.person || 'Orang'}</option>
+                      <option value={3}>3 {t.person || 'Orang'}</option>
+                      <option value={4}>4 {t.person || 'Orang'}</option>
                     </select>
                   </div>
                 )}
 
                 <div>
                   <label htmlFor="p5-rsvp-msg" className="block text-xs font-mono font-bold text-[#FFF000] uppercase mb-1">
-                    PESAN TAMBAHAN (OPSIONAL):
+                    {t.notesLabel || 'PESAN TAMBAHAN (OPSIONAL)'}:
                   </label>
                   <textarea
                     id="p5-rsvp-msg"
                     rows={2}
                     value={rsvpMessage}
                     onChange={(e) => setRsvpMessage(e.target.value)}
-                    placeholder="Catatan untuk kedua mempelai..."
+                    placeholder={t.notesPlaceholder || 'Catatan untuk kedua mempelai...'}
                     className="w-full px-3.5 py-2.5 bg-black border-2 border-white/40 text-white text-xs font-mono focus:border-[#E60012] focus:outline-none"
                   />
                 </div>
@@ -301,7 +317,7 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
                 >
                   <Flame className="w-4 h-4 text-[#FFF000] skew-x-6" />
                   <span className="skew-x-6">
-                    {isSubmittingRSVP ? 'TRANSMITTING...' : 'EXECUTE RSVP COMMAND'}
+                    {isSubmittingRSVP ? 'TRANSMITTING...' : p5Translations?.sendRsvp || t.sendRsvp || 'EXECUTE RSVP COMMAND'}
                   </span>
                 </button>
               </form>
@@ -314,10 +330,16 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#E60012] text-white text-xs font-black uppercase tracking-[0.2em] -skew-x-12 mb-3">
               <MessageSquare className="w-3.5 h-3.5 text-[#FFF000] skew-x-12" />
-              <span className="skew-x-12">PHAN-SITE FORUM // APPROVAL: 100% LOVE</span>
+              <span className="skew-x-12">
+                {p5Translations?.phanSiteForum || 'PHAN-SITE FORUM // APPROVAL: 100% LOVE'}
+              </span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-black uppercase italic tracking-tight text-[#FFFFFF]">
-              DOA RESTU & <span className="text-[#E60012] not-italic">TRANSMISI PESAN</span>
+              {t.wishesTitle ? (
+                t.wishesTitle.toUpperCase()
+              ) : (
+                <>DOA RESTU & <span className="text-[#E60012] not-italic">TRANSMISI PESAN</span></>
+              )}
             </h2>
           </div>
 
@@ -326,7 +348,7 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
             <form onSubmit={handleWishSubmit} className="space-y-3">
               <div>
                 <label htmlFor="p5-wish-name" className="block text-xs font-mono font-bold text-[#FFF000] uppercase mb-1">
-                  NAMA ANDA:
+                  {t.yourName || 'NAMA ANDA'}:
                 </label>
                 <input
                   id="p5-wish-name"
@@ -334,14 +356,14 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
                   value={wishName}
                   onChange={(e) => setWishName(e.target.value)}
                   required
-                  placeholder="Nama pemberi doa..."
+                  placeholder={t.guestNamePlaceholder || 'Nama pemberi doa...'}
                   className="w-full px-3.5 py-2 bg-black border border-white/40 text-white text-xs font-mono focus:border-[#E60012] focus:outline-none"
                 />
               </div>
 
               <div>
                 <label htmlFor="p5-wish-msg" className="block text-xs font-mono font-bold text-[#FFF000] uppercase mb-1">
-                  UNTAIAN DOA & UCAPAN SELAMAT:
+                  {t.wishPlaceholder || 'UNTAIAN DOA & UCAPAN SELAMAT'}:
                 </label>
                 <textarea
                   id="p5-wish-msg"
@@ -349,7 +371,7 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
                   value={wishMessage}
                   onChange={(e) => setWishMessage(e.target.value)}
                   required
-                  placeholder="Tuliskan doa restu tulus untuk April & Siti..."
+                  placeholder={t.wishPlaceholder || 'Tuliskan doa restu tulus untuk kedua mempelai...'}
                   className="w-full px-3.5 py-2 bg-black border border-white/40 text-white text-xs font-mono focus:border-[#E60012] focus:outline-none"
                 />
               </div>
@@ -361,7 +383,7 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
               >
                 <Send className="w-3.5 h-3.5 skew-x-6" />
                 <span className="skew-x-6">
-                  {isSubmittingWish ? 'POSTING TRANSMISSION...' : 'KIRIM DOA RESTU KE PHAN-SITE'}
+                  {isSubmittingWish ? 'POSTING TRANSMISSION...' : p5Translations?.sendWish || t.sendWish || 'KIRIM DOA RESTU KE PHAN-SITE'}
                 </span>
               </button>
             </form>
@@ -386,7 +408,7 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
                       </span>
                     </div>
                     <span className="text-[10px] font-mono text-[#FFF000]">
-                      {new Date(w.created_at).toLocaleDateString('id-ID', {
+                      {new Date(w.created_at).toLocaleDateString(language === 'JP' ? 'ja-JP' : language === 'CN' ? 'zh-CN' : language === 'EN' ? 'en-US' : 'id-ID', {
                         day: 'numeric',
                         month: 'short',
                         year: 'numeric',

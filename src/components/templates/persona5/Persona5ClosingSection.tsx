@@ -1,7 +1,7 @@
 import React from 'react';
-import { motion } from 'motion/react';
-import { Heart, ArrowUp, Star, Flame, Zap } from 'lucide-react';
+import { ArrowUp, Star } from 'lucide-react';
 import { Invitation } from '../../../types/wedding';
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface Persona5ClosingSectionProps {
   invitation: Invitation;
@@ -12,6 +12,9 @@ export const Persona5ClosingSection: React.FC<Persona5ClosingSectionProps> = ({
   invitation,
   onBackToCover,
 }) => {
+  const { t } = useLanguage();
+  const p5Translations = t.p5;
+
   return (
     <footer className="py-20 sm:py-28 bg-[#000000] text-[#FFFFFF] relative overflow-hidden border-t-4 border-[#FFFFFF] select-none">
       {/* Background Graphic Slashes */}
@@ -24,29 +27,36 @@ export const Persona5ClosingSection: React.FC<Persona5ClosingSectionProps> = ({
         {/* Slanted Stamp */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#E60012] text-white text-xs font-black uppercase tracking-[0.25em] -skew-x-12 border-2 border-white shadow-[4px_4px_0px_0px_#FFF000]">
           <Star className="w-3.5 h-3.5 fill-[#FFF000] text-[#FFF000] skew-x-12" />
-          <span className="skew-x-12">MISSION ACCOMPLISHED // TAKE OVER</span>
+          <span className="skew-x-12">
+            {p5Translations?.missionAccomplished || 'MISSION ACCOMPLISHED // TAKE OVER'}
+          </span>
         </div>
 
         {/* Thank you statement */}
         <div className="bg-[#141418] border-4 border-white p-6 sm:p-8 -skew-x-2 shadow-[10px_10px_0px_0px_#E60012] space-y-4">
           <h2 className="text-3xl sm:text-4xl font-black uppercase italic tracking-tight text-white">
-            TERIMA KASIH ATAS <span className="text-[#E60012] not-italic">DOA & KEHADIRAN ANDA</span>
+            {p5Translations?.thankYouTitle ? (
+              p5Translations.thankYouTitle
+            ) : (
+              <>TERIMA KASIH ATAS <span className="text-[#E60012] not-italic">DOA & KEHADIRAN ANDA</span></>
+            )}
           </h2>
 
           <p className="text-xs sm:text-sm font-mono text-[#FFFFFF]/80 leading-relaxed max-w-xl mx-auto">
-            {invitation.closing_message ||
+            {t.closingHonorMessage ||
+              invitation.closing_message ||
               'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.'}
           </p>
 
           <div className="pt-4 border-t border-white/20">
             <p className="text-xs font-mono text-[#FFF000] uppercase font-bold tracking-widest mb-1">
-              KAMI YANG BERBAHAGIA:
+              {t.warmRegards || 'KAMI YANG BERBAHAGIA:'}
             </p>
             <div className="text-2xl sm:text-3xl font-black uppercase tracking-wide text-white">
               {invitation.groom_nickname} <span className="text-[#E60012]">&</span> {invitation.bride_nickname}
             </div>
             <p className="text-[11px] font-mono text-[#FFFFFF]/60 mt-1">
-              Beserta Seluruh Keluarga Besar Bpk. Suwardi & Bpk. Poniman
+              {t.familyAndFriends || 'Beserta Seluruh Keluarga Besar Bpk. Suwardi & Bpk. Poniman'}
             </p>
           </div>
         </div>
@@ -59,7 +69,9 @@ export const Persona5ClosingSection: React.FC<Persona5ClosingSectionProps> = ({
             className="inline-flex items-center gap-2 px-6 py-3 bg-[#E60012] hover:bg-[#FF0019] text-white text-xs font-black uppercase tracking-wider transition-colors border-2 border-white -skew-x-6 shadow-[4px_4px_0px_0px_#FFF000] cursor-pointer"
           >
             <ArrowUp className="w-4 h-4 skew-x-6" />
-            <span className="skew-x-6">KEMBALI KE SAMPUL UNDANGAN (CALLING CARD)</span>
+            <span className="skew-x-6">
+              {p5Translations?.backToCallingCard || 'KEMBALI KE SAMPUL UNDANGAN (CALLING CARD)'}
+            </span>
           </button>
         </div>
 

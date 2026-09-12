@@ -61,8 +61,11 @@ export interface WeddingEvent {
   start_time: string;
   end_time?: string;
   venue: string;
+  venue_name?: string;
   address: string;
   maps_url?: string;
+  latitude?: number;
+  longitude?: number;
   description?: string;
   sort_order: number;
 }
@@ -76,6 +79,8 @@ export interface StoryItem {
   photo_url?: string;
   sort_order: number;
 }
+
+export type LoveStory = StoryItem;
 
 export interface GalleryItem {
   id: string;
@@ -129,9 +134,11 @@ export interface Wish {
   created_at: string;
 }
 
+export type TemplateId = 'royal-arch' | 'persona-5' | 'pastel-pop' | 'javanese-royal' | 'cute-pink-floral';
+
 export interface Invitation {
   id: string;
-  template_id?: 'royal-arch' | 'persona-5' | 'pastel-pop';
+  template_id?: TemplateId;
   owner_id?: string;
   title: string;
   slug: string;

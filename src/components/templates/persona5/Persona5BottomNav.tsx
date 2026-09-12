@@ -1,26 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { Home, Users, Calendar, MapPin, Heart, Image, MessageSquare, Star } from 'lucide-react';
+import { Home, Users, Calendar, MapPin, Heart, Image, MessageSquare } from 'lucide-react';
+import { useLanguage } from '../../../context/LanguageContext';
 
 export const Persona5BottomNav: React.FC = () => {
+  const { t } = useLanguage();
   const [activeSection, setActiveSection] = useState('p5-home');
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
+  const p5Translations = t.p5;
+
   const navItems = [
-    { id: 'p5-home', label: 'HOME', icon: Home },
-    { id: 'p5-couple', label: 'STATUS', icon: Users },
-    { id: 'p5-events', label: 'ACARA', icon: Calendar },
-    { id: 'p5-location', label: 'LOKASI', icon: MapPin },
-    { id: 'p5-story', label: 'KISAH', icon: Heart },
-    { id: 'p5-gallery', label: 'GALERI', icon: Image },
-    { id: 'p5-rsvp', label: 'RSVP', icon: MessageSquare },
+    { id: 'p5-home', label: p5Translations?.navHome || 'HOME', icon: Home },
+    { id: 'p5-couple', label: p5Translations?.navStatus || 'STATUS', icon: Users },
+    { id: 'p5-events', label: p5Translations?.navEvents || 'ACARA', icon: Calendar },
+    { id: 'p5-location', label: p5Translations?.navLocation || 'LOKASI', icon: MapPin },
+    { id: 'p5-story', label: p5Translations?.navStory || 'KISAH', icon: Heart },
+    { id: 'p5-gallery', label: p5Translations?.navGallery || 'GALERI', icon: Image },
+    { id: 'p5-rsvp', label: p5Translations?.navRsvp || 'RSVP', icon: MessageSquare },
   ];
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
-      // Auto-hide briefly on aggressive rapid downward scroll, re-show on up scroll
+      // Auto-hide briefly on rapid downward scroll, re-show on up scroll
       if (currentScrollY > lastScrollY && currentScrollY > 400) {
         setIsVisible(false);
       } else {

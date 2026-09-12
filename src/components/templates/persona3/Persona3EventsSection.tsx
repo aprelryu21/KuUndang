@@ -47,7 +47,7 @@ export const Persona3EventsSection: React.FC<Persona3EventsSectionProps> = ({ ev
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {sortedEvents.map((evt, idx) => {
             const operationNum = String(idx + 1).padStart(2, '0');
-            const isAkad = evt.event_type === 'akad' || evt.title.toLowerCase().includes('akad');
+            const isAkad = evt.event_type === 'akad' || (evt.title || '').toLowerCase().includes('akad');
 
             return (
               <motion.div

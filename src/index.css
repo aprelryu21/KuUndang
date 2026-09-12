@@ -58,3 +58,74 @@
 .animate-spin-slow {
   animation: spin-slow 8s linear infinite;
 }
+
+/* Javanese Golden Dust & Melati Rising Float */
+@keyframes javaneseFloat {
+  0% {
+    transform: translateY(0) scale(0.85);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.9;
+  }
+  85% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-105vh) scale(1.1);
+    opacity: 0;
+  }
+}
+
+@keyframes javaneseSway {
+  0%, 100% {
+    transform: translateX(-8px) rotate(-12deg);
+  }
+  50% {
+    transform: translateX(8px) rotate(12deg);
+  }
+}
+
+.animate-javanese-float {
+  animation-name: javaneseFloat;
+}
+
+.animate-javanese-sway {
+  animation-name: javaneseSway;
+}
+
+/* Cute Falling Petals & Floating Blossom Animations */
+@keyframes cutePetalFall {
+  0% {
+    transform: translateY(-5vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.85;
+  }
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(105vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes cutePetalSway {
+  0%, 100% {
+    transform: translateX(-15px) rotate(-15deg);
+  }
+  50% {
+    transform: translateX(15px) rotate(15deg);
+  }
+}
+
+.animate-cute-fall {
+  animation-name: cutePetalFall;
+}
+
+.animate-cute-sway {
+  animation-name: cutePetalSway;
+}
+

@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Calendar, Clock, MapPin, Navigation, ExternalLink, Flame, BookmarkCheck } from 'lucide-react';
+import { Calendar, Clock, MapPin, Navigation, Flame, BookmarkCheck } from 'lucide-react';
 import { WeddingEvent, Invitation } from '../../../types/wedding';
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface Persona5EventsSectionProps {
   events: WeddingEvent[];
@@ -9,11 +10,14 @@ interface Persona5EventsSectionProps {
 }
 
 export const Persona5EventsSection: React.FC<Persona5EventsSectionProps> = ({ events }) => {
+  const { t } = useLanguage();
+  const p5Translations = t.p5;
+
   // Helper to construct Google Calendar URL
   const getGoogleCalendarUrl = (ev: WeddingEvent) => {
-    const title = encodeURIComponent(`${ev.title} — April & Siti Wedding`);
+    const title = encodeURIComponent(`${ev.title} — Wedding Celebration`);
     const details = encodeURIComponent(
-      `${ev.description || 'Pernikahan Suci April Pratama & Siti Nurjannah.'}\nLokasi: ${ev.venue}, ${ev.address}`
+      `${ev.description || 'Pernikahan Suci'}\nLokasi: ${ev.venue}, ${ev.address}`
     );
     const location = encodeURIComponent(`${ev.venue}, ${ev.address}`);
     const dateFormatted = ev.date.replace(/-/g, '');
@@ -41,13 +45,19 @@ export const Persona5EventsSection: React.FC<Persona5EventsSectionProps> = ({ ev
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#E60012] text-white text-xs font-black uppercase tracking-[0.2em] -skew-x-12 mb-3">
             <Flame className="w-3.5 h-3.5 text-[#FFF000] skew-x-12" />
-            <span className="skew-x-12">COGNITIVE PALACE INFILTRATION ITINERARY</span>
+            <span className="skew-x-12">
+              {p5Translations?.eventsHeader || 'COGNITIVE PALACE INFILTRATION ITINERARY'}
+            </span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-black uppercase italic tracking-tight text-[#FFFFFF]">
-            TARGET <span className="text-[#E60012] not-italic">OPERATIONS</span>
+            {p5Translations?.targetOperations ? (
+              p5Translations.targetOperations
+            ) : (
+              <>TARGET <span className="text-[#E60012] not-italic">OPERATIONS</span></>
+            )}
           </h2>
           <p className="text-xs sm:text-sm font-mono text-[#FFFFFF]/70 mt-2">
-            Jadwal Rangkaian Acara Sakral Akad Nikah, Resepsi, dan Unduh Mantu
+            {p5Translations?.eventsSubtitle || 'Jadwal Rangkaian Acara Sakral Akad Nikah, Resepsi, dan Unduh Mantu'}
           </p>
         </div>
 
@@ -94,7 +104,7 @@ export const Persona5EventsSection: React.FC<Persona5EventsSectionProps> = ({ ev
                     <div className="flex items-center gap-2 text-white font-bold">
                       <Clock className="w-4 h-4 text-[#E60012]" />
                       <span>
-                        {ev.start_time} {ev.end_time ? `- ${ev.end_time}` : 'WIB - Selesai'}
+                        {ev.start_time} {ev.end_time ? `- ${ev.end_time}` : p5Translations?.untilFinished || 'WIB - Selesai'}
                       </span>
                     </div>
                   </div>
@@ -121,7 +131,7 @@ export const Persona5EventsSection: React.FC<Persona5EventsSectionProps> = ({ ev
                       className="w-full py-2.5 bg-[#E60012] hover:bg-[#FF0019] text-white text-xs font-black uppercase tracking-wider transition-colors flex items-center justify-center gap-2 -skew-x-6 border border-white"
                     >
                       <Navigation className="w-3.5 h-3.5 skew-x-6" />
-                      <span className="skew-x-6">PETUNJUK RUTE (MAPS)</span>
+                      <span className="skew-x-6">{t.googleMaps || 'PETUNJUK RUTE (MAPS)'}</span>
                     </a>
                   )}
 
@@ -132,7 +142,7 @@ export const Persona5EventsSection: React.FC<Persona5EventsSectionProps> = ({ ev
                     className="w-full py-2 bg-[#000000] hover:bg-[#1C1C22] text-[#FFF000] text-xs font-mono font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 -skew-x-6 border border-[#FFF000]/60"
                   >
                     <BookmarkCheck className="w-3.5 h-3.5 skew-x-6" />
-                    <span className="skew-x-6">SIMPAN KE GOOGLE CALENDAR</span>
+                    <span className="skew-x-6">{t.saveTheDate || 'SIMPAN KE GOOGLE CALENDAR'}</span>
                   </a>
                 </div>
               </motion.div>

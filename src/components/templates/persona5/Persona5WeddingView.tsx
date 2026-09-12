@@ -14,7 +14,6 @@ import { Persona5ClosingSection } from './Persona5ClosingSection';
 import { Persona5AudioPlayer, PERSONA5_DEFAULT_MUSIC } from './Persona5AudioPlayer';
 import { Persona5BottomNav } from './Persona5BottomNav';
 import { AdminLoginModal } from '../../admin/AdminLoginModal';
-import { KeyRound, Star, Zap } from 'lucide-react';
 
 interface Persona5WeddingViewProps {
   data: FullInvitationData;
@@ -97,22 +96,7 @@ export const Persona5WeddingView: React.FC<Persona5WeddingViewProps> = ({
         />
       )}
 
-      {/* 4. FLOATING SECRET ADMIN BUTTON (Top Right, when cover is closed) */}
-      {!isCoverOpen && (
-        <div className="fixed top-14 right-3 sm:right-6 z-30">
-          <button
-            type="button"
-            onClick={() => setIsAdminModalOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1 bg-[#000000]/85 hover:bg-[#E60012] border border-white/30 text-white text-[10px] font-mono tracking-wider transition-all -skew-x-6 backdrop-blur-xs shadow-md cursor-pointer group"
-            title="Buka Login Admin Studio"
-          >
-            <KeyRound className="w-3 h-3 text-[#FFF000] group-hover:text-white skew-x-6" />
-            <span className="skew-x-6 font-bold hidden sm:inline">STUDIO ACCESS</span>
-          </button>
-        </div>
-      )}
-
-      {/* 5. MAIN INVITATION BODY */}
+      {/* 4. MAIN INVITATION BODY */}
       <main className="relative">
         {/* Section: Personal Greeting & Holy Verse */}
         <Persona5GreetingBanner

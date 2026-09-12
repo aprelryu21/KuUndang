@@ -8,6 +8,7 @@ import { LandingTemplatesGallery } from '../components/landing/LandingTemplatesG
 import { LandingHowItWorks } from '../components/landing/LandingHowItWorks';
 import { LandingFAQAndCTA } from '../components/landing/LandingFAQAndCTA';
 import { LandingFooter } from '../components/landing/LandingFooter';
+import { LandingMobileBottomNav } from '../components/landing/LandingMobileBottomNav';
 import { AdminLoginModal } from '../components/admin/AdminLoginModal';
 
 export const LandingPage: React.FC = () => {
@@ -16,7 +17,7 @@ export const LandingPage: React.FC = () => {
   // Global keyboard shortcut for PC: Ctrl + Shift + A, Cmd + Shift + A, Alt + Shift + A
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      const isAKey = e.key.toLowerCase() === 'a' || e.code === 'KeyA';
+      const isAKey = (e.key || '').toLowerCase() === 'a' || e.code === 'KeyA';
       const isCtrlShift = (e.ctrlKey || e.metaKey) && e.shiftKey && isAKey;
       const isAltShift = e.altKey && e.shiftKey && isAKey;
 
@@ -66,6 +67,9 @@ export const LandingPage: React.FC = () => {
 
       {/* Footer with Secret & Mobile Disguised Login Triggers */}
       <LandingFooter onOpenAdminLogin={() => setIsAdminModalOpen(true)} />
+
+      {/* Floating Bottom Nav on Mobile */}
+      <LandingMobileBottomNav />
 
       {/* Secret / Camouflaged Admin Login Modal */}
       <AdminLoginModal

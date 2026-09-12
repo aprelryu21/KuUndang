@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { weddingService } from '../../services/weddingService';
-import { Invitation } from '../../types/wedding';
+import { Invitation, TemplateId } from '../../types/wedding';
 import {
   Plus,
   Copy,
@@ -29,7 +29,7 @@ export const AdminInvitationsListPage: React.FC = () => {
   const [newBride, setNewBride] = useState('');
   const [newSlug, setNewSlug] = useState('');
   const [newDate, setNewDate] = useState('2026-10-10');
-  const [newTemplate, setNewTemplate] = useState<'royal-arch' | 'persona-5'>('royal-arch');
+  const [newTemplate, setNewTemplate] = useState<TemplateId>('royal-arch');
 
   // Duplicate Modal State
   const [duplicateSource, setDuplicateSource] = useState<Invitation | null>(null);
@@ -55,8 +55,8 @@ export const AdminInvitationsListPage: React.FC = () => {
     setNewGroom(groom);
     setNewBride(bride);
     if (groom && bride) {
-      const gSlug = groom.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const bSlug = bride.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const gSlug = (groom || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const bSlug = (bride || '').toLowerCase().replace(/[^a-z0-9]/g, '');
       setNewSlug(`${gSlug}-${bSlug}`);
       if (!newTitle) {
         setNewTitle(`The Wedding of ${groom} & ${bride}`);
@@ -209,10 +209,20 @@ export const AdminInvitationsListPage: React.FC = () => {
                     className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase ${
                       inv.template_id === 'persona-5'
                         ? 'bg-[#E60012] text-white -skew-x-3'
+                        : inv.template_id === 'javanese-royal'
+                        ? 'bg-[#D4AF37] text-[#1A1009]'
+                        : inv.template_id === 'cute-pink-floral'
+                        ? 'bg-[#FF5C8D] text-white'
                         : 'bg-[#283D52] text-[#FFFCF7]'
                     }`}
                   >
-                    {inv.template_id === 'persona-5' ? 'Persona 5 Style' : 'The Royal Arch'}
+                    {inv.template_id === 'persona-5'
+                      ? 'Persona 5 Style'
+                      : inv.template_id === 'javanese-royal'
+                      ? 'Adat Jawa Sakral'
+                      : inv.template_id === 'cute-pink-floral'
+                      ? 'Pastel Bloom Pink'
+                      : 'The Royal Arch'}
                   </span>
                 </div>
                 <p>
@@ -358,7 +368,7 @@ export const AdminInvitationsListPage: React.FC = () => {
                     type="text"
                     required
                     value={newSlug}
-                    onChange={(e) => setNewSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                    onChange={(e) => setNewSlug((e.target.value || '').toLowerCase().replace(/[^a-z0-9-]/g, ''))}
                     placeholder="rizky-anisa"
                     className="w-full px-3 py-2.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-r-xl text-xs text-[#24313A]"
                   />
@@ -389,6 +399,8 @@ export const AdminInvitationsListPage: React.FC = () => {
                 >
                   <option value="royal-arch">The Royal Navy & Gold Arch (Klasik Ningrat)</option>
                   <option value="persona-5">Phantom Crimson & Black (Persona 5 Theme)</option>
+                  <option value="javanese-royal">Adat Jawa Keraton & Gamelan Sakral</option>
+                  <option value="cute-pink-floral">Pastel Bloom & Bunga Lucu (Pink Manis)</option>
                 </select>
               </div>
 
@@ -460,7 +472,7 @@ export const AdminInvitationsListPage: React.FC = () => {
                     type="text"
                     required
                     value={dupSlug}
-                    onChange={(e) => setDupSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                    onChange={(e) => setDupSlug((e.target.value || '').toLowerCase().replace(/[^a-z0-9-]/g, ''))}
                     className="w-full px-3 py-2.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-r-xl text-xs text-[#24313A]"
                   />
                 </div>

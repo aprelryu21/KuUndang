@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
-import { Calendar, Clock, Flame, Heart, Sparkles, Star } from 'lucide-react';
+import { Flame, Star } from 'lucide-react';
 import { Invitation } from '../../../types/wedding';
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface Persona5HeroSectionProps {
   invitation: Invitation;
 }
 
 export const Persona5HeroSection: React.FC<Persona5HeroSectionProps> = ({ invitation }) => {
+  const { t } = useLanguage();
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -38,6 +39,8 @@ export const Persona5HeroSection: React.FC<Persona5HeroSectionProps> = ({ invita
     return () => clearInterval(timer);
   }, [invitation.wedding_date]);
 
+  const p5Translations = t.p5;
+
   return (
     <section id="p5-home" className="relative pt-24 pb-20 sm:py-28 bg-[#0D0D0D] text-[#FFFFFF] overflow-hidden">
       {/* Background Graphic Elements */}
@@ -63,7 +66,7 @@ export const Persona5HeroSection: React.FC<Persona5HeroSectionProps> = ({ invita
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#E60012] text-[#FFFFFF] border-2 border-white -skew-x-12 shadow-[4px_4px_0px_0px_#FFF000]">
             <Flame className="w-4 h-4 text-[#FFF000] skew-x-12" />
             <span className="text-xs font-black uppercase tracking-[0.2em] skew-x-12">
-              TARGET INFILTRATION // WEDDING CELEBRATION
+              {p5Translations?.countdownHeader || 'TARGET INFILTRATION // WEDDING CELEBRATION'}
             </span>
           </div>
         </div>
@@ -71,7 +74,7 @@ export const Persona5HeroSection: React.FC<Persona5HeroSectionProps> = ({ invita
         {/* Main Title Typography */}
         <div className="text-center space-y-4">
           <p className="text-xs sm:text-sm font-mono tracking-[0.35em] text-[#FFF000] uppercase font-bold">
-            STEAL THE WEDDING STAGE
+            {p5Translations?.stealStage || 'STEAL THE WEDDING STAGE'}
           </p>
 
           <div className="relative inline-block">
@@ -87,14 +90,14 @@ export const Persona5HeroSection: React.FC<Persona5HeroSectionProps> = ({ invita
           </div>
 
           <p className="text-sm sm:text-base font-mono text-[#FFFFFF]/80 max-w-xl mx-auto pt-2">
-            Jumat, 17 September 2021 // Akad & Resepsi Pernikahan
+            {p5Translations?.dateFormat || 'Jumat, 17 September 2021 // Akad & Resepsi Pernikahan'}
           </p>
         </div>
 
         {/* Persona 5 Mission Deadline / Countdown Section */}
         <div className="mt-12 max-w-2xl mx-auto bg-[#16161A] border-4 border-[#E60012] p-5 sm:p-7 shadow-[10px_10px_0px_0px_#000000] -skew-x-2 relative">
           <div className="absolute -top-4 left-6 bg-[#FFF000] text-[#000000] font-black text-xs uppercase tracking-widest px-3 py-0.5 border border-black -skew-x-6">
-            ★ MISSION DEADLINE / COUNTDOWN ★
+            {p5Translations?.missionDeadline || '★ MISSION DEADLINE / COUNTDOWN ★'}
           </div>
 
           <div className="grid grid-cols-4 gap-2 sm:gap-4 text-center mt-2">
@@ -103,7 +106,7 @@ export const Persona5HeroSection: React.FC<Persona5HeroSectionProps> = ({ invita
                 {String(timeLeft.days).padStart(2, '0')}
               </div>
               <div className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-[#FFFFFF]/70 mt-1 skew-x-3">
-                HARI
+                {t.days.toUpperCase()}
               </div>
             </div>
 
@@ -112,7 +115,7 @@ export const Persona5HeroSection: React.FC<Persona5HeroSectionProps> = ({ invita
                 {String(timeLeft.hours).padStart(2, '0')}
               </div>
               <div className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-[#FFFFFF]/70 mt-1 skew-x-3">
-                JAM
+                {t.hours.toUpperCase()}
               </div>
             </div>
 
@@ -121,7 +124,7 @@ export const Persona5HeroSection: React.FC<Persona5HeroSectionProps> = ({ invita
                 {String(timeLeft.minutes).padStart(2, '0')}
               </div>
               <div className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-[#FFFFFF]/70 mt-1 skew-x-3">
-                MENIT
+                {t.minutes.toUpperCase()}
               </div>
             </div>
 
@@ -130,7 +133,7 @@ export const Persona5HeroSection: React.FC<Persona5HeroSectionProps> = ({ invita
                 {String(timeLeft.seconds).padStart(2, '0')}
               </div>
               <div className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-[#FFFFFF]/70 mt-1 skew-x-3">
-                DETIK
+                {t.seconds.toUpperCase()}
               </div>
             </div>
           </div>
@@ -143,10 +146,10 @@ export const Persona5HeroSection: React.FC<Persona5HeroSectionProps> = ({ invita
             <span>METAVERSE COGNITIVE DIALOGUE:</span>
           </div>
           <p className="text-sm font-sans italic text-[#FFFFFF] leading-relaxed">
-            &quot;{invitation.hero_quote || 'Dua jiwa berjanji merajut takdir bersama, mengarungi samudra waktu dengan cinta dan ketulusan.'}&quot;
+            &quot;{t.heroQuote || invitation.hero_quote || 'Dua jiwa berjanji merajut takdir bersama, mengarungi samudra waktu dengan cinta dan ketulusan.'}&quot;
           </p>
           <div className="text-right text-[11px] font-mono text-[#FFFFFF]/60 mt-2">
-            — April & Siti, Tokyo & East Java
+            — {invitation.groom_nickname} & {invitation.bride_nickname}
           </div>
         </div>
       </div>

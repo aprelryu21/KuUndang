@@ -11,10 +11,11 @@ interface PastelPopEventsSectionProps {
 export const PastelPopEventsSection: React.FC<PastelPopEventsSectionProps> = ({ events, invitation }) => {
   const getGoogleCalendarUrl = (ev: WeddingEvent) => {
     const title = encodeURIComponent(`${ev.title} - ${invitation.title}`);
+    const venueName = ev.venue_name || ev.venue;
     const details = encodeURIComponent(
-      `Pernikahan ${invitation.bride_nickname} & ${invitation.groom_nickname}\nLokasi: ${ev.venue_name}, ${ev.address}\nInfo: ${ev.description || ''}`
+      `Pernikahan ${invitation.bride_nickname} & ${invitation.groom_nickname}\nLokasi: ${venueName}, ${ev.address}\nInfo: ${ev.description || ''}`
     );
-    const location = encodeURIComponent(`${ev.venue_name}, ${ev.address}`);
+    const location = encodeURIComponent(`${venueName}, ${ev.address}`);
 
     const eventDate = ev.date ? new Date(ev.date) : new Date(invitation.wedding_date);
     const year = eventDate.getFullYear();

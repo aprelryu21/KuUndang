@@ -35,7 +35,7 @@ export const PastelPopLocationSection: React.FC<PastelPopLocationSectionProps> =
       return `https://www.google.com/maps/search/?api=1&query=${ev.latitude},${ev.longitude}`;
     }
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-      `${ev.venue_name}, ${ev.address}`
+      `${ev.venue_name || ev.venue}, ${ev.address}`
     )}`;
   };
 

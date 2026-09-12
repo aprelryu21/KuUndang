@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Shield, Zap, Sparkles, Heart, Star, ExternalLink, Instagram } from 'lucide-react';
+import { Zap, Star, Instagram } from 'lucide-react';
 import { Couple } from '../../../types/wedding';
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface Persona5StatusSectionProps {
   bride: Couple;
@@ -9,27 +10,46 @@ interface Persona5StatusSectionProps {
 }
 
 export const Persona5StatusSection: React.FC<Persona5StatusSectionProps> = ({ bride, groom }) => {
+  const { t, language } = useLanguage();
   const [activeTab, setActiveTab] = useState<'groom' | 'bride'>('groom');
 
-  const groomSkills = [
+  const defaultGroomSkills = [
     { name: 'Enduring Love', type: 'PASSIVE', desc: 'Meningkatkan kesabaran dan keikhlasan menghadapi setiap liku kehidupan.' },
     { name: 'Sacred Vow', type: 'SUPPORT', desc: 'Melindungi keharmonisan rumah tangga dengan fondasi syariat dan komitmen suci.' },
     { name: 'Graceful Heart', type: 'BUFF', desc: 'Memberikan ketenangan dan senyuman tulus di segala suasana.' },
     { name: 'Eternal Bond', type: 'SPECIAL', desc: 'Mengikat janji seumur hidup hingga ke surga-Nya.' },
   ];
 
-  const brideSkills = [
+  const defaultBrideSkills = [
     { name: 'Gentle Grace', type: 'PASSIVE', desc: 'Membawa keteduhan, kelembutan tutur kata, dan kasih sayang yang mendalam.' },
     { name: 'Patience Shield', type: 'SUPPORT', desc: 'Menghalau keraguan dengan kesetiaan dan ketulusan hati tiada batas.' },
     { name: 'Joyful Radiance', type: 'BUFF', desc: 'Menebar kebahagiaan dan kehangatan dalam keluarga tercinta.' },
     { name: 'Infinite Devotion', type: 'SPECIAL', desc: 'Sumpah setia mendampingi dalam suka maupun duka selamanya.' },
   ];
 
+  const p5Translations = t.p5;
   const currentPerson = activeTab === 'groom' ? groom : bride;
-  const currentSkills = activeTab === 'groom' ? groomSkills : brideSkills;
+  const currentSkills =
+    activeTab === 'groom'
+      ? p5Translations?.groomSkills || defaultGroomSkills
+      : p5Translations?.brideSkills || defaultBrideSkills;
+
   const arcanaName = activeTab === 'groom' ? 'IV. THE EMPEROR' : 'III. THE EMPRESS';
   const codename = activeTab === 'groom' ? 'JOKER' : 'QUEEN';
-  const roleTitle = activeTab === 'groom' ? 'PENGANTIN PRIA' : 'PENGANTIN WANITA';
+  const roleTitle =
+    activeTab === 'groom'
+      ? p5Translations?.groomRole || t.theGroom || 'PENGANTIN PRIA'
+      : p5Translations?.brideRole || t.theBride || 'PENGANTIN WANITA';
+
+  // Social stats labels localized
+  const statLabelsByLang: Record<string, string[]> = {
+    ID: ['CHARM (PESONA)', 'KNOWLEDGE (PENGETAHUAN)', 'GUTS (KEBERANIAN)', 'PROFICIENCY (KEMAHIRAN)', 'KINDNESS (KASIH SAYANG)'],
+    JW: ['CHARM (PANCAWARNA)', 'KNOWLEDGE (KAWRUH)', 'GUTS (KANDEGING MANAH)', 'PROFICIENCY (KASAMPURNAN)', 'KINDNESS (WELAS ASIH)'],
+    EN: ['CHARM (CHARISMA)', 'KNOWLEDGE (WISDOM)', 'GUTS (COURAGE)', 'PROFICIENCY (SKILL)', 'KINDNESS (COMPASSION)'],
+    JP: ['魅力 (CHARM)', '知識 (KNOWLEDGE)', '度胸 (GUTS)', '器用さ (PROFICIENCY)', '優しさ (KINDNESS)'],
+    CN: ['魅力 (CHARM)', '知识 (KNOWLEDGE)', '胆量 (GUTS)', '灵巧 (PROFICIENCY)', '体贴 (KINDNESS)'],
+  };
+  const statLabels = statLabelsByLang[language] || statLabelsByLang.ID;
 
   return (
     <section id="p5-couple" className="py-20 sm:py-28 bg-[#0D0D0D] text-[#FFFFFF] relative overflow-hidden border-t-4 border-[#E60012]">
@@ -50,13 +70,19 @@ export const Persona5StatusSection: React.FC<Persona5StatusSectionProps> = ({ br
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#E60012] text-[#FFFFFF] text-xs font-black uppercase tracking-[0.2em] -skew-x-12 mb-3">
             <Star className="w-3.5 h-3.5 fill-[#FFF000] text-[#FFF000] skew-x-12" />
-            <span className="skew-x-12">PHANTOM THIEVES STATUS ARCHIVE</span>
+            <span className="skew-x-12">
+              {p5Translations?.statusHeader || 'PHANTOM THIEVES STATUS ARCHIVE'}
+            </span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-black uppercase italic tracking-tight text-[#FFFFFF]">
-            PROFILE & <span className="text-[#E60012] not-italic">STATUS SCREEN</span>
+            {p5Translations?.statusArchive ? (
+              p5Translations.statusArchive
+            ) : (
+              <>PROFILE & <span className="text-[#E60012] not-italic">STATUS SCREEN</span></>
+            )}
           </h2>
           <p className="text-xs sm:text-sm font-mono text-[#FFFFFF]/70 mt-2">
-            Mempelai Pengantin dalam Arsip Persona 5 // Level 99 Confidant MAX
+            {p5Translations?.statusSubtitle || 'Mempelai Pengantin dalam Arsip Persona 5 // Level 99 Confidant MAX'}
           </p>
         </div>
 
@@ -72,7 +98,7 @@ export const Persona5StatusSection: React.FC<Persona5StatusSectionProps> = ({ br
             }`}
           >
             <span className="skew-x-6 inline-block">
-              {groom.nickname} // GROOM
+              {groom.nickname} // {p5Translations?.groomRole || t.theGroom || 'GROOM'}
             </span>
           </button>
 
@@ -86,7 +112,7 @@ export const Persona5StatusSection: React.FC<Persona5StatusSectionProps> = ({ br
             }`}
           >
             <span className="skew-x-6 inline-block">
-              {bride.nickname} // BRIDE
+              {bride.nickname} // {p5Translations?.brideRole || t.theBride || 'BRIDE'}
             </span>
           </button>
         </div>
@@ -122,7 +148,12 @@ export const Persona5StatusSection: React.FC<Persona5StatusSectionProps> = ({ br
             <div className="md:col-span-5 space-y-4">
               <div className="relative aspect-[4/5] bg-black border-4 border-[#E60012] overflow-hidden -skew-x-2 shadow-lg group">
                 <img
-                  src={currentPerson.photo_url || (activeTab === 'groom' ? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=800' : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800')}
+                  src={
+                    currentPerson.photo_url ||
+                    (activeTab === 'groom'
+                      ? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=800'
+                      : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800')
+                  }
                   alt={currentPerson.full_name}
                   className="w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
                 />
@@ -140,10 +171,10 @@ export const Persona5StatusSection: React.FC<Persona5StatusSectionProps> = ({ br
               {/* Parents Lineage Details */}
               <div className="bg-black/60 border border-white/20 p-4 text-xs font-mono text-left space-y-1.5">
                 <p className="text-[#FFF000] font-bold uppercase tracking-wider">
-                  SILSILAH KELUARGA:
+                  {p5Translations?.familyLineage || 'SILSILAH KELUARGA:'}
                 </p>
                 <p className="text-white">
-                  {currentPerson.child_order || 'Putra/Putri dari'}:
+                  {currentPerson.child_order || (activeTab === 'groom' ? t.sonOf : t.daughterOf)}:
                 </p>
                 <p className="text-white font-bold text-sm">
                   {currentPerson.father_name} & {currentPerson.mother_name}
@@ -177,16 +208,10 @@ export const Persona5StatusSection: React.FC<Persona5StatusSectionProps> = ({ br
                 </div>
 
                 <div className="space-y-2.5">
-                  {[
-                    { label: 'CHARM (PESONA)', value: 'MAX 99', color: '#E60012' },
-                    { label: 'KNOWLEDGE (PENGETAHUAN)', value: 'MAX 99', color: '#FFF000' },
-                    { label: 'GUTS (KEBERANIAN)', value: 'MAX 99', color: '#E60012' },
-                    { label: 'PROFICIENCY (KEMAHIRAN)', value: 'MAX 99', color: '#FFFFFF' },
-                    { label: 'KINDNESS (KASIH SAYANG)', value: 'MAX 99', color: '#FFF000' },
-                  ].map((stat, i) => (
+                  {statLabels.map((label, i) => (
                     <div key={i} className="flex items-center gap-3">
                       <span className="w-36 sm:w-44 text-[11px] font-mono font-bold text-white uppercase truncate">
-                        {stat.label}
+                        {label}
                       </span>
                       <div className="flex-1 h-3 bg-[#222228] border border-white/20 overflow-hidden relative">
                         <div
@@ -195,7 +220,7 @@ export const Persona5StatusSection: React.FC<Persona5StatusSectionProps> = ({ br
                         />
                       </div>
                       <span className="text-[10px] font-mono font-bold text-[#FFF000] w-14 text-right">
-                        {stat.value}
+                        MAX 99
                       </span>
                     </div>
                   ))}
@@ -206,7 +231,7 @@ export const Persona5StatusSection: React.FC<Persona5StatusSectionProps> = ({ br
               <div className="space-y-2.5">
                 <div className="flex items-center gap-2 text-xs font-mono text-[#FFF000] font-bold uppercase">
                   <Zap className="w-4 h-4 text-[#FFF000]" />
-                  <span>EQUIPPED WEDDING SKILLS:</span>
+                  <span>{p5Translations?.skillsTitle || 'DAFTAR KEAHLIAN / PASSIVE SKILLS:'}</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

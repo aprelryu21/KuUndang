@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Heart, Sparkles, Star, Flame, Trophy } from 'lucide-react';
+import { Star, Trophy } from 'lucide-react';
 import { StoryItem } from '../../../types/wedding';
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface Persona5SocialLinkStoryProps {
   stories: StoryItem[];
@@ -14,6 +15,9 @@ const DEFAULT_STORY_IMAGES = [
 ];
 
 export const Persona5SocialLinkStory: React.FC<Persona5SocialLinkStoryProps> = ({ stories }) => {
+  const { t } = useLanguage();
+  const p5Translations = t.p5;
+
   return (
     <section id="p5-story" className="py-20 sm:py-28 bg-[#000000] text-[#FFFFFF] relative overflow-hidden border-t-4 border-[#E60012]">
       {/* Halftone Overlay */}
@@ -32,13 +36,19 @@ export const Persona5SocialLinkStory: React.FC<Persona5SocialLinkStoryProps> = (
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FFF000] text-black text-xs font-black uppercase tracking-[0.2em] -skew-x-12 mb-3">
             <Trophy className="w-3.5 h-3.5 text-black skew-x-12" />
-            <span className="skew-x-12">CONFIDANT MEMORIES // RANK MAX</span>
+            <span className="skew-x-12">
+              {p5Translations?.storyHeader || 'CONFIDANT MEMORIES // RANK MAX'}
+            </span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-black uppercase italic tracking-tight text-[#FFFFFF]">
-            CONFIDANT: <span className="text-[#E60012] not-italic">THE LOVERS</span>
+            {p5Translations?.theLovers ? (
+              p5Translations.theLovers
+            ) : (
+              <>CONFIDANT: <span className="text-[#E60012] not-italic">THE LOVERS</span></>
+            )}
           </h2>
           <p className="text-xs sm:text-sm font-mono text-[#FFFFFF]/70 mt-2">
-            Kronik Perjalanan Kisah Kasih April & Siti Menuju Mahligai Pernikahan
+            {p5Translations?.storySubtitle || 'Kronik Perjalanan Kisah Kasih Menuju Mahligai Pernikahan'}
           </p>
         </div>
 
