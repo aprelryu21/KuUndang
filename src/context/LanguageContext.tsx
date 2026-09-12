@@ -1,0 +1,798 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+export type LanguageCode = 'ID' | 'JW' | 'EN' | 'JP' | 'CN';
+
+export interface LanguageOption {
+  code: LanguageCode;
+  name: string;
+  nativeName: string;
+  flag: string; // Flag emoji
+}
+
+export const LANGUAGES: LanguageOption[] = [
+  { code: 'ID', name: 'Indonesia', nativeName: 'Bahasa Indonesia', flag: '🇮🇩' },
+  { code: 'JW', name: 'Jawa', nativeName: 'Basa Jawa', flag: '🇮🇩' },
+  { code: 'EN', name: 'Inggris', nativeName: 'English', flag: '🇬🇧' },
+  { code: 'JP', name: 'Jepang', nativeName: '日本語', flag: '🇯🇵' },
+  { code: 'CN', name: 'Cina', nativeName: '中文', flag: '🇨🇳' },
+];
+
+export const TRANSLATIONS = {
+  ID: {
+    // Opening
+    weddingOf: 'Pernikahan',
+    dearGuest: 'Kepada Yth.',
+    honoredGuest: 'Tamu Terhormat',
+    openInvitation: 'Buka Undangan',
+    scrollDownToOpen: 'Geser ke bawah untuk membuka undangan',
+    scrollPrompt: 'atau ketuk tombol buka di bawah',
+    invitationGreeting: 'Kami sangat berbahagia atas kehadiran Anda ♡',
+    heroQuote: 'Dua jiwa berjanji merajut takdir bersama, mengarungi samudra waktu dengan cinta dan ketulusan.',
+    closingHonorMessage: 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.',
+    invitationNotice: 'Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Anda berkenan hadir.',
+    // Hero & Countdown
+    presenceAndLove: 'presence & love',
+    weAreGettingMarried: 'Dengan penuh rasa syukur, kami mengundang Anda untuk merayakan momen suci pernikahan kami.',
+    saveTheDate: 'Save the Date',
+    days: 'Hari',
+    hours: 'Jam',
+    minutes: 'Menit',
+    seconds: 'Detik',
+    // Couple
+    theCoupleTitle: 'The Happy Couple',
+    theCoupleSubtitle: 'Mempelai Pria & Wanita',
+    theBride: 'Mempelai Wanita',
+    theGroom: 'Mempelai Pria',
+    sonOf: 'Putra dari',
+    daughterOf: 'Putri dari',
+    and: 'dan',
+    // Events
+    weddingEvents: 'Rangkaian Acara',
+    saveToCalendar: 'SIMPAN KE KALENDER',
+    openGoogleMaps: 'BUKA GOOGLE MAPS',
+    calendarSuccess: 'Acara berhasil ditambahkan ke kalender! ♡',
+    // Location Section (New)
+    locationTitle: 'Lokasi & Denah Acara',
+    locationSubtitle: 'Petunjuk arah dan alamat lengkap pelaksanaan akad nikah serta resepsi pernikahan kami.',
+    shareLocation: 'BAGIKAN LOKASI',
+    openInMapsApp: 'BUKA LEWAT APLIKASI MAPS',
+    copyAddress: 'SALIN ALAMAT LENGKAP',
+    addressCopied: 'Alamat berhasil disalin ke clipboard! ♡',
+    venueAkadLabel: 'Lokasi Akad Nikah',
+    venueReceptionLabel: 'Lokasi Resepsi Pernikahan',
+    routeGuide: 'Panduan Rute & Akses Lokasi',
+    routeGuideText: 'Tersedia area parkir yang luas dan aman. Mohon ikuti petunjuk petugas keamanan di gerbang masuk.',
+    // Story
+    loveStory: 'Kisah Cinta Kami',
+    loveStorySubtitle: 'Perjalanan cinta penuh makna yang membawa kami menuju ikatan suci pernikahan.',
+    // Gallery
+    photoGallery: 'Galeri Kenangan',
+    photoGallerySubtitle: 'Momen-momen indah yang terabadikan dalam lembaran kisah kami.',
+    close: 'Tutup',
+    // RSVP
+    rsvpTitle: 'Konfirmasi Kehadiran',
+    rsvpSubtitle: 'Mohon kesediaan Bapak/Ibu/Saudara/i untuk mengonfirmasi kehadiran sebelum acara dimulai.',
+    guestNameLabel: 'Nama Tamu',
+    guestNamePlaceholder: 'Nama Lengkap Anda / Keluarga',
+    attendanceLabel: 'Konfirmasi Kehadiran',
+    attending: 'Hadir',
+    notAttending: 'Tidak dapat hadir',
+    guestCountLabel: 'Jumlah Tamu Hadir',
+    guestCountUnit: 'Orang',
+    wishesLabel: 'Doa & Ucapan untuk Mempelai',
+    wishesPlaceholder: 'Tuliskan ucapan dan doa hangat Anda di sini...',
+    sendRsvp: 'KIRIM KONFIRMASI (RSVP)',
+    sendingRsvp: 'Mengirim konfirmasi...',
+    rsvpSuccessToastAttending: 'Konfirmasi kehadiran berhasil dikirim! ♡',
+    rsvpSuccessToastDecline: 'Terima kasih telah mengonfirmasi ketidakhadiran ♡',
+    rsvpFeedbackAttending: (name: string) => `Yay! See you there, ${name} ♡`,
+    rsvpFeedbackDecline: (name: string) => `Thank you for letting us know, ${name} ♡`,
+    rsvpRecordedNotice: 'Konfirmasi Anda telah tercatat dengan baik dalam buku tamu kami.',
+    changeRsvp: 'Ubah Konfirmasi Kehadiran',
+    // Wishes Form
+    wishesTitle: 'Wedding Wishes',
+    wishesSubtitle: 'Untaian doa dan kata-kata penuh makna dari segenap keluarga dan sahabat terkasih.',
+    sendWishPrompt: 'Tuliskan Doa Restu & Ucapan Anda',
+    yourName: 'Nama Lengkap Anda',
+    yourWish: 'Tuliskan ucapan hangat & doa terbaik untuk kedua mempelai...',
+    submitWish: 'KIRIM DOA RESTU',
+    submittingWish: 'Mengirim doa...',
+    wishSuccessToast: 'Doa dan ucapan hangat Anda telah terkirim! ♡',
+    emptyWishes: 'Belum ada ucapan tertulis. Jadilah yang pertama memberikan doa restu di atas ♡',
+    viewMoreWishes: 'Lihat Ucapan Lainnya',
+    // Gifts
+    weddingGiftTitle: 'Wedding Gift',
+    giftQuote: '"Your presence is the greatest gift."',
+    giftSubtitle: 'Namun jika Anda ingin memberikan tanda kasih secara digital atau mengirimkan kado fisik, kami menyediakan informasi berikut dengan penuh kerendahan hati.',
+    bankTransfer: 'Transfer Bank',
+    eWallet: 'Dompet Digital',
+    physicalGift: 'Kirim Fisik',
+    copyNumber: 'SALIN NOMOR / ALAMAT',
+    copiedSuccess: 'Nomor Tersalin!',
+    copiedToast: "Copied! Thank you, you're too sweet ♡",
+    // Closing
+    ourGratitude: 'OUR SINCERE GRATITUDE',
+    closingDefaultMessage: 'It would mean the world to have you with us.',
+    closingSubtitle: 'Thank you for being part of our story, for your warm prayers, laughter, and unforgettable blessings.',
+    closingPlayful: 'Eat, laugh, dance, repeat. ♡',
+    craftedWithLove: 'Crafted with love via KU UNDANG',
+    backToCover: 'Kembali ke Sampul Undangan',
+    // Floating Nav
+    navHome: 'Home',
+    navCouple: 'Mempelai',
+    navEvent: 'Acara',
+    navLocation: 'Lokasi',
+    navGallery: 'Galeri',
+    navRsvp: 'RSVP',
+    // Dynamic Invitation Content Translations
+    content: {
+      holyVerse: '“Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang.” (QS. Ar-Rum: 21)',
+      groom: {
+        childOrder: 'Putra Kedua dari',
+        parents: 'Bapak Suwaji & Ibu Arlina',
+        bio: 'Pria penyabar yang gemar menjelajahi alam pegunungan, merakit baris kode, dan jatuh hati pada senyuman Allya sejak hari pertama.',
+      },
+      bride: {
+        childOrder: 'Putri Pertama dari',
+        parents: 'Bapak Kardi & Ibu Yuliati',
+        bio: 'Seseorang yang mencintai seni grafis, buku cerita klasik, dan selalu menemukan kehangatan dalam cangkir kopi sore.',
+      },
+      events: {
+        akadTitle: 'Akad Nikah',
+        akadDesc: 'Momen sakral pengucapan ijab kabul di hadapan keluarga inti dan para saksi.',
+        receptionTitle: 'Resepsi Pernikahan',
+        receptionDesc: 'Perayaan penuh suka cita bersama segenap keluarga, sahabat, dan rekan terkasih.',
+      },
+      stories: [
+        {
+          title: 'First Hello',
+          desc: 'Sebuah perjumpaan tak sengaja di kedai kopi saat gerimis sore. Secangkir latte hangat dan sapaan malu-malu yang membuka lembaran kisah baru.',
+        },
+        {
+          title: 'Our First Date',
+          desc: 'Menghabiskan waktu berjalan santai di bawah pendar lampu kota, bertukar mimpi masa depan, dan menyadari bahwa kami saling melengkapi.',
+        },
+        {
+          title: 'The Question',
+          desc: 'Di atas bukit Medowo yang asri dengan angin sejuk perbukitan, Shofwan berlutut menyerahkan cincin. Sebuah jawaban "Ya" terucap penuh haru.',
+        },
+        {
+          title: 'Forever Begins',
+          desc: 'Hari di mana dua keluarga bersatu, dua hati berikrar suci, mengawali babak baru kehidupan dengan cinta dan doa tulus.',
+        },
+      ],
+    },
+  },
+  JW: {
+    // Opening
+    weddingOf: 'Pahargyan Temanten',
+    dearGuest: 'Katur Dhumateng Panjenenganipun',
+    honoredGuest: 'Para Rawuh Ingkang Minulyo',
+    openInvitation: 'Bikak Serat Ulem',
+    scrollDownToOpen: 'Kaseret mangandhap kangge mbikak ulem',
+    scrollPrompt: 'utawi tutul tombol ing andhap menika',
+    invitationGreeting: 'Kula sakalihan ngaturaken agenging panuwun awit rawuh panjenengan ♡',
+    heroQuote: 'Reroncen tresna loro raga nyawiji ing garising takdir, lumampah sesarengan kanthi tresna lan tulus asih.',
+    closingHonorMessage: 'Mawantu-wantu agenging panyuwun kula sakeluwarga, bilih panjenengan kersa rawuh saha maringi berkah pangestu dhumateng pinanganten kekalih.',
+    invitationNotice: 'Mawantu-wantu agenging panyuwun kula, bilih panjenengan kersa rawuh saha maringi berkah pangestu.',
+    // Hero & Countdown
+    presenceAndLove: 'Rawuh & Donga Pangestu',
+    weAreGettingMarried: 'Kanthi raos syukur dhumateng Gusti Ingkang Maha Kuwaos, kula sakeluwarga ngaturi rawuh panjenengan ing adicara pahargyan palakrama.',
+    saveTheDate: 'Catet Tanggalipun',
+    days: 'Dinten',
+    hours: 'Jam',
+    minutes: 'Menit',
+    seconds: 'Detik',
+    // Couple
+    theCoupleTitle: 'Temanten Kekalih',
+    theCoupleSubtitle: 'Pinanganten Kakung & Pinanganten Putri',
+    theBride: 'Temanten Putri',
+    theGroom: 'Temanten Kakung',
+    sonOf: 'Putra kakung saking',
+    daughterOf: 'Putri pambayun saking',
+    and: 'kaliyan',
+    // Events
+    weddingEvents: 'Rantaman Adicara',
+    saveToCalendar: 'SIMPEN ING KALENDER',
+    openGoogleMaps: 'BIKAK GOOGLE MAPS',
+    calendarSuccess: 'Adicara kasil kalampahan katur ing kalender! ♡',
+    // Location Section
+    locationTitle: 'Papan & Denah Palakrama',
+    locationSubtitle: 'Pitedah margi saha papan jangkep lampahing ijab kabul kaliyan resepsi pahargyan temanten.',
+    shareLocation: 'BAGIKAKEN PAPAN',
+    openInMapsApp: 'BIKAK ING APLIKASI MAPS',
+    copyAddress: 'TIRU ALAMAT JANGKEP',
+    addressCopied: 'Alamat kasil kasalin ing clipboard! ♡',
+    venueAkadLabel: 'Papan Ijab Kabul',
+    venueReceptionLabel: 'Papan Resepsi Palakrama',
+    routeGuide: 'Pitedah Margi & Parkir',
+    routeGuideText: 'Papan parkir jembar lan prayogi kasedhiyakaken. Nyuwun tulung derek pitedahipun petugas keamanan ing gapura mlebet.',
+    // Story
+    loveStory: 'Lelampahan Tresna',
+    loveStorySubtitle: 'Peprincen mangsa endah lampahing katresnan kula kekalih tumeka ing palakrama.',
+    ourStoryTitle: 'Lelampahan Tresna',
+    ourStorySubtitle: 'Peprincen mangsa endah lampahing katresnan kula kekalih tumeka ing palakrama.',
+    // Gallery
+    photoGallery: 'Galeri Kenangan',
+    photoGallerySubtitle: 'Reroncen kenangan endah sinerat ing bingkai katresnan.',
+    galleryTitle: 'Galeri Kenangan',
+    gallerySubtitle: 'Reroncen kenangan endah sinerat ing bingkai katresnan.',
+    close: 'Tutup',
+    viewAllPhotos: 'Mirsani Sedaya Foto',
+    // RSVP
+    rsvpTitle: 'Konfirmasi Rawuh (RSVP)',
+    rsvpSubtitle: 'Panyuwun konfirmasi rawuh panjenengan kangge nyamektakaken papan pinarak lan hidangan.',
+    guestNameLabel: 'Asma Tamu',
+    guestNamePlaceholder: 'Asma Jangkep Panjenengan / Keluwarga',
+    attendanceLabel: 'Pilihan Rawuh',
+    attending: 'Ngestoni Rawuh',
+    notAttending: 'Nyuwun Pangapunten Mboten Saged Rawuh',
+    guestCountLabel: 'Cacahing Tamu Rawuh',
+    guestCountUnit: 'Tiyang',
+    wishesLabel: 'Donga & Pangestu Kangge Temanten',
+    wishesPlaceholder: 'Serat donga pangestu saha ucapan selamat...',
+    sendRsvp: 'KINTUN KONFIRMASI (RSVP)',
+    sendingRsvp: 'Ngintunaken konfirmasi...',
+    rsvpSuccessToastAttending: 'Matur nuwun, konfirmasi rawuh kasil katampi! ♡',
+    rsvpSuccessToastDecline: 'Matur nuwun sampun paring kabar dhumateng kula sakeluwarga ♡',
+    rsvpFeedbackAttending: (name: string) => `Matur nuwun sanget, sumangga kepareng rawuh, ${name} ♡`,
+    rsvpFeedbackDecline: (name: string) => `Matur nuwun sampun paring kabar, ${name} ♡`,
+    rsvpRecordedNotice: 'Matur nuwun, konfirmasi rawuh panjenengan sampun kacathet kanthi sae ing buku tamu.',
+    fullName: 'Asma Jangkep',
+    attendingStatus: 'Pilihan Rawuh',
+    willAttend: 'Ngestoni Rawuh',
+    cantAttend: 'Nyuwun Pangapunten Mboten Saged Rawuh',
+    numberOfGuests: 'Cacahing Tamu',
+    submitRsvp: 'Kintun Konfirmasi',
+    submitting: 'Ngintunaken...',
+    rsvpSuccessToast: 'Matur nuwun, konfirmasi rawuh panjenengan sampun katampi kanthi sae! ♡',
+    alreadyRsvp: 'Sampun Nate Konfirmasi',
+    changeRsvp: 'Gantos Konfirmasi Rawuh',
+    // Wishes Form
+    wishesTitle: 'Donga & Pangestu',
+    wishesSubtitle: 'Untaian donga panyuwun lan pangestu saking para sedherek lan kanca mitra.',
+    sendWishPrompt: 'Kintun Donga Pangestu Kangge Temanten',
+    yourName: 'Asma Panjenengan',
+    yourWish: 'Serat donga pangestu saha ucapan selamat...',
+    submitWish: 'Kintun Donga Pangestu',
+    submittingWish: 'Ngintunaken donga...',
+    wishSuccessToast: 'Matur nuwun sanget, donga pangestu panjenengan sampun katur! ♡',
+    emptyWishes: 'Dering wonten ucapan. Sumangga dados ingkang kaping pisan maringi donga pangestu ♡',
+    viewMoreWishes: 'Mirsani Donga Liyane',
+    // Gifts
+    weddingGiftTitle: 'Tandha Asih / Kado Temanten',
+    giftQuote: '“Rawuh panjenengan sami minangka kanugrahan ingkang paling ageng kagem kula sakeluwarga.”',
+    giftSubtitle: 'Menawi kepareng maringi tandha katresnan awujud kado utawi amplop digital, kula cawisaken katrangan rekening ing andhap menika.',
+    bankTransfer: 'Transfer Bank',
+    eWallet: 'Dompet Digital',
+    physicalGift: 'Kintun Kado Fisik',
+    copyNumber: 'TIRU NOMER / ALAMAT',
+    copiedSuccess: 'Nomer Kasil Kasalin!',
+    copiedToast: "Kasil kasalin! Matur nuwun sanget awit kawigatosan panjenengan ♡",
+    // Closing
+    ourGratitude: 'AGENGING ATUR PANUWUN',
+    closingDefaultMessage: 'Kula sakalihan ngaturaken agenging panuwun awit rawuh lan donga pangestunipun.',
+    closingSubtitle: 'Matur nuwun sampun kepareng rawuh, maringi panyengkuyung, saha donga berkah ingkang tansah dados pepadhang lampah gesang kula kekalih.',
+    closingPlayful: 'Bagas waras, tansah ayem tentrem lan basuki. ♡',
+    craftedWithLove: 'Crafted with love via KU UNDANG',
+    backToCover: 'Wangsul Dhateng Kaca Awal',
+    // Floating Nav
+    navHome: 'Ngarep',
+    navCouple: 'Temanten',
+    navEvent: 'Adicara',
+    navLocation: 'Papan',
+    navGallery: 'Galeri',
+    navRsvp: 'RSVP',
+    // Dynamic Invitation Content Translations
+    content: {
+      holyVerse: '“Lan ing antarane pratandha-pratandha panguwasane Gusti Allah yaiku Panjenengane nyiptakake jodho kanggo sira saka jinisira dhewe, supaya sira rumangsa ayem tentrem ana ing sandhinge, lan Panjenengane ndadekake ing antarane sira rasa tresna lan welas asih.” (QS. Ar-Rum: 21)',
+      groom: {
+        childOrder: 'Putra Kakung Kaping Kalih saking',
+        parents: 'Bapak Suwaji & Ibu Arlina',
+        bio: 'Priya ingkang sabar, remen njlajah alam gunung, ngronce baris kode program, lan tresna marang Allya wiwit dinten kapisan pinanggih.',
+      },
+      bride: {
+        childOrder: 'Putri Pambayun saking',
+        parents: 'Bapak Kardi & Ibu Yuliati',
+        bio: 'Wanita ingkang kebak grapyak, remen seni desain lan sastra, tansah nemokake kabagyan sajroning cangkir kopi anget ing wanci sonten.',
+      },
+      events: {
+        akadTitle: 'Ijab Kabul (Akad Nikah)',
+        akadDesc: 'Prastawa suci lan sakral janji prasetya ing ngarsane Gusti Allah SWT sarta para saksi kulawarga.',
+        receptionTitle: 'Pahargyan Resepsi Palakrama',
+        receptionDesc: 'Syukuran lan silaturahmi kumpul bebarengan para rawuh sedaya kanthi suka gumbira.',
+      },
+      stories: [
+        {
+          title: 'Tepang Kapisan',
+          desc: 'Pangertosan tanpa dinyana wonten ing papan kopi wanci sonten grimis. Secangkir latte anget dados pambuka lampahing katresnan.',
+        },
+        {
+          title: 'Sesarengan Lumampah',
+          desc: 'Mlaku-mlaku bebarengan ing sangisore sorot lampu kutha, nyawiji pangarep-arep lan ngraosaken manawa kula kekalih sami jangkepi.',
+        },
+        {
+          title: 'Panyuwun Lamaran',
+          desc: 'Wonten ing redi Medowo ingkang asri, Shofwan ngaturaken ali-ali lan kasembadan kanthi wangsulan bungahing manah.',
+        },
+        {
+          title: 'Nyawiji ing Palakrama',
+          desc: 'Dinten suci nalika kalih kulawarga nyawiji, ngucap janji suci ngudi kabagyan kanthi berkah saha donga pangestu.',
+        },
+      ],
+    },
+  },
+  EN: {
+    // Opening
+    weddingOf: 'The Wedding of',
+    dearGuest: 'Dear Honored Guest:',
+    honoredGuest: 'Honored Guest',
+    openInvitation: 'Open Invitation',
+    scrollDownToOpen: 'Scroll down to open invitation',
+    scrollPrompt: 'or click the button below',
+    invitationGreeting: "We're so happy you're here ♡",
+    heroQuote: 'Two souls promised to weave destiny together, navigating the ocean of time with love and sincerity.',
+    closingHonorMessage: 'It is our greatest honor and joy if you would bestow us with your gracious presence and heartfelt blessings.',
+    invitationNotice: 'It is our greatest honor and happiness to invite you to witness and celebrate our union.',
+    // Hero & Countdown
+    presenceAndLove: 'presence & love',
+    weAreGettingMarried: 'With joyful hearts, we warmly invite you to share in the celebration of our marriage.',
+    saveTheDate: 'Save the Date',
+    days: 'Days',
+    hours: 'Hours',
+    minutes: 'Minutes',
+    seconds: 'Seconds',
+    // Couple
+    theCoupleTitle: 'The Happy Couple',
+    theCoupleSubtitle: 'The Bride & Groom',
+    theBride: 'The Bride',
+    theGroom: 'The Groom',
+    sonOf: 'Son of',
+    daughterOf: 'Daughter of',
+    and: 'and',
+    // Events
+    weddingEvents: 'Wedding Schedule',
+    saveToCalendar: 'SAVE TO CALENDAR',
+    openGoogleMaps: 'OPEN GOOGLE MAPS',
+    calendarSuccess: 'Event added to your calendar! ♡',
+    // Location Section
+    locationTitle: 'Venue & Location Guide',
+    locationSubtitle: 'Detailed address and directions for our wedding ceremony and reception venues.',
+    shareLocation: 'SHARE LOCATION',
+    openInMapsApp: 'OPEN IN MAPS APP',
+    copyAddress: 'COPY FULL ADDRESS',
+    addressCopied: 'Address copied to clipboard! ♡',
+    venueAkadLabel: 'Solemnization Venue',
+    venueReceptionLabel: 'Reception Venue',
+    routeGuide: 'Route & Parking Information',
+    routeGuideText: 'Spacious and secure parking is available. Please follow the instructions of security staff upon arrival.',
+    // Story
+    loveStory: 'Our Love Story',
+    loveStorySubtitle: 'The meaningful milestones that shaped our journey to this sacred moment.',
+    // Gallery
+    photoGallery: 'Our Memories',
+    photoGallerySubtitle: 'A collection of cherished moments captured along our journey together.',
+    close: 'Close',
+    // RSVP
+    rsvpTitle: 'Presence & RSVP',
+    rsvpSubtitle: 'Kindly confirm your attendance before the wedding day to help us prepare.',
+    guestNameLabel: 'Your Full Name',
+    guestNamePlaceholder: 'Your Name / Family',
+    attendanceLabel: 'Attendance Status',
+    attending: 'Joyfully Accept',
+    notAttending: 'Regretfully Decline',
+    guestCountLabel: 'Number of Guests',
+    guestCountUnit: 'Guests',
+    wishesLabel: 'Wishes & Prayers',
+    wishesPlaceholder: 'Write your warm blessings and congratulations here...',
+    sendRsvp: 'SUBMIT RSVP',
+    sendingRsvp: 'Submitting confirmation...',
+    rsvpSuccessToastAttending: 'RSVP successfully confirmed! ♡',
+    rsvpSuccessToastDecline: 'Thank you for letting us know ♡',
+    rsvpFeedbackAttending: (name: string) => `Yay! See you there, ${name} ♡`,
+    rsvpFeedbackDecline: (name: string) => `Thank you for letting us know, ${name} ♡`,
+    rsvpRecordedNotice: 'Your attendance response has been successfully recorded in our guestbook.',
+    changeRsvp: 'Change RSVP Response',
+    // Wishes Form
+    wishesTitle: 'Wedding Wishes',
+    wishesSubtitle: 'Heartfelt wishes and blessings from our beloved family and dearest friends.',
+    sendWishPrompt: 'Send Your Warm Blessings & Wishes',
+    yourName: 'Your Full Name',
+    yourWish: 'Write your heartfelt prayers & blessings for the bride and groom...',
+    submitWish: 'SEND BLESSING',
+    submittingWish: 'Sending blessing...',
+    wishSuccessToast: 'Your warm blessing has been sent! ♡',
+    emptyWishes: 'No wishes yet. Be the first to leave your warm blessings above ♡',
+    viewMoreWishes: 'View More Wishes',
+    // Gifts
+    weddingGiftTitle: 'Wedding Gift',
+    giftQuote: '"Your presence is the greatest gift."',
+    giftSubtitle: 'Should you wish to honor us with a gift or digital token of love, we share the following information with humble gratitude.',
+    bankTransfer: 'Bank Transfer',
+    eWallet: 'E-Wallet',
+    physicalGift: 'Postal Address',
+    copyNumber: 'COPY NUMBER / ADDRESS',
+    copiedSuccess: 'Copied Successfully!',
+    copiedToast: "Copied! Thank you, you're too sweet ♡",
+    // Closing
+    ourGratitude: 'OUR SINCERE GRATITUDE',
+    closingDefaultMessage: 'It would mean the world to have you with us.',
+    closingSubtitle: 'Thank you for being part of our story, for your warm prayers, laughter, and unforgettable blessings.',
+    closingPlayful: 'Eat, laugh, dance, repeat. ♡',
+    craftedWithLove: 'Crafted with love via KU UNDANG',
+    backToCover: 'Back to Invitation Cover',
+    // Floating Nav
+    navHome: 'Home',
+    navCouple: 'Couple',
+    navEvent: 'Events',
+    navLocation: 'Location',
+    navGallery: 'Gallery',
+    navRsvp: 'RSVP',
+    // Dynamic Invitation Content Translations
+    content: {
+      holyVerse: '“And of His signs is that He created for you from yourselves mates that you may find tranquility in them; and He placed between you affection and mercy. Indeed in that are signs for a people who give thought.” (Surah Ar-Rum: 21)',
+      groom: {
+        childOrder: 'Second son of',
+        parents: 'Mr. Suwaji & Mrs. Arlina',
+        bio: 'A patient soul who loves hiking mountain trails, building elegant code, and fell deeply in love with Allya’s radiant smile from day one.',
+      },
+      bride: {
+        childOrder: 'First daughter of',
+        parents: 'Mr. Kardi & Mrs. Yuliati',
+        bio: 'A creative spirit who adores graphic design, vintage literature, and always finds comfort in an afternoon cup of warm coffee.',
+      },
+      events: {
+        akadTitle: 'Holy Matrimony',
+        akadDesc: 'The sacred solemnization ceremony and pledge of eternal love in the presence of beloved family.',
+        receptionTitle: 'Wedding Reception',
+        receptionDesc: 'A joyous celebration and banquet with our beloved family, friends, and cherished guests.',
+      },
+      stories: [
+        {
+          title: 'First Hello',
+          desc: 'An unexpected encounter at a cozy coffee shop during an afternoon drizzle. A warm latte and a shy greeting that opened a beautiful new chapter.',
+        },
+        {
+          title: 'Our First Date',
+          desc: 'Strolling through gentle city lights, sharing future dreams, and softly realizing how completely we belong together.',
+        },
+        {
+          title: 'The Question',
+          desc: 'Atop the scenic hills of Medowo with gentle mountain breeze, Shofwan knelt with a ring. A tearful, joyful "Yes" was spoken.',
+        },
+        {
+          title: 'Forever Begins',
+          desc: 'The day two families unite, two hearts pledge eternal devotion, embarking on life’s greatest adventure together.',
+        },
+      ],
+    },
+  },
+  JP: {
+    // Opening
+    weddingOf: '結婚披露宴',
+    dearGuest: '拝啓:',
+    honoredGuest: 'ご来賓の皆様',
+    openInvitation: '招待状を開く',
+    scrollDownToOpen: '下にスクロールして招待状を開く',
+    scrollPrompt: 'または下のボタンをクリック',
+    invitationGreeting: '皆様のご臨席を心より嬉しく思います ♡',
+    heroQuote: '二つの魂が共に運命を紡ぎ、愛と真心を込めて時の大海原を歩み出します。',
+    closingHonorMessage: '皆様にご臨席賜り、温かいご祝福をいただけますことは、私たちにとってこの上ない栄誉と喜びです。',
+    invitationNotice: '私たちの新しい門出に際し、皆様をお迎えできますことを心より光栄に存じます。',
+    // Hero & Countdown
+    presenceAndLove: '愛と祝福',
+    weAreGettingMarried: '私たちは結婚いたします。皆様とこの特別な日を共に過ごせることを楽しみにしております。',
+    saveTheDate: '日程のご案内',
+    days: '日',
+    hours: '時間',
+    minutes: '分',
+    seconds: '秒',
+    // Couple
+    theCoupleTitle: '新郎新婦のご紹介',
+    theCoupleSubtitle: 'The Bride & Groom',
+    theBride: '新婦',
+    theGroom: '新郎',
+    sonOf: '令息',
+    daughterOf: '令嬢',
+    and: 'と',
+    // Events
+    weddingEvents: '挙式・披露宴',
+    saveToCalendar: 'カレンダーに登録',
+    openGoogleMaps: '地図を見る',
+    calendarSuccess: 'カレンダーに登録しました！♡',
+    // Location Section
+    locationTitle: '式場のご案内・アクセス',
+    locationSubtitle: '挙式および披露宴会場の所在地、地図、交通アクセスをご案内いたします。',
+    shareLocation: '場所を共有する',
+    openInMapsApp: 'マップアプリで開く',
+    copyAddress: '住所をコピー',
+    addressCopied: '住所をクリップボードにコピーしました！♡',
+    venueAkadLabel: '挙式会場',
+    venueReceptionLabel: '披露宴会場',
+    routeGuide: '駐車場・交通案内',
+    routeGuideText: '専用駐車場をご用意しております。現地の案内係の指示に従ってご利用ください。',
+    // Story
+    loveStory: '二人の歩み',
+    loveStorySubtitle: '出会いから今日に至るまでの大切な思い出の軌跡。',
+    // Gallery
+    photoGallery: 'フォトギャラリー',
+    photoGallerySubtitle: '二人の大切な瞬間を記録した写真のコレクション。',
+    close: '閉じる',
+    // RSVP
+    rsvpTitle: 'ご出欠のお伺い (RSVP)',
+    rsvpSubtitle: 'お手数をおかけいたしますが、ご出欠の連絡をお願い申し上げます。',
+    guestNameLabel: 'お名前',
+    guestNamePlaceholder: 'お名前をご記入ください',
+    attendanceLabel: 'ご出欠',
+    attending: 'ご出席',
+    notAttending: 'ご欠席',
+    guestCountLabel: 'ご出席人数',
+    guestCountUnit: '名様',
+    wishesLabel: 'お祝いのメッセージ',
+    wishesPlaceholder: '新郎新婦へのお祝いメッセージをご記入ください...',
+    sendRsvp: '出欠を送信する',
+    sendingRsvp: '送信中...',
+    rsvpSuccessToastAttending: 'ご出席のご返信を承りました！♡',
+    rsvpSuccessToastDecline: 'ご返信ありがとうございました ♡',
+    rsvpFeedbackAttending: (name: string) => `お会いできることを楽しみにしております、${name}様 ♡`,
+    rsvpFeedbackDecline: (name: string) => `ご返信いただき誠にありがとうございました、${name}様 ♡`,
+    rsvpRecordedNotice: '芳名録にご返信内容を記録いたしました。',
+    changeRsvp: '出欠内容を変更する',
+    // Wishes Form
+    wishesTitle: 'お祝いメッセージ',
+    wishesSubtitle: '皆様から寄せられた温かい祝福のお言葉をご紹介いたします。',
+    sendWishPrompt: '温かい祝福メッセージをお寄せください',
+    yourName: 'あなたのお名前',
+    yourWish: '新郎新婦へのお祝いメッセージや祈りをご記入ください...',
+    submitWish: 'メッセージを送信する',
+    submittingWish: '送信中...',
+    wishSuccessToast: '温かいメッセージをお送りいただきありがとうございました！♡',
+    emptyWishes: 'まだメッセージがありません。ぜひ最初のメッセージをお寄せください ♡',
+    viewMoreWishes: '他のメッセージを見る',
+    // Gifts
+    weddingGiftTitle: 'お祝い・御祝儀',
+    giftQuote: '「皆様のご列席こそが最高の贈り物です」',
+    giftSubtitle: 'お気持ちを贈呈していただける場合は、恐縮ながら下記の口座情報をご案内申し上げます。',
+    bankTransfer: '銀行振込',
+    eWallet: '電子マネー',
+    physicalGift: '郵送先住所',
+    copyNumber: '口座番号・住所をコピー',
+    copiedSuccess: 'コピー完了！',
+    copiedToast: 'コピーしました！温かいお気持ちに感謝いたします ♡',
+    // Closing
+    ourGratitude: '心よりの感謝を込めて',
+    closingDefaultMessage: '皆様にお会いできることを心待ちにしております。',
+    closingSubtitle: '私たちの物語の一部となっていただき、温かい祝福と笑顔に心より感謝申し上げます。',
+    closingPlayful: '食べて、笑って、踊って、永遠に。♡',
+    craftedWithLove: 'Crafted with love via KU UNDANG',
+    backToCover: '表紙・オープニングに戻る',
+    // Floating Nav
+    navHome: 'ホーム',
+    navCouple: '新郎新婦',
+    navEvent: '挙式',
+    navLocation: '会場',
+    navGallery: '写真',
+    navRsvp: '出欠',
+    // Dynamic Invitation Content Translations
+    content: {
+      holyVerse: '「また主の兆候の一つには、あなたがた自身の中から配偶者を創られたことがある。あなたがたが彼女らによって心の安らぎを得るためであり、主はあなたがたの間に愛と慈悲を置かれた。」（クルアーン 30:21）',
+      groom: {
+        childOrder: 'スワジ氏とアルリナ夫人の次男',
+        parents: 'スワジ氏 & アルリナ夫人',
+        bio: '自然と山歩きを愛し、コードを紡ぎ、出会った初日からアリアの優しい笑顔に心を奪われた青年。',
+      },
+      bride: {
+        childOrder: 'カルディ氏とユリアティ夫人の長女',
+        parents: 'カルディ氏 & ユリアティ夫人',
+        bio: 'グラフィックデザインや古典文学を愛し、午後の温かいコーヒーにささやかな幸せを感じる心豊かな女性。',
+      },
+      events: {
+        akadTitle: '挙式の儀 (Akad Nikah)',
+        akadDesc: '親族や証人の皆様の前で永遠の愛を誓う厳粛で神聖な挙式の儀式。',
+        receptionTitle: '披露宴 (Wedding Reception)',
+        receptionDesc: '愛するご家族、ご友人、大切な皆様をお迎えし、共に祝宴と美食を楽しむ祝宴のひととき。',
+      },
+      stories: [
+        {
+          title: '出会いの始まり',
+          desc: '小雨の降る午後のカフェで偶然交わした言葉。温かいカフェラテと照れくさい挨拶が、二人の物語の扉を開きました。',
+        },
+        {
+          title: '最初のデート',
+          desc: '街の灯りの下をゆっくりと歩きながら未来の夢を語り合い、お互いがかけがえのない存在であることに気づきました。',
+        },
+        {
+          title: 'プロポーズの誓い',
+          desc: '爽やかな丘の上、夕暮れの風が包む中で指輪が手渡され、感動と涙とともに「はい」と答えました。',
+        },
+        {
+          title: '永遠の旅立ち',
+          desc: '二つの家族が一つとなり、二つの心が永遠を誓い、愛と祈りに満ちた新しい人生の旅路が始まります。',
+        },
+      ],
+    },
+  },
+  CN: {
+    // Opening
+    weddingOf: '婚礼盛典',
+    dearGuest: '致尊敬的贵宾：',
+    honoredGuest: '尊贵贵宾',
+    openInvitation: '开启请柬',
+    scrollDownToOpen: '向下滚动开启婚礼请柬',
+    scrollPrompt: '或轻触下方开启按钮',
+    invitationGreeting: '由衷期待并感激您的莅临 ♡',
+    heroQuote: '两颗心灵许诺共织命运，以深爱与真诚横渡漫长时光之海。',
+    closingHonorMessage: '若蒙诸位亲友莅临现场，赐予温暖祝福，将是我们莫大的荣幸与欣喜。',
+    invitationNotice: '谨定于良辰吉日举行结婚典礼，诚邀您莅临见证我们的幸福时刻。',
+    // Hero & Countdown
+    presenceAndLove: '爱与祝福',
+    weAreGettingMarried: '怀着无比感恩与喜悦的心情，诚挚邀请您共赴这场浪漫的婚礼盛宴。',
+    saveTheDate: '喜结连理',
+    days: '天',
+    hours: '小时',
+    minutes: '分钟',
+    seconds: '秒',
+    // Couple
+    theCoupleTitle: '新人介绍',
+    theCoupleSubtitle: 'The Bride & Groom',
+    theBride: '新娘',
+    theGroom: '新郎',
+    sonOf: '公子',
+    daughterOf: '千金',
+    and: '与',
+    // Events
+    weddingEvents: '婚礼日程',
+    saveToCalendar: '添加至日历',
+    openGoogleMaps: '查看地图导航',
+    calendarSuccess: '已成功添加至日历！♡',
+    // Location Section
+    locationTitle: '婚礼地点与交通指引',
+    locationSubtitle: '婚礼仪式与宴会场地的详细地址、地图位置及到场路线指南。',
+    shareLocation: '分享婚礼地点',
+    openInMapsApp: '在地图应用中打开',
+    copyAddress: '复制详细地址',
+    addressCopied: '地址已成功复制至剪贴板！♡',
+    venueAkadLabel: '婚礼仪式地点',
+    venueReceptionLabel: '婚宴庆典地点',
+    routeGuide: '路线及停车指引',
+    routeGuideText: '现场配备宽敞的专属停车场。抵达时请遵循现场安保人员的指引有序停放车辆。',
+    // Story
+    loveStory: '爱情故事',
+    loveStorySubtitle: '携手走过的每一个平凡与珍贵瞬间，汇聚成奔向未来的坚定步伐。',
+    // Gallery
+    photoGallery: '甜蜜光影',
+    photoGallerySubtitle: '定格时光里的温馨瞬间，记录我们专属的浪漫回忆。',
+    close: '关闭',
+    // RSVP
+    rsvpTitle: '出席回执 (RSVP)',
+    rsvpSubtitle: '为方便统筹安排席位，请您于婚礼前填写出席确认回执。',
+    guestNameLabel: '贵宾姓名',
+    guestNamePlaceholder: '请填写您的姓名 / 携眷姓名',
+    attendanceLabel: '出席情况',
+    attending: '荣幸出席',
+    notAttending: '遗憾缺席',
+    guestCountLabel: '出席人数',
+    guestCountUnit: '位',
+    wishesLabel: '祝福寄语',
+    wishesPlaceholder: '请在此留下您真挚的祝福与祈愿...',
+    sendRsvp: '提交出席确认',
+    sendingRsvp: '正在提交...',
+    rsvpSuccessToastAttending: '出席回执已成功提交！♡',
+    rsvpSuccessToastDecline: '感谢您的回复与祝福 ♡',
+    rsvpFeedbackAttending: (name: string) => `非常期待您的到来，${name} ♡`,
+    rsvpFeedbackDecline: (name: string) => `感谢您的告知与真诚祝福，${name} ♡`,
+    rsvpRecordedNotice: '您的出席信息已成功登记在婚礼宾客名册中。',
+    changeRsvp: '修改出席信息',
+    // Wishes Form
+    wishesTitle: '宾客祝福',
+    wishesSubtitle: '来自亲朋好友最温暖真挚的美好祝愿。',
+    sendWishPrompt: '为新人送上温情祝福与祈愿',
+    yourName: '您的姓名',
+    yourWish: '在此写下对两位新人的美好祝福与祝愿...',
+    submitWish: '发送诚挚祝福',
+    submittingWish: '正在发送祝福...',
+    wishSuccessToast: '您的祝福寄语已成功送达！♡',
+    emptyWishes: '暂无留言。欢迎您成为首位送上真挚祝福的贵宾 ♡',
+    viewMoreWishes: '查看更多祝福',
+    // Gifts
+    weddingGiftTitle: '新人礼品 / 心意礼金',
+    giftQuote: '“您的到场即是我们最珍贵的礼物”',
+    giftSubtitle: '若您希望向我们表达心意或送上数码礼金，我们怀着感激之情提供以下账户信息。',
+    bankTransfer: '银行转账',
+    eWallet: '电子钱包',
+    physicalGift: '礼品邮寄地址',
+    copyNumber: '复制账号 / 地址',
+    copiedSuccess: '已复制成功！',
+    copiedToast: '已复制！衷心感谢您的厚意与祝福 ♡',
+    // Closing
+    ourGratitude: '致以最真挚的谢意',
+    closingDefaultMessage: '能够与您共同见证，对我们而言无比珍贵。',
+    closingSubtitle: '感谢您成为我们故事中不可或缺的一部分，感谢您的陪伴与深情祝福。',
+    closingPlayful: '欢声笑语，举杯共庆。♡',
+    craftedWithLove: 'Crafted with love via KU UNDANG',
+    backToCover: '返回邀请函封面',
+    // Floating Nav
+    navHome: '首页',
+    navCouple: '新人',
+    navEvent: '日程',
+    navLocation: '地点',
+    navGallery: '图集',
+    navRsvp: '回执',
+    // Dynamic Invitation Content Translations
+    content: {
+      holyVerse: '“他的一种迹象是：他从你们的同类中为你们创造配偶，以便你们依恋她们，并且使你们互相爱悦，互相怜悯。对于能思维的民众，此中确有许多迹象。”（古兰经 罗马章:21）',
+      groom: {
+        childOrder: '苏瓦吉先生与阿琳娜女士之次子',
+        parents: '苏瓦吉先生 与 阿琳娜女士',
+        bio: '性格温和沉稳，热爱徒步登山与编写代码，从初次相逢的那一刻起，便深深倾心于阿尔雅明媚的笑容。',
+      },
+      bride: {
+        childOrder: '卡尔迪先生与尤利亚蒂女士之长女',
+        parents: '卡尔迪先生 与 尤利亚蒂女士',
+        bio: '热爱平面设计与经典文学，总能在午后一杯温暖的咖啡里体会生活的诗意与温情。',
+      },
+      events: {
+        akadTitle: '神圣婚礼仪式',
+        akadDesc: '在至亲与见证人的注目下，举行庄严神圣的宣誓合卺仪式。',
+        receptionTitle: '新婚答谢喜宴',
+        receptionDesc: '与亲朋好友欢聚一堂，共享美酒佳肴，共庆良缘的美好盛典。',
+      },
+      stories: [
+        {
+          title: '初次相遇',
+          desc: '一个细雨蒙蒙的午后，在咖啡馆里不期而遇。一杯温暖的拿铁与一句羞涩的问候，悄然翻开了专属我们的爱情篇章。',
+        },
+        {
+          title: '初次约会',
+          desc: '漫步在柔和的城市灯火下，畅谈对未来的憧憬与梦想，心中悄然笃定彼此就是命中注定的那个人。',
+        },
+        {
+          title: '浪漫求婚',
+          desc: '在清风拂过的翠绿山丘上，他单膝跪地捧上求婚戒指，伴随着感动的泪水，一句坚定的“我愿意”许下余生诺言。',
+        },
+        {
+          title: '步入永恒',
+          desc: '两姓联姻，两心相印，在至亲好友的见证与真挚祈愿中，携手开启相伴一生的崭新篇章。',
+        },
+      ],
+    },
+  },
+};
+
+interface LanguageContextType {
+  language: LanguageCode;
+  setLanguage: (lang: LanguageCode) => void;
+  t: typeof TRANSLATIONS.ID;
+}
+
+const LanguageContext = createContext<LanguageContextType>({
+  language: 'ID',
+  setLanguage: () => {},
+  t: TRANSLATIONS.ID,
+});
+
+export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [language, setLanguageState] = useState<LanguageCode>('ID');
+
+  useEffect(() => {
+    const saved = localStorage.getItem('wedding_lang') as LanguageCode;
+    if (saved && (saved === 'ID' || saved === 'JW' || saved === 'EN' || saved === 'JP' || saved === 'CN')) {
+      setLanguageState(saved);
+    }
+  }, []);
+
+  const setLanguage = (lang: LanguageCode) => {
+    setLanguageState(lang);
+    localStorage.setItem('wedding_lang', lang);
+  };
+
+  const t = TRANSLATIONS[language] || TRANSLATIONS.ID;
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
+
+export const useLanguage = () => useContext(LanguageContext);

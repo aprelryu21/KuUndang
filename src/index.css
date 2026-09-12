@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-primary: #283D52;
+    --color-accent: #C2A56B;
+    --color-background: #F7F2EA;
+    --color-secondary-bg: #EFE8DE;
+    --color-text: #24313A;
+    --color-muted: #768692;
+    --color-gold: #C2A56B;
+    --color-blush: #DFBFC1;
+    --color-warm-white: #FFFCF7;
+    --font-heading: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'Manrope', system-ui, -apple-system, sans-serif;
+    --font-accent: 'Alex Brush', cursive;
+    --corner-radius: 16px;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .font-heading {
+    font-family: var(--font-heading);
+  }
+
+  .font-accent {
+    font-family: var(--font-accent);
+  }
+
+  /* Custom subtle scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #F7F2EA;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #C2A56B;
+    border-radius: 9999px;
+  }
+}
+
+/* Vinyl rotation animation */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}

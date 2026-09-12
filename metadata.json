@@ -1,0 +1,6 @@
+{
+  "name": "KU UNDANG",
+  "description": "Platform dan CMS pembuat undangan digital pernikahan premium dengan desain sinematik, multi-bahasa, RSVP realtime, amplop digital, dan galeri kenangan.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

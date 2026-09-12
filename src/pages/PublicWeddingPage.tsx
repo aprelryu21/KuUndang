@@ -1,0 +1,360 @@
+import React, { useEffect, useState } from 'react';
+import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { FullInvitationData, Guest, SectionKey, SectionSetting } from '../types/wedding';
+import { weddingService } from '../services/weddingService';
+import { OpeningCover } from '../components/public-wedding/OpeningCover';
+import { FloatingMusicPlayer } from '../components/public-wedding/FloatingMusicPlayer';
+import { PersonalGreeting } from '../components/public-wedding/PersonalGreeting';
+import { HeroSection } from '../components/public-wedding/HeroSection';
+import { CountdownSection } from '../components/public-wedding/CountdownSection';
+import { CoupleSection } from '../components/public-wedding/CoupleSection';
+import { EventsSection } from '../components/public-wedding/EventsSection';
+import { LocationSection } from '../components/public-wedding/LocationSection';
+import { StorySection } from '../components/public-wedding/StorySection';
+import { GallerySection } from '../components/public-wedding/GallerySection';
+import { RSVPSection } from '../components/public-wedding/RSVPSection';
+import { WishesSection } from '../components/public-wedding/WishesSection';
+import { GiftSection } from '../components/public-wedding/GiftSection';
+import { ClosingSection } from '../components/public-wedding/ClosingSection';
+import { FloatingNav } from '../components/public-wedding/FloatingNav';
+import { Persona5WeddingView } from '../components/templates/persona5/Persona5WeddingView';
+import { LanguageSwitcher } from '../components/common/LanguageSwitcher';
+import { AdminLoginModal } from '../components/admin/AdminLoginModal';
+import { Heart, ArrowLeft, Eye, RefreshCw } from 'lucide-react';
+
+interface PublicWeddingPageProps {
+  isPreview?: boolean;
+}
+
+export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview = false }) => {
+  const { slug, id } = useParams<{ slug?: string; id?: string }>();
+  const [searchParams] = useSearchParams();
+  const guestCode = searchParams.get('to');
+  const navigate = useNavigate();
+
+  const [data, setData] = useState<FullInvitationData | null>(null);
+  const [guest, setGuest] = useState<Guest | null>(null);
+  const [guestName, setGuestName] = useState('');
+  const [isCoverOpen, setIsCoverOpen] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [musicStarted, setMusicStarted] = useState(false);
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+
+  // Global keyboard shortcut to open Admin Login Modal (Ctrl + Shift + A or Cmd + Shift + A or Alt + Shift + A)
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      const isAKey = e.key.toLowerCase() === 'a' || e.code === 'KeyA';
+      const isCtrlShift = (e.ctrlKey || e.metaKey) && e.shiftKey && isAKey;
+      const isAltShift = e.altKey && e.shiftKey && isAKey;
+      const isCtrlAlt = e.ctrlKey && e.altKey && isAKey;
+
+      if (isCtrlShift || isAltShift || isCtrlAlt) {
+        e.preventDefault();
+        setIsAdminModalOpen((prev) => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
+
+  // Load invitation data
+  const loadData = async () => {
+    setLoading(true);
+    weddingService.init();
+
+    let fullData: FullInvitationData | null = null;
+    if (isPreview && id) {
+      fullData = await weddingService.getInvitationById(id);
+    } else {
+      const targetSlug = slug || 'april-siti';
+      fullData = await weddingService.getInvitationBySlug(targetSlug);
+    }
+
+    if (fullData) {
+      setData(fullData);
+
+      // Dynamic document title
+      document.title = `${fullData.invitation.groom_nickname} & ${fullData.invitation.bride_nickname} — Wedding Invitation`;
+
+      // Check for guest code ?to=...
+      if (guestCode) {
+        const matchedGuest = await weddingService.getGuestByCode(fullData.invitation.id, guestCode);
+        if (matchedGuest) {
+          setGuest(matchedGuest);
+          setGuestName(matchedGuest.name);
+          localStorage.setItem('wedding_guest_name', matchedGuest.name);
+        }
+      } else {
+        // Retrieve last stored guest name from localStorage
+        const storedName = localStorage.getItem('wedding_guest_name');
+        if (storedName) {
+          setGuestName(storedName);
+        }
+      }
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadData();
+    window.scrollTo(0, 0);
+  }, [slug, id, isPreview, guestCode]);
+
+  // Handle open invitation
+  const handleOpenInvitation = async (enteredName: string) => {
+    const finalName = enteredName || guestName || 'Tamu Terhormat';
+    setGuestName(finalName);
+    localStorage.setItem('wedding_guest_name', finalName);
+
+    if (data && guestCode) {
+      await weddingService.markGuestOpened(data.invitation.id, guestCode);
+    }
+
+    setIsCoverOpen(false);
+    setMusicStarted(true);
+  };
+
+  const handleBackToCover = () => {
+    setIsCoverOpen(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#F7F2EA] text-[#283D52]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-full border-2 border-[#C2A56B] border-t-transparent animate-spin" />
+          <div className="font-heading text-xl tracking-widest uppercase text-[#283D52]">
+            Loading Invitation...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[#F7F2EA] text-[#24313A] text-center">
+        <div className="w-16 h-16 rounded-full bg-[#DFBFC1]/30 flex items-center justify-center mb-4 text-[#283D52]">
+          <Heart className="w-8 h-8 text-[#DFBFC1] fill-[#DFBFC1]" />
+        </div>
+        <h1 className="font-heading text-3xl sm:text-4xl text-[#283D52] font-semibold">
+          404 — Invitation Not Found
+        </h1>
+        <p className="mt-3 text-sm text-[#768692] max-w-md">
+          Undangan yang Anda cari mungkin telah diarsipkan, belum dipublikasikan, atau URL telah berubah.
+        </p>
+        <div className="mt-6 flex gap-3">
+          <button
+            onClick={() => navigate('/april-siti')}
+            className="px-5 py-2.5 rounded-xl bg-[#283D52] text-[#FFFCF7] text-xs font-semibold uppercase tracking-wider shadow-sm hover:bg-[#1E2E3E] transition-colors"
+          >
+            Buka Undangan Demo
+          </button>
+          <Link
+            to="/admin"
+            className="px-5 py-2.5 rounded-xl bg-[#FFFCF7] border border-[#283D52]/20 text-[#283D52] text-xs font-semibold uppercase tracking-wider hover:bg-[#EFE8DE] transition-colors"
+          >
+            Admin Studio
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const { invitation, bride, groom, events, stories, gallery, gifts, sections, wishes } = data;
+  const theme = invitation.theme_config;
+
+  // Custom CSS variables style applied to root
+  const themeStyle = {
+    '--color-primary': theme?.primary_color || '#283D52',
+    '--color-accent': theme?.accent_color || '#C2A56B',
+    '--color-background': theme?.background_color || '#F7F2EA',
+    '--color-secondary-bg': theme?.secondary_bg || '#EFE8DE',
+    '--color-text': theme?.text_color || '#24313A',
+    '--color-muted': theme?.muted_color || '#768692',
+    '--color-gold': theme?.gold_color || '#C2A56B',
+    '--color-blush': theme?.blush_color || '#DFBFC1',
+  } as React.CSSProperties;
+
+  // Render individual sections according to admin order & enabled status
+  const renderSection = (sectionKey: SectionKey) => {
+    switch (sectionKey) {
+      case 'greeting':
+        return (
+          <PersonalGreeting
+            key="greeting"
+            guestName={guestName}
+            greetingText={invitation.greeting_text}
+          />
+        );
+      case 'hero':
+        return <HeroSection key="hero" invitation={invitation} />;
+      case 'countdown':
+        return <CountdownSection key="countdown" weddingDate={invitation.wedding_date} />;
+      case 'couple':
+        return <CoupleSection key="couple" bride={bride} groom={groom} />;
+      case 'events':
+        return <EventsSection key="events" events={events} invitation={invitation} />;
+      case 'location':
+        return <LocationSection key="location" events={events} />;
+      case 'story':
+        return <StorySection key="story" stories={stories} />;
+      case 'gallery':
+        return <GallerySection key="gallery" gallery={gallery} />;
+      case 'rsvp':
+        return (
+          <RSVPSection
+            key="rsvp"
+            invitationId={invitation.id}
+            defaultGuestName={guestName}
+            guestId={guest?.id}
+            onRSVPSubmitted={loadData}
+          />
+        );
+      case 'wishes':
+        return (
+          <WishesSection
+            key="wishes"
+            wishes={wishes}
+            invitationId={invitation.id}
+            defaultGuestName={guestName}
+            onWishAdded={loadData}
+          />
+        );
+      case 'gifts':
+        return <GiftSection key="gifts" gifts={gifts} />;
+      case 'closing':
+        return <ClosingSection key="closing" invitation={invitation} onBackToCover={handleBackToCover} />;
+      default:
+        return null;
+    }
+  };
+
+  // Ensure location section exists in list if not already present
+  const allSections = [...sections];
+  if (!allSections.some((s) => s.section_key === 'location')) {
+    const eventsIndex = allSections.findIndex((s) => s.section_key === 'events');
+    const locationSection: SectionSetting = {
+      id: 'sec-location-auto',
+      invitation_id: invitation.id,
+      section_key: 'location',
+      title: 'Alamat & Lokasi Acara',
+      enabled: true,
+      sort_order: eventsIndex !== -1 ? allSections[eventsIndex].sort_order + 0.5 : 6.5,
+    };
+    allSections.push(locationSection);
+  }
+
+  // Sort sections by sort_order
+  const sortedSections = allSections
+    .filter((s) => s.enabled && s.section_key !== 'cover')
+    .sort((a, b) => a.sort_order - b.sort_order);
+
+  // Check template: query parameter override (?template=persona-5) or database setting
+  const templateQuery = searchParams.get('template');
+  const activeTemplate =
+    templateQuery === 'persona-5' || templateQuery === 'persona-3' || templateQuery === 'royal-arch'
+      ? (templateQuery === 'persona-3' ? 'persona-5' : templateQuery)
+      : invitation.template_id || 'royal-arch';
+
+  // Render Persona 5 Template
+  if (activeTemplate === 'persona-5') {
+    return (
+      <div className="relative min-h-screen bg-[#0D0D0D]">
+        {/* Admin Preview Mode Floating Bar */}
+        {isPreview && (
+          <div className="fixed top-0 inset-x-0 z-50 bg-[#16161A] text-[#FFFFFF] border-b-2 border-[#E60012] px-4 py-2 flex items-center justify-between text-xs shadow-md">
+            <div className="flex items-center gap-2 font-mono">
+              <Eye className="w-4 h-4 text-[#FFF000]" />
+              <span>
+                PREVIEW [PERSONA 5 STYLISTIC TEMPLATE] — {invitation.title} ({invitation.status.toUpperCase()})
+              </span>
+            </div>
+            <Link
+              to={`/admin/invitations/${invitation.id}/edit`}
+              className="flex items-center gap-1.5 px-3 py-1 bg-[#E60012] text-white rounded-none font-mono font-bold text-[11px] hover:bg-[#FF0019] transition-colors -skew-x-6"
+            >
+              <ArrowLeft className="w-3 h-3 skew-x-6" />
+              <span className="skew-x-6">Pengaturan Undangan</span>
+            </Link>
+          </div>
+        )}
+
+        <Persona5WeddingView
+          data={data}
+          guest={guest}
+          guestName={guestName}
+          isPreview={isPreview}
+          onRefreshData={loadData}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div style={themeStyle} className="relative min-h-screen bg-[#F7F2EA] text-[#24313A]">
+      {/* Admin Preview Mode Floating Bar */}
+      {isPreview && (
+        <div className="fixed top-0 inset-x-0 z-50 bg-[#283D52] text-[#FFFCF7] px-4 py-2 flex items-center justify-between text-xs shadow-md">
+          <div className="flex items-center gap-2 font-medium">
+            <Eye className="w-4 h-4 text-[#DFBFC1]" />
+            <span>MODAL PREVIEW — Undangan: {invitation.title} ({invitation.status.toUpperCase()})</span>
+          </div>
+          <Link
+            to={`/admin/invitations/${invitation.id}/edit`}
+            className="flex items-center gap-1.5 px-3 py-1 bg-[#FFFCF7] text-[#283D52] rounded-md font-semibold text-[11px] hover:bg-[#DFBFC1] transition-colors"
+          >
+            <ArrowLeft className="w-3 h-3" />
+            <span>Kembali ke Editor</span>
+          </Link>
+        </div>
+      )}
+
+      {/* Opening Fullscreen Cover */}
+      <OpeningCover
+        invitation={invitation}
+        initialGuestName={guestName}
+        isOpen={isCoverOpen}
+        onOpen={handleOpenInvitation}
+        onTriggerAdminModal={() => setIsAdminModalOpen(true)}
+      />
+
+      {/* Language Switcher for Inside Invitation (Top-Right) */}
+      {!isCoverOpen && (
+        <div
+          id="invitation-language-selector"
+          className={`fixed right-3 sm:right-6 z-40 transition-all ${
+            isPreview ? 'top-14' : 'top-3 sm:top-5'
+          }`}
+        >
+          <LanguageSwitcher theme="light" />
+        </div>
+      )}
+
+      {/* Main Wedding Content */}
+      <main className={`transition-opacity duration-1000 ${isCoverOpen ? 'opacity-0' : 'opacity-100'}`}>
+        {sortedSections.map((sec) => renderSection(sec.section_key))}
+      </main>
+
+      {/* Floating Background Music Player */}
+      <FloatingMusicPlayer
+        musicUrl={invitation.music_url}
+        musicTitle={invitation.music_title}
+        musicArtist={invitation.music_artist}
+        enabled={invitation.music_enabled}
+        autoPlayTrigger={musicStarted}
+      />
+
+      {/* Floating Bottom Navigation for Quick Jump */}
+      {!isCoverOpen && <FloatingNav />}
+
+      {/* Secret Admin Login Modal (Triggered by Ctrl+Shift+A or Heart badge) */}
+      <AdminLoginModal
+        isOpen={isAdminModalOpen}
+        onClose={() => setIsAdminModalOpen(false)}
+      />
+    </div>
+  );
+};
