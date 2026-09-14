@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'motion/react';
 import {
   GiftAccount,
   Wish,
@@ -51,10 +52,10 @@ export const JavaneseRSVPAndWishes: React.FC<JavaneseRSVPAndWishesProps> = ({
   // RSVP state
   const [rsvpName, setRsvpName] = useState(defaultGuestName || '');
   const [rsvpStatus, setRsvpStatus] = useState<'attending' | 'declined'>('attending');
-  const [rsvpGuests, setRsvpGuests] = useState('2');
-  const [rsvpNotes, setRsvpNotes] = useState('');
-  const [isSubmittingRSVP, setIsSubmittingRSVP] = useState(false);
-  const [rsvpSuccessMsg, setRsvpSuccessMsg] = useState(false);
+  const [guestCount, setGuestCount] = useState<number>(2);
+  const [rsvpWish, setRsvpWish] = useState('');
+  const [isSubmittingRsvp, setIsSubmittingRsvp] = useState(false);
+  const [rsvpSubmitted, setRsvpSubmitted] = useState(false);
 
   // Standalone Wish state
   const [wishAuthor, setWishAuthor] = useState(defaultGuestName || '');
@@ -97,22 +98,31 @@ export const JavaneseRSVPAndWishes: React.FC<JavaneseRSVPAndWishesProps> = ({
     e.preventDefault();
     if (!rsvpName.trim()) return;
 
-    setIsSubmittingRSVP(true);
+    setIsSubmittingRsvp(true);
     try {
       await weddingService.submitRSVP({
         invitation_id: invitationId,
         guest_name: rsvpName.trim(),
         attendance: rsvpStatus === 'attending' ? 'attending' : 'not_attending',
-        guest_count: parseInt(rsvpGuests) || 1,
-        notes: rsvpNotes.trim(),
+        guest_count: guestCount,
+        notes: rsvpWish.trim() || undefined,
       });
-      setRsvpSuccessMsg(true);
+
+      if (rsvpWish.trim()) {
+        await weddingService.submitWish({
+          invitation_id: invitationId,
+          guest_name: rsvpName.trim(),
+          message: rsvpWish.trim(),
+        });
+      }
+
+      setRsvpSubmitted(true);
       playGongAgeng();
       if (onRefreshData) onRefreshData();
     } catch (err) {
       console.error('Failed to submit RSVP:', err);
     } finally {
-      setIsSubmittingRSVP(false);
+      setIsSubmittingRsvp(false);
     }
   };
 
