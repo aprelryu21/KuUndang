@@ -67,6 +67,9 @@ export const GiftSection: React.FC<GiftSectionProps> = ({ gifts, section }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-left">
           {gifts.map((item, index) => {
             const isCopied = copiedId === item.id;
+            const isAddress = item.type === 'address';
+            const providerName = item.provider || (item as any).bank_name || (isAddress ? 'Kado Fisik' : 'Bank Transfer');
+            const holderName = item.account_name || (item as any).account_holder || '';
 
             return (
               <motion.div
@@ -84,7 +87,7 @@ export const GiftSection: React.FC<GiftSectionProps> = ({ gifts, section }) => {
                         {getIcon(item.type)}
                       </div>
                       <span className="text-xs font-semibold uppercase tracking-wider text-[#283D52]">
-                        {item.provider}
+                        {providerName}
                       </span>
                     </div>
 
@@ -97,16 +100,21 @@ export const GiftSection: React.FC<GiftSectionProps> = ({ gifts, section }) => {
                     </span>
                   </div>
 
-                  <p className="font-heading text-xl sm:text-2xl font-bold tracking-wider text-[#283D52] break-all select-all font-mono">
+                  <p className="text-[11px] text-[#768692] uppercase font-semibold">
+                    {isAddress ? 'Alamat Pengiriman:' : 'Nomor Rekening:'}
+                  </p>
+
+                  <p className={isAddress ? "font-sans text-sm sm:text-base font-semibold text-[#283D52] leading-relaxed select-all my-1.5" : "font-heading text-xl sm:text-2xl font-bold tracking-wider text-[#283D52] break-all select-all font-mono my-1"}>
                     {item.account_number}
                   </p>
 
                   <p className="mt-1 text-xs text-[#768692]">
-                    a.n. <span className="font-semibold text-[#24313A]">{item.account_name}</span>
+                    {isAddress ? 'Penerima: ' : 'a.n. '}
+                    <span className="font-semibold text-[#24313A]">{holderName}</span>
                   </p>
 
                   {item.description && (
-                    <p className="mt-2 text-[11px] text-[#768692] leading-relaxed italic">
+                    <p className="mt-2 text-[11px] text-[#768692] leading-relaxed italic bg-[#F7F2EA]/60 p-2.5 rounded-xl border border-[#283D52]/5">
                       {item.description}
                     </p>
                   )}
@@ -126,7 +134,7 @@ export const GiftSection: React.FC<GiftSectionProps> = ({ gifts, section }) => {
                     ) : (
                       <>
                         <Copy className="w-4 h-4 text-[#DFBFC1]" />
-                        <span>{t.copyNumber}</span>
+                        <span>{isAddress ? 'Salin Alamat' : t.copyNumber}</span>
                       </>
                     )}
                   </button>

@@ -1,22 +1,26 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { GiftAccount, Wish, RSVP } from '../../../types/wedding';
-import { useLanguage } from '../../../context/LanguageContext';
-import { weddingService } from '../../../services/weddingService';
 import {
+  GiftAccount,
+  Wish,
+  SectionSetting,
+} from '../../../types/wedding';
+import { weddingService } from '../../../services/weddingService';
+import { useLanguage } from '../../../context/LanguageContext';
+import {
+  BatikKawungPattern,
   JavaneseDivider,
   JavaneseCornerFlourish,
-  BatikKawungPattern,
+  playGongAgeng,
 } from './javaneseAssets';
 import {
-  CreditCard,
-  Copy,
-  Check,
   Heart,
+  Sparkles,
+  Check,
+  Copy,
+  CreditCard,
   Send,
   UserCheck,
   UserX,
-  Sparkles,
   MessageSquare,
 } from 'lucide-react';
 
@@ -25,6 +29,8 @@ interface JavaneseRSVPAndWishesProps {
   defaultGuestName: string;
   gifts?: GiftAccount[];
   wishes: Wish[];
+  giftSection?: SectionSetting;
+  isGiftsEnabled?: boolean;
   onRefreshData?: () => void;
 }
 
@@ -33,6 +39,8 @@ export const JavaneseRSVPAndWishes: React.FC<JavaneseRSVPAndWishesProps> = ({
   defaultGuestName,
   gifts = [],
   wishes = [],
+  giftSection,
+  isGiftsEnabled = true,
   onRefreshData,
 }) => {
   const { t, language } = useLanguage();
@@ -43,10 +51,10 @@ export const JavaneseRSVPAndWishes: React.FC<JavaneseRSVPAndWishesProps> = ({
   // RSVP state
   const [rsvpName, setRsvpName] = useState(defaultGuestName || '');
   const [rsvpStatus, setRsvpStatus] = useState<'attending' | 'declined'>('attending');
-  const [guestCount, setGuestCount] = useState(2);
-  const [rsvpWish, setRsvpWish] = useState('');
-  const [isSubmittingRsvp, setIsSubmittingRsvp] = useState(false);
-  const [rsvpSubmitted, setRsvpSubmitted] = useState(false);
+  const [rsvpGuests, setRsvpGuests] = useState('2');
+  const [rsvpNotes, setRsvpNotes] = useState('');
+  const [isSubmittingRSVP, setIsSubmittingRSVP] = useState(false);
+  const [rsvpSuccessMsg, setRsvpSuccessMsg] = useState(false);
 
   // Standalone Wish state
   const [wishAuthor, setWishAuthor] = useState(defaultGuestName || '');
@@ -62,18 +70,20 @@ export const JavaneseRSVPAndWishes: React.FC<JavaneseRSVPAndWishesProps> = ({
           {
             id: 'gift-1',
             invitation_id: invitationId,
+            type: 'bank' as const,
             bank_name: 'BCA',
             account_number: '0181928371',
-            account_holder: 'Mempelai Wanita',
-            is_active: true,
+            account_name: 'Mempelai Wanita',
+            sort_order: 1,
           },
           {
             id: 'gift-2',
             invitation_id: invitationId,
+            type: 'bank' as const,
             bank_name: 'Bank Mandiri',
             account_number: '1420019283746',
-            account_holder: 'Mempelai Pria',
-            is_active: true,
+            account_name: 'Mempelai Pria',
+            sort_order: 2,
           },
         ];
 
@@ -87,30 +97,22 @@ export const JavaneseRSVPAndWishes: React.FC<JavaneseRSVPAndWishesProps> = ({
     e.preventDefault();
     if (!rsvpName.trim()) return;
 
-    setIsSubmittingRsvp(true);
+    setIsSubmittingRSVP(true);
     try {
-      await weddingService.createRSVP({
+      await weddingService.submitRSVP({
         invitation_id: invitationId,
         guest_name: rsvpName.trim(),
         attendance: rsvpStatus === 'attending' ? 'attending' : 'not_attending',
-        guest_count: rsvpStatus === 'attending' ? Number(guestCount) : 0,
-        message: rsvpWish.trim() || undefined,
+        guest_count: parseInt(rsvpGuests) || 1,
+        notes: rsvpNotes.trim(),
       });
-
-      if (rsvpWish.trim()) {
-        await weddingService.createWish({
-          invitation_id: invitationId,
-          guest_name: rsvpName.trim(),
-          message: rsvpWish.trim(),
-        });
-      }
-
-      setRsvpSubmitted(true);
+      setRsvpSuccessMsg(true);
+      playGongAgeng();
       if (onRefreshData) onRefreshData();
     } catch (err) {
-      console.error('RSVP submission error:', err);
+      console.error('Failed to submit RSVP:', err);
     } finally {
-      setIsSubmittingRsvp(false);
+      setIsSubmittingRSVP(false);
     }
   };
 
@@ -120,17 +122,18 @@ export const JavaneseRSVPAndWishes: React.FC<JavaneseRSVPAndWishesProps> = ({
 
     setIsSubmittingWish(true);
     try {
-      await weddingService.createWish({
+      await weddingService.submitWish({
         invitation_id: invitationId,
         guest_name: wishAuthor.trim(),
         message: wishMessage.trim(),
       });
       setWishMessage('');
       setWishSuccessMsg(true);
-      setTimeout(() => setWishSuccessMsg(false), 3000);
+      playGongAgeng();
+      setTimeout(() => setWishSuccessMsg(false), 5000);
       if (onRefreshData) onRefreshData();
     } catch (err) {
-      console.error('Wish submission error:', err);
+      console.error('Failed to submit wish:', err);
     } finally {
       setIsSubmittingWish(false);
     }
@@ -139,72 +142,87 @@ export const JavaneseRSVPAndWishes: React.FC<JavaneseRSVPAndWishesProps> = ({
   return (
     <div className="space-y-0">
       {/* 1. Tali Asih / Kado Digital (Gifts) */}
-      <section
-        id="javanese-gifts"
-        className="py-20 sm:py-24 px-4 bg-[#1E110A] text-[#FAF6EE] relative overflow-hidden border-t border-[#D4AF37]/30"
-      >
-        <BatikKawungPattern className="absolute inset-0 pointer-events-none opacity-8" />
+      {isGiftsEnabled && displayGifts && displayGifts.length > 0 && (
+        <section
+          id="javanese-gifts"
+          className="py-20 sm:py-24 px-4 bg-[#1E110A] text-[#FAF6EE] relative overflow-hidden border-t border-[#D4AF37]/30"
+        >
+          <BatikKawungPattern className="absolute inset-0 pointer-events-none opacity-8" />
 
-        <div className="max-w-4xl mx-auto relative z-10">
-          <div className="text-center mb-14 space-y-3">
-            <p className="text-xs font-serif tracking-[0.25em] text-[#D4AF37] uppercase">
-              {language === 'JW' ? 'TANDA TRESNA & TALI ASIH' : 'TANDA KASIH & AMPLOP DIGITAL'}
-            </p>
-            <h2 className="font-serif text-3xl sm:text-5xl font-bold tracking-wide text-[#FAF6EE]">
-              {language === 'JW' ? 'Pasugatan Tali Asih' : 'Kado Pernikahan & Doa Restu'}
-            </h2>
-            <p className="max-w-xl mx-auto text-xs sm:text-sm font-serif text-[#FAF6EE]/75 leading-relaxed">
-              {language === 'JW'
-                ? 'Donga pangestu panjenengan sedaya sampun dados kabingahan tumrap kula sakeluwarga. Nanging menawi kepareng maringi tanda tresna, saged lumantar rekening ing andhap menika.'
-                : 'Doa restu Anda merupakan karunia terindah bagi kami. Namun apabila berkenan memberikan tanda kasih, dapat disalurkan melalui rekening berikut.'}
-            </p>
-            <JavaneseDivider className="my-4" />
-          </div>
+          <div className="max-w-4xl mx-auto relative z-10">
+            <div className="text-center mb-14 space-y-3">
+              <p className="text-xs font-serif tracking-[0.25em] text-[#D4AF37] uppercase">
+                {language === 'JW' ? 'TANDA TRESNA & TALI ASIH' : 'TANDA KASIH & AMPLOP DIGITAL'}
+              </p>
+              <h2 className="font-serif text-3xl sm:text-5xl font-bold tracking-wide text-[#FAF6EE]">
+                {giftSection?.title || (language === 'JW' ? 'Pasugatan Tali Asih' : 'Kado Pernikahan & Doa Restu')}
+              </h2>
+              <p className="max-w-xl mx-auto text-xs sm:text-sm font-serif text-[#FAF6EE]/75 leading-relaxed">
+                {giftSection?.subtitle ||
+                  (language === 'JW'
+                    ? 'Donga pangestu panjenengan sedaya sampun dados kabingahan tumrap kula sakeluwarga. Nanging menawi kepareng maringi tanda tresna, saged lumantar rekening ing andhap menika.'
+                    : 'Doa restu Anda merupakan karunia terindah bagi kami. Namun apabila berkenan memberikan tanda kasih, dapat disalurkan melalui rekening berikut.')}
+              </p>
+              <JavaneseDivider className="my-4" />
+            </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
-            {displayGifts.map((gift) => (
-              <div
-                key={gift.id}
-                className="bg-[#24160E]/90 border-2 border-[#D4AF37]/60 rounded-2xl p-6 relative shadow-[0_6px_20px_rgba(0,0,0,0.6)] flex flex-col justify-between"
-              >
-                <div className="absolute top-2 right-2">
-                  <CreditCard className="w-5 h-5 text-[#D4AF37]/60" />
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
+              {displayGifts.map((gift) => {
+                const isAddress = gift.type === 'address';
+                const provider = gift.bank_name || (gift as any).provider || (isAddress ? 'Kirim Kado Fisik' : 'Bank Transfer');
+                const accountHolder = gift.account_name || (gift as any).account_holder || '';
 
-                <div>
-                  <div className="inline-block px-3 py-1 rounded-full bg-[#1A1009] border border-[#D4AF37]/40 text-[11px] font-serif font-bold text-[#E5C158] uppercase mb-3">
-                    {gift.bank_name}
+                return (
+                  <div
+                    key={gift.id}
+                    className="bg-[#24160E]/90 border-2 border-[#D4AF37]/60 rounded-2xl p-6 relative shadow-[0_6px_20px_rgba(0,0,0,0.6)] flex flex-col justify-between"
+                  >
+                    <div className="absolute top-2 right-2">
+                      <CreditCard className="w-5 h-5 text-[#D4AF37]/60" />
+                    </div>
+
+                    <div>
+                      <div className="inline-block px-3 py-1 rounded-full bg-[#1A1009] border border-[#D4AF37]/40 text-[11px] font-serif font-bold text-[#E5C158] uppercase mb-3">
+                        {provider}
+                      </div>
+                      <p className={isAddress ? "font-serif text-sm sm:text-base font-bold text-[#FAF6EE] leading-relaxed my-2" : "font-mono text-xl sm:text-2xl font-bold text-[#FAF6EE] tracking-wider my-2"}>
+                        {gift.account_number}
+                      </p>
+                      <p className="font-serif text-xs text-[#FAF6EE]/70">
+                        {isAddress ? 'Penerima: ' : 'a.n. '}
+                        <span className="font-bold text-[#E5C158]">{accountHolder}</span>
+                      </p>
+                      {(gift as any).description && (
+                        <p className="mt-2 text-[11px] font-serif text-[#FAF6EE]/60 italic">
+                          {(gift as any).description}
+                        </p>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(gift.account_number, gift.id)}
+                      className="mt-6 w-full py-2.5 px-4 rounded-xl bg-[#1A1009] hover:bg-[#2C1810] border border-[#D4AF37]/60 text-[#E5C158] font-serif text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
+                    >
+                      {copiedBankId === gift.id ? (
+                        <>
+                          <Check className="w-4 h-4 text-green-400" />
+                          <span className="text-green-300">{isAddress ? 'Alamat Kasalin!' : 'Nomer Rekening Kasalin!'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-4 h-4 text-[#D4AF37]" />
+                          <span>{isAddress ? 'Salin Alamat' : 'Salin Nomer Rekening'}</span>
+                        </>
+                      )}
+                    </button>
                   </div>
-                  <p className="font-mono text-xl sm:text-2xl font-bold text-[#FAF6EE] tracking-wider my-2">
-                    {gift.account_number}
-                  </p>
-                  <p className="font-serif text-xs text-[#FAF6EE]/70">
-                    a.n. <span className="font-bold text-[#E5C158]">{gift.account_holder}</span>
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => handleCopy(gift.account_number, gift.id)}
-                  className="mt-6 w-full py-2.5 px-4 rounded-xl bg-[#1A1009] hover:bg-[#2C1810] border border-[#D4AF37]/60 text-[#E5C158] font-serif text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
-                >
-                  {copiedBankId === gift.id ? (
-                    <>
-                      <Check className="w-4 h-4 text-green-400" />
-                      <span className="text-green-300">Nomer Rekening Kasalin!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-4 h-4 text-[#D4AF37]" />
-                      <span>Salin Nomer Rekening</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            ))}
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* 2. Serat Rawuh (RSVP) */}
       <section

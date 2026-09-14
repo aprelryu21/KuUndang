@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Check, Copy, MessageSquare, Flame, Gift, Send, Zap } from 'lucide-react';
-import { GiftAccount, Wish } from '../../../types/wedding';
+import { GiftAccount, Wish, SectionSetting } from '../../../types/wedding';
 import { weddingService } from '../../../services/weddingService';
 import { useToast } from '../../../context/ToastContext';
 import { useLanguage } from '../../../context/LanguageContext';
@@ -11,6 +11,8 @@ interface Persona5RSVPAndWishesProps {
   wishes: Wish[];
   defaultGuestName: string;
   guestId?: string | null;
+  giftSection?: SectionSetting;
+  isGiftsEnabled?: boolean;
   onRefreshData?: () => void;
 }
 
@@ -20,6 +22,8 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
   wishes,
   defaultGuestName,
   guestId,
+  giftSection,
+  isGiftsEnabled = true,
   onRefreshData,
 }) => {
   const { showToast } = useToast();
@@ -118,79 +122,92 @@ export const Persona5RSVPAndWishes: React.FC<Persona5RSVPAndWishesProps> = ({
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10 space-y-16">
         {/* 1. VELVET ROOM TRIBUTE / REKENING DIGITAL */}
-        <div>
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#E60012] text-white text-xs font-black uppercase tracking-[0.2em] -skew-x-12 mb-3">
-              <Gift className="w-3.5 h-3.5 text-[#FFF000] skew-x-12" />
-              <span className="skew-x-12">
-                {p5Translations?.tributeHeader || 'VELVET ROOM DIGITAL TRIBUTE'}
-              </span>
+        {isGiftsEnabled && gifts && gifts.length > 0 && (
+          <div>
+            <div className="text-center mb-10">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#E60012] text-white text-xs font-black uppercase tracking-[0.2em] -skew-x-12 mb-3">
+                <Gift className="w-3.5 h-3.5 text-[#FFF000] skew-x-12" />
+                <span className="skew-x-12">
+                  {p5Translations?.tributeHeader || 'VELVET ROOM DIGITAL TRIBUTE'}
+                </span>
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-black uppercase italic tracking-tight text-[#FFFFFF]">
+                {giftSection?.title ? (
+                  giftSection.title.toUpperCase()
+                ) : t.weddingGift ? (
+                  t.weddingGift.toUpperCase()
+                ) : (
+                  <>AMPLOP DIGITAL &amp; <span className="text-[#E60012] not-italic">TANDA KASIH</span></>
+                )}
+              </h2>
+              <p className="text-xs sm:text-sm font-mono text-[#FFFFFF]/70 mt-2 max-w-xl mx-auto">
+                {giftSection?.subtitle ||
+                  t.giftDescription ||
+                  'Doa restu Anda adalah hadiah terindah. Bagi yang ingin memberikan tanda kasih secara cashless:'}
+              </p>
             </div>
-            <h2 className="text-3xl sm:text-5xl font-black uppercase italic tracking-tight text-[#FFFFFF]">
-              {t.weddingGift ? (
-                t.weddingGift.toUpperCase()
-              ) : (
-                <>AMPLOP DIGITAL & <span className="text-[#E60012] not-italic">TANDA KASIH</span></>
-              )}
-            </h2>
-            <p className="text-xs sm:text-sm font-mono text-[#FFFFFF]/70 mt-2 max-w-xl mx-auto">
-              {t.giftDescription ||
-                'Doa restu Anda adalah hadiah terindah. Bagi yang ingin memberikan tanda kasih secara cashless:'}
-            </p>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {gifts.map((gf) => {
-              const isCopied = copiedId === gf.id;
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+              {gifts.map((gf) => {
+                const isCopied = copiedId === gf.id;
+                const providerName = gf.provider || (gf as any).bank_name || (gf.type === 'address' ? 'KADO FISIK' : 'BANK');
+                const accountHolder = gf.account_name || (gf as any).account_holder || '';
+                const isAddress = gf.type === 'address';
 
-              return (
-                <div
-                  key={gf.id}
-                  className="bg-[#141418] border-4 border-white p-6 -skew-x-2 shadow-[8px_8px_0px_0px_#E60012] text-left relative"
-                >
-                  <div className="flex items-center justify-between border-b border-white/20 pb-3 mb-4">
-                    <span className="bg-[#E60012] text-white text-xs font-black uppercase tracking-wider px-2 py-0.5 -skew-x-6">
-                      {gf.provider}
-                    </span>
-                    <span className="text-[10px] font-mono text-[#FFF000] uppercase font-bold">
-                      OFFICIAL REPOSITORY
-                    </span>
-                  </div>
-
-                  <div className="space-y-1 my-3">
-                    <p className="text-[11px] font-mono text-[#FFFFFF]/60 uppercase">
-                      {t.accountNumber || 'NOMOR REKENING'}:
-                    </p>
-                    <div className="text-xl sm:text-2xl font-mono font-black text-white tracking-widest">
-                      {gf.account_number}
-                    </div>
-                    <p className="text-xs font-mono text-[#FFF000] uppercase font-bold">
-                      A.N. {gf.account_name}
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => handleCopyAccount(gf.id, gf.account_number)}
-                    className="w-full mt-4 py-2.5 bg-[#000000] hover:bg-[#E60012] text-white text-xs font-mono font-black uppercase tracking-wider transition-colors border border-white flex items-center justify-center gap-2 -skew-x-6 cursor-pointer"
+                return (
+                  <div
+                    key={gf.id}
+                    className="bg-[#141418] border-4 border-white p-6 -skew-x-2 shadow-[8px_8px_0px_0px_#E60012] text-left relative"
                   >
-                    {isCopied ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 text-[#FFF000] skew-x-6" />
-                        <span className="skew-x-6 text-[#FFF000]">{t.numberCopied || 'BERHASIL DISALIN!'}</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5 skew-x-6" />
-                        <span className="skew-x-6">{t.copyNumber || 'SALIN NOMOR REKENING'}</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              );
-            })}
+                    <div className="flex items-center justify-between border-b border-white/20 pb-3 mb-4">
+                      <span className="bg-[#E60012] text-white text-xs font-black uppercase tracking-wider px-2 py-0.5 -skew-x-6">
+                        {providerName}
+                      </span>
+                      <span className="text-[10px] font-mono text-[#FFF000] uppercase font-bold">
+                        {isAddress ? 'PHYSICAL DELIVERY' : 'OFFICIAL REPOSITORY'}
+                      </span>
+                    </div>
+
+                    <div className="space-y-1 my-3">
+                      <p className="text-[11px] font-mono text-[#FFFFFF]/60 uppercase">
+                        {isAddress ? 'ALAMAT PENGIRIMAN:' : t.accountNumber || 'NOMOR REKENING'}:
+                      </p>
+                      <div className={isAddress ? "text-sm sm:text-base font-mono font-bold text-white leading-relaxed" : "text-xl sm:text-2xl font-mono font-black text-white tracking-widest"}>
+                        {gf.account_number}
+                      </div>
+                      <p className="text-xs font-mono text-[#FFF000] uppercase font-bold mt-1">
+                        {isAddress ? 'PENERIMA: ' : 'A.N. '} {accountHolder}
+                      </p>
+                      {gf.description && (
+                        <p className="text-[11px] font-mono text-white/70 italic mt-2">
+                          {gf.description}
+                        </p>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleCopyAccount(gf.id, gf.account_number)}
+                      className="w-full mt-4 py-2.5 bg-[#000000] hover:bg-[#E60012] text-white text-xs font-mono font-black uppercase tracking-wider transition-colors border border-white flex items-center justify-center gap-2 -skew-x-6 cursor-pointer"
+                    >
+                      {isCopied ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-[#FFF000] skew-x-6" />
+                          <span className="skew-x-6 text-[#FFF000]">{t.numberCopied || 'BERHASIL DISALIN!'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5 skew-x-6" />
+                          <span className="skew-x-6">{isAddress ? 'SALIN ALAMAT' : t.copyNumber || 'SALIN NOMOR REKENING'}</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* 2. BATTLE COMMAND RSVP */}
         <div className="max-w-2xl mx-auto">

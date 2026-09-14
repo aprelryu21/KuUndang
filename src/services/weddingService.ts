@@ -669,9 +669,14 @@ export const weddingService = {
           .eq('invitation_id', id)
           .order('sort_order', { ascending: true });
         if (!gfErr && dbGifts && dbGifts.length > 0) {
-          gifts = dbGifts;
+          gifts = dbGifts.map((g: any) => ({
+            ...g,
+            provider: g.provider || g.bank_name || '',
+            bank_name: g.bank_name || g.provider || '',
+            account_name: g.account_name || g.account_holder || '',
+          }));
           const localGifts = getLocal<GiftAccount[]>(STORAGE_KEYS.GIFTS, []);
-          setLocal(STORAGE_KEYS.GIFTS, [...localGifts.filter((g) => g.invitation_id !== id), ...dbGifts]);
+          setLocal(STORAGE_KEYS.GIFTS, [...localGifts.filter((g) => g.invitation_id !== id), ...gifts]);
         }
       } catch (err) {
         console.warn('Supabase fetch gifts error:', err);
@@ -1356,7 +1361,24 @@ export const weddingService = {
       try {
         await client.from('gifts').delete().eq('invitation_id', invitationId);
         if (gifts.length > 0) {
-          await client.from('gifts').upsert(gifts.map(cleanGiftForSupabase));
+          let cleanGifts = gifts.map(cleanGiftForSupabase);
+          let { error } = await client.from('gifts').upsert(cleanGifts);
+          if (error && (error.code === 'PGRST204' || error.message?.includes('column'))) {
+            cleanGifts = gifts.map((g) => ({
+              id: g.id,
+              invitation_id: g.invitation_id,
+              type: g.type || 'bank',
+              bank_name: g.bank_name || (g as any).provider || '',
+              account_number: g.account_number || '',
+              account_name: g.account_name || (g as any).account_holder || '',
+              sort_order: g.sort_order || 0,
+            }));
+            const retry = await client.from('gifts').upsert(cleanGifts);
+            error = retry.error;
+          }
+          if (error) {
+            console.warn('Supabase updateGifts sync warning:', error.message);
+          }
         }
       } catch (err) {
         console.warn('Supabase updateGifts sync failed:', err);

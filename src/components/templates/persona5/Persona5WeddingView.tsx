@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FullInvitationData, Guest } from '../../../types/wedding';
+import { weddingService } from '../../../services/weddingService';
 import { Persona5OpeningCover } from './Persona5OpeningCover';
 import { Persona5TopHeader } from './Persona5TopHeader';
 import { Persona5GreetingBanner } from './Persona5GreetingBanner';
@@ -84,13 +85,15 @@ export const Persona5WeddingView: React.FC<Persona5WeddingViewProps> = ({
       className="relative min-h-screen bg-[#0D0D0D] text-[#FFFFFF] overflow-x-hidden font-sans select-none selection:bg-[#E60012] selection:text-white"
     >
       {/* 1. FULLSCREEN OPENING COVER */}
-      <Persona5CoverOpening
-        invitation={invitation}
-        guestName={activeGuestName}
-        isOpen={isCoverOpen}
-        onOpen={handleOpenInvitation}
-        onOpenAdmin={() => setIsAdminModalOpen(true)}
-      />
+      {isCoverOpen && (
+        <Persona5OpeningCover
+          invitation={invitation}
+          guestName={activeGuestName}
+          guest={guest}
+          onOpen={handleOpenInvitation}
+          onOpenAdminModal={() => setIsAdminModalOpen(true)}
+        />
+      )}
 
       {/* 2. TOP HEADER (STICKY) - RECIPIENT NAME & CONTROLS */}
       {!isCoverOpen && (
@@ -111,14 +114,15 @@ export const Persona5WeddingView: React.FC<Persona5WeddingViewProps> = ({
         />
       )}
 
-      {/* 4. MAIN INVITATION BODY */}
-      <main className="relative">
-        {/* Section: Personal Greeting & Holy Verse */}
+      {/* 4. MAIN BODY CONTAINER */}
+      <main
+        className={`transition-opacity duration-700 ${
+          isCoverOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        }`}
+      >
+        {/* Section 0: Greeting Banner (Nama Tamu Kehormatan) */}
         {isSectionEnabled('greeting') && (
-          <Persona5GreetingBanner
-            guestName={activeGuestName}
-            invitation={invitation}
-          />
+          <Persona5GreetingBanner guestName={activeGuestName} invitation={invitation} />
         )}
 
         {/* Dynamic Stylized Diagonal Marquee Strip 1 */}

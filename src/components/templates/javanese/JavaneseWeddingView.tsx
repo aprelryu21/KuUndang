@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FullInvitationData, Guest } from '../../../types/wedding';
+import { weddingService } from '../../../services/weddingService';
 import { JavaneseCover } from './JavaneseCover';
 import { JavaneseHeader } from './JavaneseHeader';
 import { JavaneseGreetingBanner } from './JavaneseGreetingBanner';
@@ -25,6 +26,7 @@ interface JavaneseWeddingViewProps {
 
 export const JavaneseWeddingView: React.FC<JavaneseWeddingViewProps> = ({
   data,
+  guest,
   guestName: initialGuestName,
   onRefreshData,
 }) => {
@@ -68,7 +70,7 @@ export const JavaneseWeddingView: React.FC<JavaneseWeddingViewProps> = ({
       className="relative min-h-screen bg-[#1A1009] text-[#FAF6EE] overflow-x-hidden font-serif select-none selection:bg-[#D4AF37] selection:text-[#1A1009]"
     >
       {/* 1. Fullscreen Opening Cover Modal */}
-      <JavaneseOpeningCover
+      <JavaneseCover
         invitation={invitation}
         initialGuestName={currentGuestName}
         isOpen={isCoverOpen}
@@ -117,6 +119,8 @@ export const JavaneseWeddingView: React.FC<JavaneseWeddingViewProps> = ({
             defaultGuestName={currentGuestName}
             gifts={gifts}
             wishes={wishes}
+            giftSection={getSec('gifts')}
+            isGiftsEnabled={isSectionEnabled('gifts')}
             onRefreshData={onRefreshData}
           />
         )}

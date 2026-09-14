@@ -2293,14 +2293,16 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
 
                     <div>
                       <label className="block text-[11px] font-semibold text-[#768692] mb-1">
-                        Nama Bank / Provider
+                        {gf.type === 'address' ? 'Keterangan Kado / Lokasi' : 'Nama Bank / Provider'}
                       </label>
                       <input
                         type="text"
-                        value={gf.provider}
+                        value={gf.provider || (gf as any).bank_name || ''}
+                        placeholder={gf.type === 'address' ? 'Contoh: Rumah Mempelai / Kantor' : 'Contoh: Bank BCA / Mandiri / GoPay'}
                         onChange={(e) => {
                           const updated = [...gifts];
                           updated[index].provider = e.target.value;
+                          updated[index].bank_name = e.target.value;
                           setGifts(updated);
                           markDirty();
                         }}
@@ -2310,14 +2312,16 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
 
                     <div>
                       <label className="block text-[11px] font-semibold text-[#768692] mb-1">
-                        Atas Nama (Pemilik)
+                        {gf.type === 'address' ? 'Nama Penerima Paket' : 'Atas Nama (Pemilik)'}
                       </label>
                       <input
                         type="text"
-                        value={gf.account_name}
+                        value={gf.account_name || (gf as any).account_holder || ''}
+                        placeholder={gf.type === 'address' ? 'Nama Penerima' : 'Nama Pemilik Rekening'}
                         onChange={(e) => {
                           const updated = [...gifts];
                           updated[index].account_name = e.target.value;
+                          (updated[index] as any).account_holder = e.target.value;
                           setGifts(updated);
                           markDirty();
                         }}
@@ -2328,14 +2332,33 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
 
                   <div>
                     <label className="block text-[11px] font-semibold text-[#768692] mb-1">
-                      Nomor Rekening / Nomor HP / Alamat Lengkap
+                      {gf.type === 'address' ? 'Alamat Lengkap Pengiriman' : 'Nomor Rekening / Nomor HP'}
                     </label>
                     <input
                       type="text"
                       value={gf.account_number}
+                      placeholder={gf.type === 'address' ? 'Jl. Mawar No. 12, Kel. Sukamaju, Jakarta...' : 'Contoh: 1234567890'}
                       onChange={(e) => {
                         const updated = [...gifts];
                         updated[index].account_number = e.target.value;
+                        setGifts(updated);
+                        markDirty();
+                      }}
+                      className="w-full px-3 py-2 bg-[#FFFCF7] border border-[#283D52]/15 rounded-xl text-xs"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-[#768692] mb-1">
+                      Catatan / Petunjuk Tambahan (Opsional)
+                    </label>
+                    <input
+                      type="text"
+                      value={(gf as any).description || ''}
+                      placeholder="Contoh: Mohon sertakan konfirmasi via WA jika sudah mengirim..."
+                      onChange={(e) => {
+                        const updated = [...gifts];
+                        (updated[index] as any).description = e.target.value;
                         setGifts(updated);
                         markDirty();
                       }}

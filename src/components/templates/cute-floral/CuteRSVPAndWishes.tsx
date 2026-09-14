@@ -274,44 +274,55 @@ export const CuteRSVPAndWishes: React.FC<CuteRSVPAndWishesProps> = ({
             </p>
 
             <div className="space-y-4">
-              {gifts.map((gift) => (
-                <div
-                  key={gift.id}
-                  className="p-4 rounded-2xl bg-gradient-to-r from-[#FFF0F5] to-[#FFEBF1] border-2 border-[#FFA3B8] flex flex-col sm:flex-row items-center justify-between gap-3 text-left"
-                >
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded-md bg-[#FF5C8D] text-white text-[10px] font-bold uppercase">
-                        {gift.provider}
-                      </span>
-                      <span className="text-xs font-sans font-bold text-[#4A2E35]">
-                        a.n {gift.account_name}
-                      </span>
-                    </div>
-                    <div className="font-mono text-base sm:text-lg font-bold text-[#E03164] mt-1 tracking-wider">
-                      {gift.account_number}
-                    </div>
-                  </div>
+              {gifts.map((gift) => {
+                const isAddress = gift.type === 'address';
+                const providerName = gift.provider || (gift as any).bank_name || (isAddress ? 'Kado Fisik' : 'Bank Transfer');
+                const holderName = gift.account_name || (gift as any).account_holder || '';
 
-                  <button
-                    type="button"
-                    onClick={() => handleCopy(gift.account_number)}
-                    className="w-full sm:w-auto px-4 py-2 rounded-xl bg-white hover:bg-[#FFF0F5] border border-[#FF85A2] text-[#FF5C8D] font-sans text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs transition-all hover:scale-105 cursor-pointer"
+                return (
+                  <div
+                    key={gift.id}
+                    className="p-4 rounded-2xl bg-gradient-to-r from-[#FFF0F5] to-[#FFEBF1] border-2 border-[#FFA3B8] flex flex-col sm:flex-row items-center justify-between gap-3 text-left"
                   >
-                    {copiedAccount === gift.account_number ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 text-green-600" />
-                        <span className="text-green-600">Tersalin!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>Salin No. Rekening</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              ))}
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 rounded-md bg-[#FF5C8D] text-white text-[10px] font-bold uppercase">
+                          {providerName}
+                        </span>
+                        <span className="text-xs font-sans font-bold text-[#4A2E35]">
+                          {isAddress ? 'Penerima: ' : 'a.n '} {holderName}
+                        </span>
+                      </div>
+                      <div className={isAddress ? "font-sans text-sm font-bold text-[#E03164] mt-1 leading-relaxed" : "font-mono text-base sm:text-lg font-bold text-[#E03164] mt-1 tracking-wider"}>
+                        {gift.account_number}
+                      </div>
+                      {(gift as any).description && (
+                        <p className="text-[11px] font-sans text-[#6B3E48] italic mt-1">
+                          {(gift as any).description}
+                        </p>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(gift.account_number)}
+                      className="w-full sm:w-auto px-4 py-2 rounded-xl bg-white hover:bg-[#FFF0F5] border border-[#FF85A2] text-[#FF5C8D] font-sans text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs transition-all hover:scale-105 cursor-pointer"
+                    >
+                      {copiedAccount === gift.account_number ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-green-600" />
+                          <span className="text-green-600">Tersalin!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>{isAddress ? 'Salin Alamat' : 'Salin No. Rekening'}</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
