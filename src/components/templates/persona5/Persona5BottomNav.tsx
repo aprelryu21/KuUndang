@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Home, Users, Calendar, MapPin, Heart, Image, MessageSquare } from 'lucide-react';
 import { useLanguage } from '../../../context/LanguageContext';
 
-export const Persona5BottomNav: React.FC = () => {
+interface Persona5BottomNavProps {
+  enabledKeys?: string[];
+}
+
+export const Persona5BottomNav: React.FC<Persona5BottomNavProps> = ({ enabledKeys }) => {
   const { t } = useLanguage();
   const [activeSection, setActiveSection] = useState('p5-home');
   const [isVisible, setIsVisible] = useState(true);
@@ -10,15 +14,19 @@ export const Persona5BottomNav: React.FC = () => {
 
   const p5Translations = t.p5;
 
-  const navItems = [
-    { id: 'p5-home', label: p5Translations?.navHome || 'HOME', icon: Home },
-    { id: 'p5-couple', label: p5Translations?.navStatus || 'STATUS', icon: Users },
-    { id: 'p5-events', label: p5Translations?.navEvents || 'ACARA', icon: Calendar },
-    { id: 'p5-location', label: p5Translations?.navLocation || 'LOKASI', icon: MapPin },
-    { id: 'p5-story', label: p5Translations?.navStory || 'KISAH', icon: Heart },
-    { id: 'p5-gallery', label: p5Translations?.navGallery || 'GALERI', icon: Image },
-    { id: 'p5-rsvp', label: p5Translations?.navRsvp || 'RSVP', icon: MessageSquare },
+  const allNavItems = [
+    { id: 'p5-home', key: 'hero', label: p5Translations?.navHome || 'HOME', icon: Home },
+    { id: 'p5-couple', key: 'couple', label: p5Translations?.navStatus || 'STATUS', icon: Users },
+    { id: 'p5-events', key: 'events', label: p5Translations?.navEvents || 'ACARA', icon: Calendar },
+    { id: 'p5-location', key: 'location', label: p5Translations?.navLocation || 'LOKASI', icon: MapPin },
+    { id: 'p5-story', key: 'story', label: p5Translations?.navStory || 'KISAH', icon: Heart },
+    { id: 'p5-gallery', key: 'gallery', label: p5Translations?.navGallery || 'GALERI', icon: Image },
+    { id: 'p5-rsvp', key: 'rsvp', label: p5Translations?.navRsvp || 'RSVP', icon: MessageSquare },
   ];
+
+  const navItems = enabledKeys
+    ? allNavItems.filter((item) => enabledKeys.includes(item.key))
+    : allNavItems;
 
   useEffect(() => {
     const handleScroll = () => {

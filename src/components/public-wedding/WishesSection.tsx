@@ -9,7 +9,7 @@ import {
   Sparkles,
   User,
 } from 'lucide-react';
-import { Wish } from '../../types/wedding';
+import { Wish, SectionSetting } from '../../types/wedding';
 import { useLanguage } from '../../context/LanguageContext';
 import { useToast } from '../../context/ToastContext';
 import { weddingService } from '../../services/weddingService';
@@ -18,6 +18,7 @@ interface WishesSectionProps {
   wishes: Wish[];
   invitationId?: string;
   defaultGuestName?: string;
+  section?: SectionSetting;
   onWishAdded?: () => void;
 }
 
@@ -25,6 +26,7 @@ export const WishesSection: React.FC<WishesSectionProps> = ({
   wishes: initialWishes,
   invitationId = 'inv-april-siti-01',
   defaultGuestName = '',
+  section,
   onWishAdded,
 }) => {
   const { t, language } = useLanguage();
@@ -131,10 +133,10 @@ export const WishesSection: React.FC<WishesSectionProps> = ({
           className="mb-12"
         >
           <h2 className="font-accent text-4xl sm:text-5xl md:text-6xl text-[#C2A56B] capitalize tracking-wide font-normal leading-tight">
-            {t.wishesTitle}
+            {section?.title || t.wishesTitle}
           </h2>
           <p className="mt-3 max-w-md mx-auto text-xs sm:text-sm text-[#768692] leading-relaxed">
-            {t.wishesSubtitle}
+            {section?.subtitle || t.wishesSubtitle}
           </p>
         </motion.div>
 

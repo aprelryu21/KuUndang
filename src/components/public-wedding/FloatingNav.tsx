@@ -1,12 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { Home, Users, Calendar, MapPin, Image, MessageSquareHeart } from 'lucide-react';
+import { Home, Users, Calendar, MapPin, Heart, Image, MessageSquareHeart } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
-export const FloatingNav: React.FC = () => {
+interface FloatingNavProps {
+  enabledKeys?: string[];
+}
+
+export const FloatingNav: React.FC<FloatingNavProps> = ({ enabledKeys }) => {
   const { t } = useLanguage();
   const [activeSection, setActiveSection] = useState('hero');
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+
+  const allNavItems = [
+    { id: 'hero', label: t.navHome, icon: Home },
+    { id: 'couple', label: t.navCouple, icon: Users },
+    { id: 'events', label: t.navEvent, icon: Calendar },
+    { id: 'location', label: t.navLocation, icon: MapPin },
+    { id: 'story', label: t.loveStory || 'Kisah', icon: Heart },
+    { id: 'gallery', label: t.navGallery, icon: Image },
+    { id: 'rsvp', label: t.navRsvp, icon: MessageSquareHeart },
+  ];
+
+  const navItems = enabledKeys
+    ? allNavItems.filter((item) => enabledKeys.includes(item.id))
+    : allNavItems;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,7 +39,7 @@ export const FloatingNav: React.FC = () => {
       setLastScrollY(currentScrollY);
 
       // Determine active section
-      const sections = ['hero', 'couple', 'events', 'location', 'gallery', 'rsvp'];
+      const sections = navItems.map((n) => n.id);
       for (const sectionId of sections) {
         const el = document.getElementById(sectionId);
         if (el) {
@@ -36,7 +54,7 @@ export const FloatingNav: React.FC = () => {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, [lastScrollY, navItems]);
 
   const scrollTo = (id: string) => {
     const element = document.getElementById(id);
@@ -44,15 +62,6 @@ export const FloatingNav: React.FC = () => {
       element.scrollIntoView({ behavior: 'smooth' });
     }
   };
-
-  const navItems = [
-    { id: 'hero', label: t.navHome, icon: Home },
-    { id: 'couple', label: t.navCouple, icon: Users },
-    { id: 'events', label: t.navEvent, icon: Calendar },
-    { id: 'location', label: t.navLocation, icon: MapPin },
-    { id: 'gallery', label: t.navGallery, icon: Image },
-    { id: 'rsvp', label: t.navRsvp, icon: MessageSquareHeart },
-  ];
 
   return (
     <nav

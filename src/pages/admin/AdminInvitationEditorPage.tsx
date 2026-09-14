@@ -23,6 +23,7 @@ import {
   ExternalLink,
   Users,
   Calendar,
+  MapPin,
   Image,
   Gift,
   Music,
@@ -45,6 +46,7 @@ import {
 import { useToast } from '../../context/ToastContext';
 import { DriveUploader } from '../../components/DriveUploader';
 import { getTemplatePreset } from '../../data/templatePresets';
+import { INITIAL_DEMO_DATA } from '../../data/initialDemo';
 
 type EditorTab =
   | 'general'
@@ -92,6 +94,44 @@ export const AdminInvitationEditorPage: React.FC = () => {
   // New gallery image input
   const [newImageUrl, setNewImageUrl] = useState('');
   const [newImageCaption, setNewImageCaption] = useState('');
+
+  // Helper to safely get and update individual section setting
+  const getSection = (key: SectionKey): SectionSetting => {
+    const found = sections.find((s) => s.section_key === key);
+    if (found) return found;
+    const std = INITIAL_DEMO_DATA.sections.find((s) => s.section_key === key);
+    return {
+      id: `sec-${key}-${id || 'new'}`,
+      invitation_id: id || '',
+      section_key: key,
+      title: std?.title || key,
+      subtitle: std?.subtitle || '',
+      enabled: true,
+      sort_order: std?.sort_order || 99,
+    };
+  };
+
+  const updateSection = (key: SectionKey, updates: Partial<SectionSetting>) => {
+    const updated = [...sections];
+    const idx = updated.findIndex((s) => s.section_key === key);
+    if (idx !== -1) {
+      updated[idx] = { ...updated[idx], ...updates };
+    } else {
+      const std = INITIAL_DEMO_DATA.sections.find((s) => s.section_key === key);
+      updated.push({
+        id: `sec-${key}-${id || 'new'}`,
+        invitation_id: id || '',
+        section_key: key,
+        title: std?.title || key,
+        subtitle: std?.subtitle || '',
+        enabled: true,
+        sort_order: std?.sort_order || 99,
+        ...updates,
+      });
+    }
+    setSections(updated);
+    markDirty();
+  };
 
   const loadData = async () => {
     if (!id) return;
@@ -1101,13 +1141,66 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
 
         {/* TAB 2: PROFIL MEMPELAI */}
         {activeTab === 'couple' && (
-          <div className="space-y-8">
+          <div className="space-y-6">
             <div>
               <h2 className="text-base font-bold text-[#283D52]">Profil Mempelai (Bride & Groom)</h2>
               <p className="text-xs text-[#768692]">
                 Informasi detail kedua mempelai, nama orang tua, dan tautan sosial media.
               </p>
             </div>
+
+            {/* Couple Section Configuration Card */}
+            {(() => {
+              const coupleSec = getSection('couple');
+              return (
+                <div className="p-4 rounded-2xl bg-[#FFFCF7] border border-[#283D52]/15 shadow-2xs space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#283D52]/10">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-xl ${coupleSec.enabled ? 'bg-[#283D52] text-[#FFFCF7]' : 'bg-[#EFE8DE] text-[#768692]'}`}>
+                        <Users className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-[#283D52]">Tampilkan Sesi Profil Mempelai di Undangan</p>
+                        <p className="text-[11px] text-[#768692]">
+                          {coupleSec.enabled ? 'Sesi saat ini AKTIF di seluruh template' : 'Sesi saat ini DISEMBUNYIKAN dari undangan publik'}
+                        </p>
+                      </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={coupleSec.enabled}
+                        onChange={(e) => updateSection('couple', { enabled: e.target.checked })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-10 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#283D52]"></div>
+                    </label>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#283D52] mb-1">Judul Sesi Mempelai</label>
+                      <input
+                        type="text"
+                        value={coupleSec.title || ''}
+                        placeholder="Kedua Mempelai"
+                        onChange={(e) => updateSection('couple', { title: e.target.value })}
+                        className="w-full px-3 py-1.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#283D52] mb-1">Subjudul Sesi Mempelai</label>
+                      <input
+                        type="text"
+                        value={coupleSec.subtitle || ''}
+                        placeholder="Mempelai Pria & Mempelai Wanita Beserta Keluarga Besar"
+                        onChange={(e) => updateSection('couple', { subtitle: e.target.value })}
+                        className="w-full px-3 py-1.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Mempelai Wanita */}
@@ -1370,13 +1463,113 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
         {/* TAB 3: RANGKAIAN ACARA (EVENTS) */}
         {activeTab === 'events' && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-base font-bold text-[#283D52]">Rangkaian Acara Pernikahan</h2>
-                <p className="text-xs text-[#768692]">
-                  Kelola acara (Akad Nikah, Resepsi, dll). Mendukung multi-acara dengan lokasi Google Maps dan kalender.
-                </p>
-              </div>
+            <div>
+              <h2 className="text-base font-bold text-[#283D52]">Rangkaian Acara Pernikahan & Lokasi</h2>
+              <p className="text-xs text-[#768692]">
+                Kelola acara (Akad Nikah, Resepsi, dll). Mendukung multi-acara dengan lokasi Google Maps dan kalender.
+              </p>
+            </div>
+
+            {/* Events Section Configuration Card */}
+            {(() => {
+              const eventsSec = getSection('events');
+              const locSec = getSection('location');
+
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Card Jadwal Acara */}
+                  <div className="p-4 rounded-2xl bg-[#FFFCF7] border border-[#283D52]/15 shadow-2xs space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-[#283D52]/10">
+                      <div className="flex items-center gap-2.5">
+                        <div className={`p-2 rounded-xl ${eventsSec.enabled ? 'bg-[#283D52] text-[#FFFCF7]' : 'bg-[#EFE8DE] text-[#768692]'}`}>
+                          <Calendar className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-[#283D52]">Sesi Rangkaian Acara</p>
+                          <p className="text-[10px] text-[#768692]">{eventsSec.enabled ? 'Sesi AKTIF' : 'DISEMBUNYIKAN'}</p>
+                        </div>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={eventsSec.enabled}
+                          onChange={(e) => updateSection('events', { enabled: e.target.checked })}
+                          className="sr-only peer"
+                        />
+                        <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#283D52]"></div>
+                      </label>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-semibold text-[#768692] mb-1">Judul Sesi Acara</label>
+                      <input
+                        type="text"
+                        value={eventsSec.title || ''}
+                        placeholder="Rangkaian Jadwal Acara"
+                        onChange={(e) => updateSection('events', { title: e.target.value })}
+                        className="w-full px-3 py-1.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-semibold text-[#768692] mb-1">Subjudul Sesi Acara</label>
+                      <input
+                        type="text"
+                        value={eventsSec.subtitle || ''}
+                        placeholder="Akad Nikah, Resepsi, & Tasyakuran"
+                        onChange={(e) => updateSection('events', { subtitle: e.target.value })}
+                        className="w-full px-3 py-1.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Card Denah & Lokasi Peta */}
+                  <div className="p-4 rounded-2xl bg-[#FFFCF7] border border-[#283D52]/15 shadow-2xs space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-[#283D52]/10">
+                      <div className="flex items-center gap-2.5">
+                        <div className={`p-2 rounded-xl ${locSec.enabled ? 'bg-[#283D52] text-[#FFFCF7]' : 'bg-[#EFE8DE] text-[#768692]'}`}>
+                          <MapPin className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-[#283D52]">Sesi Denah & Lokasi (Maps)</p>
+                          <p className="text-[10px] text-[#768692]">{locSec.enabled ? 'Sesi AKTIF' : 'DISEMBUNYIKAN'}</p>
+                        </div>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={locSec.enabled}
+                          onChange={(e) => updateSection('location', { enabled: e.target.checked })}
+                          className="sr-only peer"
+                        />
+                        <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#283D52]"></div>
+                      </label>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-semibold text-[#768692] mb-1">Judul Sesi Lokasi</label>
+                      <input
+                        type="text"
+                        value={locSec.title || ''}
+                        placeholder="Denah & Petunjuk Lokasi"
+                        onChange={(e) => updateSection('location', { title: e.target.value })}
+                        className="w-full px-3 py-1.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-semibold text-[#768692] mb-1">Subjudul Sesi Lokasi</label>
+                      <input
+                        type="text"
+                        value={locSec.subtitle || ''}
+                        placeholder="Navigasi Peta Digital Menuju Tempat Acara"
+                        onChange={(e) => updateSection('location', { subtitle: e.target.value })}
+                        className="w-full px-3 py-1.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            <div className="flex items-center justify-between pt-2">
+              <h3 className="text-sm font-bold text-[#283D52]">Daftar Mata Acara</h3>
               <button
                 type="button"
                 onClick={() => {
@@ -1614,57 +1807,67 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
         {/* TAB 4: KISAH CINTA (STORY) */}
         {activeTab === 'story' && (
           <div className="space-y-6">
-            {/* Story Section Visibility Toggle Card */}
+            {/* Story Section Configuration Card */}
             {(() => {
-              const storySec = sections.find((s) => s.section_key === 'story');
-              const isStoryEnabled = storySec ? storySec.enabled : true;
-
-              const handleToggleStory = (enabled: boolean) => {
-                const updated = [...sections];
-                const idx = updated.findIndex((s) => s.section_key === 'story');
-                if (idx !== -1) {
-                  updated[idx].enabled = enabled;
-                } else {
-                  updated.push({
-                    id: 'sec-story',
-                    invitation_id: id!,
-                    section_key: 'story',
-                    title: 'Kisah Cinta (Our Story)',
-                    enabled,
-                    sort_order: 7,
-                  });
-                }
-                setSections(updated);
-                markDirty();
-              };
+              const storySec = getSection('story');
 
               return (
-                <div className="p-4 rounded-2xl bg-[#FFFCF7] border border-[#283D52]/15 flex items-center justify-between shadow-2xs">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2.5 rounded-xl ${isStoryEnabled ? 'bg-[#283D52] text-[#FFFCF7]' : 'bg-[#EFE8DE] text-[#768692]'}`}>
-                      <Heart className="w-4 h-4 fill-current" />
+                <div className="p-5 rounded-2xl bg-[#FFFCF7] border border-[#283D52]/15 shadow-2xs space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#283D52]/10">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2.5 rounded-xl ${storySec.enabled ? 'bg-[#283D52] text-[#FFFCF7]' : 'bg-[#EFE8DE] text-[#768692]'}`}>
+                        <Heart className="w-4 h-4 fill-current" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-[#283D52]">
+                          Tampilkan Sesi "Kisah Cinta Kami" (Love Story) di Undangan
+                        </p>
+                        <p className="text-[11px] text-[#768692]">
+                          {storySec.enabled
+                            ? 'Sesi saat ini AKTIF dan tertampil di seluruh template undangan publik.'
+                            : 'Sesi saat ini DISEMBUNYIKAN dari seluruh template undangan publik.'}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs font-bold text-[#283D52]">
-                        Tampilkan Sesi "How It All Began" (Kisah Cinta) di Undangan
-                      </p>
-                      <p className="text-[11px] text-[#768692]">
-                        {isStoryEnabled
-                          ? 'Sesi saat ini AKTIF dan tampil di halaman undangan publik.'
-                          : 'Sesi saat ini DISEMBUNYIKAN dari undangan publik.'}
-                      </p>
-                    </div>
+
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={storySec.enabled}
+                        onChange={(e) => updateSection('story', { enabled: e.target.checked })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#283D52]"></div>
+                    </label>
                   </div>
 
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={isStoryEnabled}
-                      onChange={(e) => handleToggleStory(e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#283D52]"></div>
-                  </label>
+                  {/* Editable Title & Subtitle for Story Section */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#283D52] mb-1">
+                        Judul Sesi Kisah Cinta (Muncul di Halaman Undangan)
+                      </label>
+                      <input
+                        type="text"
+                        value={storySec.title || ''}
+                        placeholder="Kisah Cinta Kami"
+                        onChange={(e) => updateSection('story', { title: e.target.value })}
+                        className="w-full px-3 py-2 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs text-[#24313A] font-medium"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#283D52] mb-1">
+                        Subjudul Sesi Kisah Cinta (Keterangan di Bawah Judul)
+                      </label>
+                      <input
+                        type="text"
+                        value={storySec.subtitle || ''}
+                        placeholder="Perjalanan cinta penuh makna yang membawa kami menuju ikatan suci pernikahan."
+                        onChange={(e) => updateSection('story', { subtitle: e.target.value })}
+                        className="w-full px-3 py-2 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs text-[#24313A]"
+                      />
+                    </div>
+                  </div>
                 </div>
               );
             })()}
@@ -1798,6 +2001,69 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
               </p>
             </div>
 
+            {/* Gallery Section Configuration Card */}
+            {(() => {
+              const gallerySec = getSection('gallery');
+              return (
+                <div className="p-5 rounded-2xl bg-[#FFFCF7] border border-[#283D52]/15 shadow-2xs space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#283D52]/10">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2.5 rounded-xl ${gallerySec.enabled ? 'bg-[#283D52] text-[#FFFCF7]' : 'bg-[#EFE8DE] text-[#768692]'}`}>
+                        <Image className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-[#283D52]">
+                          Tampilkan Sesi "Galeri Foto" di Undangan
+                        </p>
+                        <p className="text-[11px] text-[#768692]">
+                          {gallerySec.enabled
+                            ? 'Sesi saat ini AKTIF dan tertampil di seluruh template undangan publik.'
+                            : 'Sesi saat ini DISEMBUNYIKAN dari seluruh template undangan publik.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={gallerySec.enabled}
+                        onChange={(e) => updateSection('gallery', { enabled: e.target.checked })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#283D52]"></div>
+                    </label>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#283D52] mb-1">
+                        Judul Sesi Galeri Foto
+                      </label>
+                      <input
+                        type="text"
+                        value={gallerySec.title}
+                        onChange={(e) => updateSection('gallery', { title: e.target.value })}
+                        placeholder="Contoh: Galeri Momen Bahagia"
+                        className="w-full px-3 py-2 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs text-[#24313A]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#283D52] mb-1">
+                        Subjudul Sesi Galeri Foto
+                      </label>
+                      <input
+                        type="text"
+                        value={gallerySec.subtitle || ''}
+                        onChange={(e) => updateSection('gallery', { subtitle: e.target.value })}
+                        placeholder="Contoh: Potret kenangan perjalanan kasih kami"
+                        className="w-full px-3 py-2 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs text-[#24313A]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* Add Photo Form with Google Drive Uploader */}
             <div className="p-4 rounded-2xl bg-[#F7F2EA] border border-[#283D52]/10 space-y-3">
               <p className="text-xs font-bold text-[#283D52]">Tambah Foto ke Galeri</p>
@@ -1919,6 +2185,69 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                 <span>Tambah Rekening</span>
               </button>
             </div>
+
+            {/* Gifts Section Configuration Card */}
+            {(() => {
+              const giftsSec = getSection('gifts');
+              return (
+                <div className="p-5 rounded-2xl bg-[#FFFCF7] border border-[#283D52]/15 shadow-2xs space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#283D52]/10">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2.5 rounded-xl ${giftsSec.enabled ? 'bg-[#283D52] text-[#FFFCF7]' : 'bg-[#EFE8DE] text-[#768692]'}`}>
+                        <Gift className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-[#283D52]">
+                          Tampilkan Sesi "Tanda Kasih / Hadiah" di Undangan
+                        </p>
+                        <p className="text-[11px] text-[#768692]">
+                          {giftsSec.enabled
+                            ? 'Sesi saat ini AKTIF dan tertampil di seluruh template undangan publik.'
+                            : 'Sesi saat ini DISEMBUNYIKAN dari seluruh template undangan publik.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={giftsSec.enabled}
+                        onChange={(e) => updateSection('gifts', { enabled: e.target.checked })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#283D52]"></div>
+                    </label>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#283D52] mb-1">
+                        Judul Sesi Tanda Kasih
+                      </label>
+                      <input
+                        type="text"
+                        value={giftsSec.title}
+                        onChange={(e) => updateSection('gifts', { title: e.target.value })}
+                        placeholder="Contoh: Tanda Kasih"
+                        className="w-full px-3 py-2 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs text-[#24313A]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#283D52] mb-1">
+                        Subjudul Sesi Tanda Kasih
+                      </label>
+                      <input
+                        type="text"
+                        value={giftsSec.subtitle || ''}
+                        onChange={(e) => updateSection('gifts', { subtitle: e.target.value })}
+                        placeholder="Contoh: Doa restu Anda adalah karunia terindah bagi kami..."
+                        className="w-full px-3 py-2 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs text-[#24313A]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
             <div className="space-y-4">
               {gifts.map((gf, index) => (
@@ -2103,68 +2432,136 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
 
         {/* TAB 9: MANAJER BAGIAN (SECTION MANAGER) */}
         {activeTab === 'sections' && (
-          <div className="space-y-6 max-w-xl">
+          <div className="space-y-6 max-w-3xl">
             <div>
               <h2 className="text-base font-bold text-[#283D52]">Manajer Bagian Undangan (Section Manager)</h2>
               <p className="text-xs text-[#768692]">
-                Aktifkan atau sembunyikan bagian halaman dan atur urutan tampilnya di situs publik.
+                Kelola seluruh 13 bagian undangan: aktifkan/sembunyikan (tampil/sembunyi), sesuaikan judul dan subjudul, serta atur urutan tampilnya di seluruh template publik.
               </p>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               {sections.map((sec, index) => (
                 <div
                   key={sec.id}
-                  className="flex items-center justify-between p-3.5 rounded-2xl bg-[#F7F2EA] border border-[#283D52]/10"
+                  className={`p-4 rounded-2xl border transition-all ${
+                    sec.enabled
+                      ? 'bg-[#FFFCF7] border-[#283D52]/15 shadow-2xs'
+                      : 'bg-[#F0ECE1]/60 border-gray-300 opacity-75'
+                  }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      checked={sec.enabled}
-                      onChange={(e) => {
-                        const updated = [...sections];
-                        updated[index].enabled = e.target.checked;
-                        setSections(updated);
-                        markDirty();
-                      }}
-                      className="rounded text-[#283D52] focus:ring-[#C2A56B] w-4 h-4 cursor-pointer"
-                    />
-                    <span className="text-xs font-semibold text-[#283D52]">{sec.title}</span>
+                  <div className="flex items-center justify-between gap-3 pb-3 border-b border-[#283D52]/10">
+                    <div className="flex items-center gap-2.5">
+                      <span className="px-2 py-0.5 rounded-md bg-[#283D52]/10 text-[#283D52] font-mono text-[10px] font-bold">
+                        #{index + 1}
+                      </span>
+                      <span className="text-xs font-bold text-[#283D52]">{sec.title || sec.section_key}</span>
+                      <span className="px-1.5 py-0.5 rounded bg-gray-100 border border-gray-200 text-[#768692] font-mono text-[9px]">
+                        {sec.section_key}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      {/* Toggle On/Off */}
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={sec.enabled}
+                          onChange={(e) => {
+                            const updated = [...sections];
+                            updated[index].enabled = e.target.checked;
+                            setSections(updated);
+                            markDirty();
+                          }}
+                          className="sr-only peer"
+                        />
+                        <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#283D52]"></div>
+                      </label>
+                      <span className={`text-[10px] font-bold uppercase tracking-wider ${sec.enabled ? 'text-emerald-700' : 'text-gray-500'}`}>
+                        {sec.enabled ? 'Aktif' : 'Sembunyi'}
+                      </span>
+
+                      {/* Reorder Buttons */}
+                      <div className="flex items-center gap-1 ml-2 border-l border-[#283D52]/10 pl-2">
+                        <button
+                          type="button"
+                          disabled={index === 0}
+                          onClick={() => {
+                            if (index === 0) return;
+                            const updated = [...sections];
+                            const temp = updated[index - 1];
+                            updated[index - 1] = updated[index];
+                            updated[index] = temp;
+                            // update sort_order
+                            updated.forEach((s, idx) => { s.sort_order = idx + 1; });
+                            setSections(updated);
+                            markDirty();
+                          }}
+                          className="p-1.5 rounded-lg bg-[#F7F2EA] hover:bg-[#EFE8DE] border border-[#283D52]/15 text-[10px] disabled:opacity-30 cursor-pointer"
+                          title="Geser Naik"
+                        >
+                          ▲
+                        </button>
+                        <button
+                          type="button"
+                          disabled={index === sections.length - 1}
+                          onClick={() => {
+                            if (index === sections.length - 1) return;
+                            const updated = [...sections];
+                            const temp = updated[index + 1];
+                            updated[index + 1] = updated[index];
+                            updated[index] = temp;
+                            // update sort_order
+                            updated.forEach((s, idx) => { s.sort_order = idx + 1; });
+                            setSections(updated);
+                            markDirty();
+                          }}
+                          className="p-1.5 rounded-lg bg-[#F7F2EA] hover:bg-[#EFE8DE] border border-[#283D52]/15 text-[10px] disabled:opacity-30 cursor-pointer"
+                          title="Geser Turun"
+                        >
+                          ▼
+                        </button>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      disabled={index === 0}
-                      onClick={() => {
-                        if (index === 0) return;
-                        const updated = [...sections];
-                        const temp = updated[index - 1];
-                        updated[index - 1] = updated[index];
-                        updated[index] = temp;
-                        setSections(updated);
-                        markDirty();
-                      }}
-                      className="px-2 py-1 rounded bg-[#FFFCF7] border border-[#283D52]/15 text-[10px] disabled:opacity-30 cursor-pointer"
-                    >
-                      ▲ Naik
-                    </button>
-                    <button
-                      type="button"
-                      disabled={index === sections.length - 1}
-                      onClick={() => {
-                        if (index === sections.length - 1) return;
-                        const updated = [...sections];
-                        const temp = updated[index + 1];
-                        updated[index + 1] = updated[index];
-                        updated[index] = temp;
-                        setSections(updated);
-                        markDirty();
-                      }}
-                      className="px-2 py-1 rounded bg-[#FFFCF7] border border-[#283D52]/15 text-[10px] disabled:opacity-30 cursor-pointer"
-                    >
-                      ▼ Turun
-                    </button>
+                  {/* Title and Subtitle inputs */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3">
+                    <div>
+                      <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#768692] mb-1">
+                        Judul Bagian / Sesi
+                      </label>
+                      <input
+                        type="text"
+                        value={sec.title || ''}
+                        onChange={(e) => {
+                          const updated = [...sections];
+                          updated[index].title = e.target.value;
+                          setSections(updated);
+                          markDirty();
+                        }}
+                        placeholder="Judul Sesi..."
+                        className="w-full px-3 py-1.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs text-[#24313A] font-medium"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#768692] mb-1">
+                        Subjudul / Keterangan Sesi
+                      </label>
+                      <input
+                        type="text"
+                        value={sec.subtitle || ''}
+                        onChange={(e) => {
+                          const updated = [...sections];
+                          updated[index].subtitle = e.target.value;
+                          setSections(updated);
+                          markDirty();
+                        }}
+                        placeholder="Subjudul atau penjelasan singkat sesi..."
+                        className="w-full px-3 py-1.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs text-[#24313A]"
+                      />
+                    </div>
                   </div>
                 </div>
               ))}
@@ -2344,6 +2741,69 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
               </div>
             </div>
 
+            {/* RSVP Section Configuration Card */}
+            {(() => {
+              const rsvpSec = getSection('rsvp');
+              return (
+                <div className="p-5 rounded-2xl bg-[#FFFCF7] border border-[#283D52]/15 shadow-2xs space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#283D52]/10">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2.5 rounded-xl ${rsvpSec.enabled ? 'bg-[#283D52] text-[#FFFCF7]' : 'bg-[#EFE8DE] text-[#768692]'}`}>
+                        <Calendar className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-[#283D52]">
+                          Tampilkan Formulir Konfirmasi Kehadiran (RSVP) di Undangan
+                        </p>
+                        <p className="text-[11px] text-[#768692]">
+                          {rsvpSec.enabled
+                            ? 'Sesi RSVP saat ini AKTIF dan dapat diisi oleh tamu undangan.'
+                            : 'Sesi RSVP saat ini DISEMBUNYIKAN dari seluruh template undangan publik.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={rsvpSec.enabled}
+                        onChange={(e) => updateSection('rsvp', { enabled: e.target.checked })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#283D52]"></div>
+                    </label>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#283D52] mb-1">
+                        Judul Sesi RSVP
+                      </label>
+                      <input
+                        type="text"
+                        value={rsvpSec.title}
+                        onChange={(e) => updateSection('rsvp', { title: e.target.value })}
+                        placeholder="Contoh: Konfirmasi Kehadiran"
+                        className="w-full px-3 py-2 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs text-[#24313A]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#283D52] mb-1">
+                        Subjudul Sesi RSVP
+                      </label>
+                      <input
+                        type="text"
+                        value={rsvpSec.subtitle || ''}
+                        onChange={(e) => updateSection('rsvp', { subtitle: e.target.value })}
+                        placeholder="Contoh: Mohon konfirmasi kehadiran Anda..."
+                        className="w-full px-3 py-2 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs text-[#24313A]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
             <div className="overflow-x-auto rounded-2xl border border-[#283D52]/10">
               <table className="w-full text-left text-xs">
                 <thead className="bg-[#F7F2EA] text-[#283D52] uppercase font-semibold text-[10px] tracking-wider border-b border-[#283D52]/10">
@@ -2396,6 +2856,69 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                 Kelola pesan ucapan yang tampil pada guestbook publik. Anda dapat menyetujui, menyembunyikan, atau menghapus ucapan.
               </p>
             </div>
+
+            {/* Wishes Section Configuration Card */}
+            {(() => {
+              const wishesSec = getSection('wishes');
+              return (
+                <div className="p-5 rounded-2xl bg-[#FFFCF7] border border-[#283D52]/15 shadow-2xs space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#283D52]/10">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2.5 rounded-xl ${wishesSec.enabled ? 'bg-[#283D52] text-[#FFFCF7]' : 'bg-[#EFE8DE] text-[#768692]'}`}>
+                        <MessageSquareHeart className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-[#283D52]">
+                          Tampilkan Buku Tamu & Doa Restu (Wishes) di Undangan
+                        </p>
+                        <p className="text-[11px] text-[#768692]">
+                          {wishesSec.enabled
+                            ? 'Sesi Doa & Ucapan saat ini AKTIF dan dapat diisi/dibaca oleh tamu.'
+                            : 'Sesi Doa & Ucapan saat ini DISEMBUNYIKAN dari seluruh template undangan publik.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={wishesSec.enabled}
+                        onChange={(e) => updateSection('wishes', { enabled: e.target.checked })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#283D52]"></div>
+                    </label>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#283D52] mb-1">
+                        Judul Sesi Ucapan & Doa
+                      </label>
+                      <input
+                        type="text"
+                        value={wishesSec.title}
+                        onChange={(e) => updateSection('wishes', { title: e.target.value })}
+                        placeholder="Contoh: Ucapan & Doa Restu"
+                        className="w-full px-3 py-2 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs text-[#24313A]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#283D52] mb-1">
+                        Subjudul Sesi Ucapan & Doa
+                      </label>
+                      <input
+                        type="text"
+                        value={wishesSec.subtitle || ''}
+                        onChange={(e) => updateSection('wishes', { subtitle: e.target.value })}
+                        placeholder="Contoh: Berikan ucapan manis serta doa restu untuk kedua mempelai..."
+                        className="w-full px-3 py-2 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs text-[#24313A]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
             <div className="space-y-3">
               {wishes.map((w) => (

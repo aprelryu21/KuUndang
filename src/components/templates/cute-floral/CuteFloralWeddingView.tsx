@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { FullInvitationData, Guest } from '../../../types/wedding';
+import { weddingService } from '../../../services/weddingService';
 import { CuteOpeningCover } from './CuteOpeningCover';
 import { CuteTopHeader } from './CuteTopHeader';
 import { CuteGreetingBanner } from './CuteGreetingBanner';
 import { CuteHeroSection } from './CuteHeroSection';
 import { CuteCoupleSection } from './CuteCoupleSection';
 import { CuteEventsSection } from './CuteEventsSection';
+import { CuteLocationSection } from './CuteLocationSection';
 import { CuteStorySection } from './CuteStorySection';
 import { CuteGallerySection } from './CuteGallerySection';
 import { CuteRSVPAndWishes } from './CuteRSVPAndWishes';
@@ -34,11 +36,22 @@ export const CuteFloralWeddingView: React.FC<CuteFloralWeddingViewProps> = ({
   );
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
 
-  const { invitation, bride, groom, events, stories, gallery, gifts, wishes } = data;
+  const { invitation, bride, groom, events, stories, gallery, gifts, wishes, sections = [] } = data;
 
-  const handleOpenCover = (enteredName: string) => {
-    if (enteredName) {
-      setCurrentGuestName(enteredName);
+  const isSectionEnabled = (key: string) => {
+    const s = sections.find((sec) => sec.section_key === key);
+    return s ? s.enabled : true;
+  };
+  const getSec = (key: string) => sections.find((sec) => sec.section_key === key);
+  const enabledKeys = sections.filter((s) => s.enabled).map((s) => s.section_key);
+
+  const handleOpenCover = async (enteredName: string) => {
+    const finalName = enteredName || currentGuestName;
+    setCurrentGuestName(finalName);
+    localStorage.setItem('wedding_guest_name', finalName);
+
+    if (guest && guest.guest_code) {
+      await weddingService.markGuestOpened(invitation.id, guest.guest_code);
     }
     setIsCoverOpen(false);
   };
@@ -71,44 +84,57 @@ export const CuteFloralWeddingView: React.FC<CuteFloralWeddingViewProps> = ({
         <CuteTopHeader invitation={invitation} />
 
         {/* Recipient Honorific Greeting Banner (Nama Penerima di Bagian Paling Atas Isi) */}
-        <CuteGreetingBanner
-          guestName={currentGuestName}
-          invitation={invitation}
-        />
+        {isSectionEnabled('greeting') && (
+          <CuteGreetingBanner
+            guestName={currentGuestName}
+            invitation={invitation}
+          />
+        )}
 
         {/* Hero Section & Countdown */}
-        <CuteHeroSection invitation={invitation} />
+        {isSectionEnabled('hero') && <CuteHeroSection invitation={invitation} />}
 
         {/* Couple Profile Section */}
-        <CuteCoupleSection bride={bride} groom={groom} />
+        {isSectionEnabled('couple') && <CuteCoupleSection bride={bride} groom={groom} />}
 
         {/* Events Schedule & Calendar */}
-        <CuteEventsSection events={events} invitation={invitation} />
+        {isSectionEnabled('events') && <CuteEventsSection events={events} invitation={invitation} />}
+
+        {/* Dedicated Location & Google Maps Section */}
+        {isSectionEnabled('location') && (
+          <CuteLocationSection events={events} section={getSec('location')} />
+        )}
 
         {/* Story Timeline Scrapbook */}
-        <CuteStorySection stories={stories} />
+        {isSectionEnabled('story') && (
+          <CuteStorySection stories={stories} section={getSec('story')} />
+        )}
 
         {/* Photo Gallery Lightbox */}
-        <CuteGallerySection gallery={gallery} />
+        {isSectionEnabled('gallery') && <CuteGallerySection gallery={gallery} />}
 
         {/* RSVP, Digital Red Packet, & Wishes */}
-        <CuteRSVPAndWishes
-          invitationId={invitation.id}
-          wishes={wishes}
-          gifts={gifts}
-          guest={guest}
-          guestName={currentGuestName}
-          onRefreshData={onRefreshData || (() => {})}
-        />
+        {(isSectionEnabled('rsvp') || isSectionEnabled('gifts') || isSectionEnabled('wishes')) && (
+          <CuteRSVPAndWishes
+            invitationId={invitation.id}
+            wishes={wishes}
+            gifts={gifts}
+            guest={guest}
+            guestName={currentGuestName}
+            onRefreshData={onRefreshData || (() => {})}
+          />
+        )}
 
         {/* Closing Thank You Section */}
-        <CuteClosingSection
-          invitation={invitation}
-          onReopenCover={handleReopenCover}
-        />
+        {isSectionEnabled('closing') && (
+          <CuteClosingSection
+            invitation={invitation}
+            onReopenCover={handleReopenCover}
+          />
+        )}
 
         {/* Floating Cute Bottom Quick Navigation Bar */}
-        {!isCoverOpen && <CuteBottomNav />}
+        {!isCoverOpen && <CuteBottomNav enabledKeys={enabledKeys} />}
       </div>
 
       {/* Floating Cute Music Player */}

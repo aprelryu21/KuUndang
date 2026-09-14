@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { StoryItem } from '../../../types/wedding';
+import { StoryItem, SectionSetting } from '../../../types/wedding';
 import { useLanguage } from '../../../context/LanguageContext';
 import {
   CuteDaisyFlower,
@@ -15,6 +15,7 @@ import { Heart, Calendar, Sparkles } from 'lucide-react';
 
 interface CuteStorySectionProps {
   stories: StoryItem[];
+  section?: SectionSetting;
 }
 
 const DEFAULT_STORY_IMAGES = [
@@ -24,7 +25,7 @@ const DEFAULT_STORY_IMAGES = [
   'https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=1000&auto=format&fit=crop',
 ];
 
-export const CuteStorySection: React.FC<CuteStorySectionProps> = ({ stories }) => {
+export const CuteStorySection: React.FC<CuteStorySectionProps> = ({ stories, section }) => {
   const { language } = useLanguage();
 
   const sortedStories = [...stories].sort((a, b) => a.sort_order - b.sort_order);
@@ -48,11 +49,12 @@ export const CuteStorySection: React.FC<CuteStorySectionProps> = ({ stories }) =
           </div>
 
           <h2 className="font-heading text-3xl sm:text-5xl font-bold text-[#E03164] tracking-wide">
-            {language === 'JW' ? 'Lelampahan Tresna Manis' : 'Perjalanan Kisah Manis Kami'}
+            {section?.title || (language === 'JW' ? 'Lelampahan Tresna Manis' : 'Perjalanan Kisah Manis Kami')}
           </h2>
 
           <p className="max-w-lg mx-auto text-xs sm:text-sm font-sans text-[#6B3E48] leading-relaxed">
-            Setiap detik yang terlewati adalah anugerah terindah. Inilah lembaran kisah kasih yang menuntun kami hingga bersatu dalam ikatan suci:
+            {section?.subtitle ||
+              'Setiap detik yang terlewati adalah anugerah terindah. Inilah lembaran kisah kasih yang menuntun kami hingga bersatu dalam ikatan suci:'}
           </p>
           <CuteFloralDivider />
         </div>

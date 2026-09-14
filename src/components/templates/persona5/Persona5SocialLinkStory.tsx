@@ -1,11 +1,12 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Star, Trophy } from 'lucide-react';
-import { StoryItem } from '../../../types/wedding';
+import { StoryItem, SectionSetting } from '../../../types/wedding';
 import { useLanguage } from '../../../context/LanguageContext';
 
 interface Persona5SocialLinkStoryProps {
   stories: StoryItem[];
+  section?: SectionSetting;
 }
 
 const DEFAULT_STORY_IMAGES = [
@@ -14,7 +15,7 @@ const DEFAULT_STORY_IMAGES = [
   'https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop',
 ];
 
-export const Persona5SocialLinkStory: React.FC<Persona5SocialLinkStoryProps> = ({ stories }) => {
+export const Persona5SocialLinkStory: React.FC<Persona5SocialLinkStoryProps> = ({ stories, section }) => {
   const { t } = useLanguage();
   const p5Translations = t.p5;
 
@@ -41,14 +42,16 @@ export const Persona5SocialLinkStory: React.FC<Persona5SocialLinkStoryProps> = (
             </span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-black uppercase italic tracking-tight text-[#FFFFFF]">
-            {p5Translations?.theLovers ? (
+            {section?.title ? (
+              section.title
+            ) : p5Translations?.theLovers ? (
               p5Translations.theLovers
             ) : (
               <>CONFIDANT: <span className="text-[#E60012] not-italic">THE LOVERS</span></>
             )}
           </h2>
           <p className="text-xs sm:text-sm font-mono text-[#FFFFFF]/70 mt-2">
-            {p5Translations?.storySubtitle || 'Kronik Perjalanan Kisah Kasih Menuju Mahligai Pernikahan'}
+            {section?.subtitle || p5Translations?.storySubtitle || 'Kronik Perjalanan Kisah Kasih Menuju Mahligai Pernikahan'}
           </p>
         </div>
 

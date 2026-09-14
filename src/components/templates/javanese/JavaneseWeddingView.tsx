@@ -35,12 +35,24 @@ export const JavaneseWeddingView: React.FC<JavaneseWeddingViewProps> = ({
   const [musicStarted, setMusicStarted] = useState(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
 
-  const { invitation, bride, groom, events, stories, gallery, gifts, wishes } = data;
+  const { invitation, bride, groom, events, stories, gallery, gifts, wishes, sections = [] } = data;
 
-  const handleOpenCover = (enteredName: string) => {
-    if (enteredName) {
-      setCurrentGuestName(enteredName);
+  const isSectionEnabled = (key: string) => {
+    const s = sections.find((sec) => sec.section_key === key);
+    return s ? s.enabled : true;
+  };
+  const getSec = (key: string) => sections.find((sec) => sec.section_key === key);
+  const enabledKeys = sections.filter((s) => s.enabled).map((s) => s.section_key);
+
+  const handleOpenCover = async (enteredName: string) => {
+    const finalName = enteredName || currentGuestName;
+    setCurrentGuestName(finalName);
+    localStorage.setItem('wedding_guest_name', finalName);
+
+    if (guest && guest.guest_code) {
+      await weddingService.markGuestOpened(invitation.id, guest.guest_code);
     }
+
     setIsCoverOpen(false);
     setMusicStarted(true);
   };
@@ -52,11 +64,11 @@ export const JavaneseWeddingView: React.FC<JavaneseWeddingViewProps> = ({
 
   return (
     <div
-      id="javanese-wedding-view"
-      className="min-h-screen bg-[#1A1009] text-[#FAF6EE] font-serif selection:bg-[#D4AF37]/30 selection:text-[#FAF6EE]"
+      id="javanese-wedding-root"
+      className="relative min-h-screen bg-[#1A1009] text-[#FAF6EE] overflow-x-hidden font-serif select-none selection:bg-[#D4AF37] selection:text-[#1A1009]"
     >
-      {/* 1. Opening Ceremonial Cover with Sacred Gong Sfx */}
-      <JavaneseCover
+      {/* 1. Fullscreen Opening Cover Modal */}
+      <JavaneseOpeningCover
         invitation={invitation}
         initialGuestName={currentGuestName}
         isOpen={isCoverOpen}
@@ -73,48 +85,54 @@ export const JavaneseWeddingView: React.FC<JavaneseWeddingViewProps> = ({
         <JavaneseHeader invitation={invitation} />
 
         {/* Recipient Honorific Greeting Banner (Nama Penerima di Bagian Atas Isi) */}
-        <JavaneseGreetingBanner
-          guestName={currentGuestName}
-          invitation={invitation}
-        />
+        {isSectionEnabled('greeting') && (
+          <JavaneseGreetingBanner
+            guestName={currentGuestName}
+            invitation={invitation}
+          />
+        )}
 
         {/* Hero & Ceremonial Countdown Section */}
-        <JavaneseHeroSection invitation={invitation} />
+        {isSectionEnabled('hero') && <JavaneseHeroSection invitation={invitation} />}
 
         {/* Sang Pinanganten Couple Profile */}
-        <JavaneseCoupleSection bride={bride} groom={groom} />
+        {isSectionEnabled('couple') && <JavaneseCoupleSection bride={bride} groom={groom} />}
 
         {/* Reroncening Adicara (Events & Calendar) */}
-        <JavaneseEventsSection events={events} invitation={invitation} />
+        {isSectionEnabled('events') && <JavaneseEventsSection events={events} invitation={invitation} />}
 
         {/* Papan Palakrama (Location & Google Maps) */}
-        <JavaneseLocationSection events={events} />
+        {isSectionEnabled('location') && <JavaneseLocationSection events={events} />}
 
         {/* Lelampahan Tresna (Story Timeline) */}
-        <JavaneseStorySection stories={stories} />
+        {isSectionEnabled('story') && <JavaneseStorySection stories={stories} section={getSec('story')} />}
 
         {/* Pasinaon Potret (Photo Gallery Lightbox) */}
-        <JavaneseGallerySection gallery={gallery} />
+        {isSectionEnabled('gallery') && <JavaneseGallerySection gallery={gallery} />}
 
         {/* Tali Asih, Konfirmasi Rawuh (RSVP), & Donga Pangestu (Wishes) */}
-        <JavaneseRSVPAndWishes
-          invitationId={invitation.id}
-          defaultGuestName={currentGuestName}
-          gifts={gifts}
-          wishes={wishes}
-          onRefreshData={onRefreshData}
-        />
+        {(isSectionEnabled('rsvp') || isSectionEnabled('gifts') || isSectionEnabled('wishes')) && (
+          <JavaneseRSVPAndWishes
+            invitationId={invitation.id}
+            defaultGuestName={currentGuestName}
+            gifts={gifts}
+            wishes={wishes}
+            onRefreshData={onRefreshData}
+          />
+        )}
 
         {/* Pambagyaharja, Family Thanks, & Back to Cover */}
-        <JavaneseClosingSection
-          invitation={invitation}
-          bride={bride}
-          groom={groom}
-          onBackToCover={handleBackToCover}
-        />
+        {isSectionEnabled('closing') && (
+          <JavaneseClosingSection
+            invitation={invitation}
+            bride={bride}
+            groom={groom}
+            onBackToCover={handleBackToCover}
+          />
+        )}
 
         {/* Floating Bottom Quick Navigation Bar */}
-        {!isCoverOpen && <JavaneseBottomNav />}
+        {!isCoverOpen && <JavaneseBottomNav enabledKeys={enabledKeys} />}
       </div>
 
       {/* Floating Sacred Gamelan Music Player */}

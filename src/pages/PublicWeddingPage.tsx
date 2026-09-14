@@ -217,9 +217,30 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
     '--color-blush': theme?.blush_color || '#DFBFC1',
   } as React.CSSProperties;
 
+  // Ensure location section exists in list if not already present
+  const allSections = [...sections];
+  if (!allSections.some((s) => s.section_key === 'location')) {
+    const eventsIndex = allSections.findIndex((s) => s.section_key === 'events');
+    const locationSection: SectionSetting = {
+      id: 'sec-location-auto',
+      invitation_id: invitation.id,
+      section_key: 'location',
+      title: 'Alamat & Lokasi Acara',
+      subtitle: 'Petunjuk arah navigasi Google Maps menuju lokasi acara',
+      enabled: true,
+      sort_order: eventsIndex !== -1 ? allSections[eventsIndex].sort_order + 0.5 : 6.5,
+    };
+    allSections.push(locationSection);
+  }
+
+  // Sort sections by sort_order
+  const sortedSections = allSections
+    .filter((s) => s.enabled && s.section_key !== 'cover')
+    .sort((a, b) => a.sort_order - b.sort_order);
+
   // Render individual sections according to admin order & enabled status
-  const renderSection = (sectionKey: SectionKey) => {
-    switch (sectionKey) {
+  const renderSection = (sec: SectionSetting) => {
+    switch (sec.section_key) {
       case 'greeting':
         return (
           <PersonalGreeting
@@ -233,15 +254,15 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
       case 'countdown':
         return <CountdownSection key="countdown" weddingDate={invitation.wedding_date} />;
       case 'couple':
-        return <CoupleSection key="couple" bride={bride} groom={groom} />;
+        return <CoupleSection key="couple" bride={bride} groom={groom} section={sec} />;
       case 'events':
-        return <EventsSection key="events" events={events} invitation={invitation} />;
+        return <EventsSection key="events" events={events} invitation={invitation} section={sec} />;
       case 'location':
-        return <LocationSection key="location" events={events} />;
+        return <LocationSection key="location" events={events} section={sec} />;
       case 'story':
-        return <StorySection key="story" stories={stories} />;
+        return <StorySection key="story" stories={stories} section={sec} />;
       case 'gallery':
-        return <GallerySection key="gallery" gallery={gallery} />;
+        return <GallerySection key="gallery" gallery={gallery} section={sec} />;
       case 'rsvp':
         return (
           <RSVPSection
@@ -249,6 +270,7 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
             invitationId={invitation.id}
             defaultGuestName={guestName}
             guestId={guest?.id}
+            section={sec}
             onRSVPSubmitted={loadData}
           />
         );
@@ -259,37 +281,18 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
             wishes={wishes}
             invitationId={invitation.id}
             defaultGuestName={guestName}
+            section={sec}
             onWishAdded={loadData}
           />
         );
       case 'gifts':
-        return <GiftSection key="gifts" gifts={gifts} />;
+        return <GiftSection key="gifts" gifts={gifts} section={sec} />;
       case 'closing':
         return <ClosingSection key="closing" invitation={invitation} onBackToCover={handleBackToCover} />;
       default:
         return null;
     }
   };
-
-  // Ensure location section exists in list if not already present
-  const allSections = [...sections];
-  if (!allSections.some((s) => s.section_key === 'location')) {
-    const eventsIndex = allSections.findIndex((s) => s.section_key === 'events');
-    const locationSection: SectionSetting = {
-      id: 'sec-location-auto',
-      invitation_id: invitation.id,
-      section_key: 'location',
-      title: 'Alamat & Lokasi Acara',
-      enabled: true,
-      sort_order: eventsIndex !== -1 ? allSections[eventsIndex].sort_order + 0.5 : 6.5,
-    };
-    allSections.push(locationSection);
-  }
-
-  // Sort sections by sort_order
-  const sortedSections = allSections
-    .filter((s) => s.enabled && s.section_key !== 'cover')
-    .sort((a, b) => a.sort_order - b.sort_order);
 
   // Check template: query parameter override (?template=cute-pink-floral or ?template=javanese-royal or ?template=persona-5) or database setting
   const templateQuery = searchParams.get('template');
@@ -496,7 +499,7 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
 
       {/* Main Wedding Content */}
       <main className={`transition-opacity duration-1000 ${isCoverOpen ? 'opacity-0' : 'opacity-100'}`}>
-        {sortedSections.map((sec) => renderSection(sec.section_key))}
+        {sortedSections.map((sec) => renderSection(sec))}
       </main>
 
       {/* Floating Background Music Player */}
@@ -509,7 +512,7 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
       />
 
       {/* Floating Bottom Navigation for Quick Jump */}
-      {!isCoverOpen && <FloatingNav />}
+      {!isCoverOpen && <FloatingNav enabledKeys={sortedSections.map((s) => s.section_key)} />}
 
       {/* Secret Admin Login Modal (Triggered by Ctrl+Shift+A or Heart badge) */}
       <AdminLoginModal

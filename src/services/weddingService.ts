@@ -238,6 +238,7 @@ export function cleanSectionForSupabase(sec: SectionSetting) {
     invitation_id: sec.invitation_id,
     section_key: sec.section_key,
     title: sec.title || '',
+    subtitle: sec.subtitle || '',
     enabled: sec.enabled ?? true,
     sort_order: sec.sort_order || 0,
   };
@@ -628,12 +629,28 @@ export const weddingService = {
       .filter((sec) => sec.invitation_id === id)
       .sort((a, b) => a.sort_order - b.sort_order);
 
+    // Ensure all 13 standard sections exist and have subtitles
+    const standardSections = INITIAL_DEMO_DATA.sections;
     if (sections.length === 0) {
-      sections = INITIAL_DEMO_DATA.sections.map((sec, idx) => ({
+      sections = standardSections.map((sec, idx) => ({
         ...sec,
         id: `sec-${idx + 1}-${id}`,
         invitation_id: id,
       }));
+    } else {
+      standardSections.forEach((stdSec, idx) => {
+        const existingIdx = sections.findIndex((s) => s.section_key === stdSec.section_key);
+        if (existingIdx === -1) {
+          sections.push({
+            ...stdSec,
+            id: `sec-${idx + 1}-${id}`,
+            invitation_id: id,
+          });
+        } else if (!sections[existingIdx].subtitle && stdSec.subtitle) {
+          sections[existingIdx].subtitle = stdSec.subtitle;
+        }
+      });
+      sections.sort((a, b) => a.sort_order - b.sort_order);
     }
 
     // 7. WISHES (Only show wishes belonging to this specific invitation!)

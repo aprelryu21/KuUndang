@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Copy, Check, Gift, CreditCard, Smartphone, Home } from 'lucide-react';
-import { GiftAccount } from '../../types/wedding';
+import { GiftAccount, SectionSetting } from '../../types/wedding';
 import { useToast } from '../../context/ToastContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { GiftBoxIllustration, VintageDivider } from './WeddingDecorations';
 
 interface GiftSectionProps {
   gifts: GiftAccount[];
+  section?: SectionSetting;
 }
 
-export const GiftSection: React.FC<GiftSectionProps> = ({ gifts }) => {
+export const GiftSection: React.FC<GiftSectionProps> = ({ gifts, section }) => {
   const { t } = useLanguage();
   const { showToast } = useToast();
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -52,10 +53,10 @@ export const GiftSection: React.FC<GiftSectionProps> = ({ gifts }) => {
           </motion.div>
 
           <h2 className="font-accent text-4xl sm:text-5xl md:text-6xl text-[#C2A56B] capitalize tracking-wide font-normal leading-tight">
-            {t.weddingGiftTitle}
+            {section?.title || t.weddingGiftTitle}
           </h2>
           <p className="mt-3 max-w-md mx-auto text-xs sm:text-sm text-[#768692] leading-relaxed">
-            {t.giftQuote}
+            {section?.subtitle || t.giftQuote}
           </p>
           <p className="mt-1 max-w-md mx-auto text-xs text-[#768692] leading-relaxed">
             {t.giftSubtitle}

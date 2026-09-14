@@ -35,6 +35,8 @@ export interface SectionSetting {
   invitation_id: string;
   section_key: SectionKey;
   title: string;
+  subtitle?: string;
+  description?: string;
   enabled: boolean;
   sort_order: number;
 }

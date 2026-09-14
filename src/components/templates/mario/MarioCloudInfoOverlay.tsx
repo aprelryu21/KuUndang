@@ -110,7 +110,19 @@ export const MarioCloudInfoOverlay: React.FC<MarioCloudInfoOverlayProps> = ({
     }
   };
 
-  const currentCfg = ZONE_CONFIG[currentZone] || ZONE_CONFIG[0];
+  const getSec = (key: string) => data.sections?.find((s) => s.section_key === key);
+
+  const dynamicZones = [
+    { id: 0, key: 'hero', world: 'WORLD 1-1', title: getSec('hero')?.title || 'SAMBUTAN', subtitle: getSec('hero')?.subtitle || 'Prolog & Doa', icon: Sparkles },
+    { id: 1, key: 'couple', world: 'WORLD 1-2', title: getSec('couple')?.title || 'MEMPELAI', subtitle: getSec('couple')?.subtitle || 'Sang Pasangan', icon: Users },
+    { id: 2, key: 'story', world: 'WORLD 1-3', title: getSec('story')?.title || 'KISAH KASIH', subtitle: getSec('story')?.subtitle || 'Love Journey', icon: Heart },
+    { id: 3, key: 'events', world: 'WORLD 1-4', title: getSec('events')?.title || 'RANGKAIAN ACARA', subtitle: getSec('events')?.subtitle || 'Save The Date', icon: Calendar },
+    { id: 4, key: 'gifts', world: 'WORLD 1-5', title: getSec('gifts')?.title || 'TANDA KASIH', subtitle: getSec('gifts')?.subtitle || 'Amplop Digital', icon: Gift },
+    { id: 5, key: 'rsvp', world: 'WORLD 1-6', title: getSec('rsvp')?.title || 'BUKU TAMU & RSVP', subtitle: getSec('rsvp')?.subtitle || 'Doa Restu', icon: MessageSquareHeart },
+    { id: 6, key: 'closing', world: 'WORLD 1-7', title: getSec('closing')?.title || 'PELAMINAN IMPIAN', subtitle: getSec('closing')?.subtitle || 'Forever & Always', icon: Award },
+  ];
+
+  const currentCfg = dynamicZones[currentZone] || dynamicZones[0];
 
   return (
     <div className="absolute top-2 sm:top-4 inset-x-2 sm:inset-x-6 z-30 pointer-events-none flex flex-col items-center">
@@ -134,7 +146,7 @@ export const MarioCloudInfoOverlay: React.FC<MarioCloudInfoOverlayProps> = ({
             {/* Stage Quick Jump / Minimap Dots */}
             <div className="flex items-center gap-1">
               <div className="hidden sm:flex items-center gap-1 mr-2">
-                {ZONE_CONFIG.map((z) => (
+                {dynamicZones.map((z) => (
                   <button
                     key={z.id}
                     onClick={() => onJumpToZone(z.id)}
@@ -247,10 +259,10 @@ export const MarioCloudInfoOverlay: React.FC<MarioCloudInfoOverlayProps> = ({
                   <div className="space-y-3">
                     <div className="text-center mb-1">
                       <span className="text-[11px] font-mono font-bold text-[#E60012] uppercase tracking-wider">
-                        TIMELINE PERJALANAN CINTA
+                        {getSec('story')?.subtitle || 'TIMELINE PERJALANAN CINTA'}
                       </span>
                       <h3 className="text-base sm:text-lg font-mono font-black text-[#283D52]">
-                        Cerita Dua Hati Bertemu
+                        {getSec('story')?.title || 'Kisah Cinta Kami'}
                       </h3>
                     </div>
 
@@ -262,12 +274,12 @@ export const MarioCloudInfoOverlay: React.FC<MarioCloudInfoOverlayProps> = ({
                             className="bg-[#F8F9FA] border-2 border-stone-300 rounded-xl p-2.5 flex items-start gap-2.5"
                           >
                             <span className="bg-[#E60012] text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded-md shrink-0">
-                              {item.year || `CH ${idx + 1}`}
+                              {(item as any).year || item.date || `CH ${idx + 1}`}
                             </span>
                             <div>
                               <h5 className="font-bold text-xs text-[#283D52]">{item.title}</h5>
                               <p className="text-[11px] text-stone-600 mt-0.5 leading-snug">
-                                {item.story}
+                                {item.description || (item as any).story}
                               </p>
                             </div>
                           </div>

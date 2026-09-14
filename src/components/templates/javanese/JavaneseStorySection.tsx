@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { StoryItem } from '../../../types/wedding';
+import { StoryItem, SectionSetting } from '../../../types/wedding';
 import { useLanguage } from '../../../context/LanguageContext';
 import {
   JavaneseDivider,
@@ -13,6 +13,7 @@ import { Sparkles, Heart, Camera } from 'lucide-react';
 
 interface JavaneseStorySectionProps {
   stories: StoryItem[];
+  section?: SectionSetting;
 }
 
 const DEFAULT_STORY_IMAGES = [
@@ -22,7 +23,7 @@ const DEFAULT_STORY_IMAGES = [
   'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80',
 ];
 
-export const JavaneseStorySection: React.FC<JavaneseStorySectionProps> = ({ stories }) => {
+export const JavaneseStorySection: React.FC<JavaneseStorySectionProps> = ({ stories, section }) => {
   const { t, language } = useLanguage();
 
   // Fallback cultural stories if none provided
@@ -92,12 +93,13 @@ export const JavaneseStorySection: React.FC<JavaneseStorySectionProps> = ({ stor
             {language === 'JW' ? 'LELAMPAHAN TRESNA SAKALASAN' : 'PERJALANAN KISAH CINTA'}
           </p>
           <h2 className="font-serif text-3xl sm:text-5xl font-bold tracking-wide text-[#FAF6EE]">
-            {language === 'JW' ? 'Reroncen Kisah Tresna' : 'Kisah Kasih Dua Hati'}
+            {section?.title || (language === 'JW' ? 'Reroncen Kisah Tresna' : 'Kisah Kasih Dua Hati')}
           </h2>
           <p className="max-w-xl mx-auto text-xs sm:text-sm font-serif text-[#FAF6EE]/75 leading-relaxed">
-            {language === 'JW'
-              ? 'Titi mangsa lampahing katresnan saking wiwitan pepanggihan tumeka ing dinten palakrama ingkang kebak berkah.'
-              : 'Untaian waktu dan perjalanan bermakna yang menuntun langkah kami menuju pelaminan suci berlandaskan cinta dan doa restu keluarga.'}
+            {section?.subtitle ||
+              (language === 'JW'
+                ? 'Titi mangsa lampahing katresnan saking wiwitan pepanggihan tumeka ing dinten palakrama ingkang kebak berkah.'
+                : 'Untaian waktu dan perjalanan bermakna yang menuntun langkah kami menuju pelaminan suci berlandaskan cinta dan doa restu keluarga.')}
           </p>
           <JavaneseDivider className="my-4" />
         </div>

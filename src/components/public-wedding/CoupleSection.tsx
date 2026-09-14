@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Instagram, Heart } from 'lucide-react';
-import { Couple } from '../../types/wedding';
+import { Couple, SectionSetting } from '../../types/wedding';
 import { useLanguage } from '../../context/LanguageContext';
 import {
   FloralWreathIllustration,
@@ -14,9 +14,10 @@ import { CoupleAvatar } from '../common/CoupleAvatar';
 interface CoupleSectionProps {
   bride: Couple;
   groom: Couple;
+  section?: SectionSetting;
 }
 
-export const CoupleSection: React.FC<CoupleSectionProps> = ({ bride, groom }) => {
+export const CoupleSection: React.FC<CoupleSectionProps> = ({ bride, groom, section }) => {
   const { t } = useLanguage();
 
   return (
@@ -37,12 +38,14 @@ export const CoupleSection: React.FC<CoupleSectionProps> = ({ bride, groom }) =>
             <FloralWreathIllustration className="w-20 h-20 sm:w-24 sm:h-24" />
           </motion.div>
 
-          <p className="font-accent text-3xl sm:text-4xl text-[#C2A56B]">{t.theCoupleTitle}</p>
+          <p className="font-accent text-3xl sm:text-4xl text-[#C2A56B]">
+            {section?.title || t.theCoupleTitle}
+          </p>
           <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl tracking-wide uppercase text-[#283D52] font-semibold mt-1">
             {groom.nickname} & {bride.nickname}
           </h2>
           <p className="mt-3 max-w-md mx-auto text-xs sm:text-sm text-[#768692] leading-relaxed">
-            {t.weAreGettingMarried}
+            {section?.subtitle || t.weAreGettingMarried}
           </p>
         </div>
 

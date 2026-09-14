@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { Check, Heart, Send, Users, Sparkles, MessageCircle } from 'lucide-react';
+import { SectionSetting } from '../../types/wedding';
 import { weddingService } from '../../services/weddingService';
 import { useToast } from '../../context/ToastContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -11,6 +12,7 @@ interface RSVPSectionProps {
   invitationId: string;
   defaultGuestName?: string;
   guestId?: string | null;
+  section?: SectionSetting;
   onRSVPSubmitted?: () => void;
 }
 
@@ -18,6 +20,7 @@ export const RSVPSection: React.FC<RSVPSectionProps> = ({
   invitationId,
   defaultGuestName = '',
   guestId = null,
+  section,
   onRSVPSubmitted,
 }) => {
   const { t } = useLanguage();
@@ -82,10 +85,10 @@ export const RSVPSection: React.FC<RSVPSectionProps> = ({
       <div className="max-w-xl mx-auto text-center">
         <div className="mb-10">
           <h2 className="font-accent text-4xl sm:text-5xl md:text-6xl text-[#C2A56B] capitalize tracking-wide font-normal leading-tight">
-            {t.rsvpTitle}
+            {section?.title || t.rsvpTitle}
           </h2>
           <p className="mt-3 text-xs sm:text-sm text-[#768692] leading-relaxed">
-            {t.rsvpSubtitle}
+            {section?.subtitle || t.rsvpSubtitle}
           </p>
         </div>
 

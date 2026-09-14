@@ -21,6 +21,12 @@ export const MarioFullBookModal: React.FC<MarioFullBookModalProps> = ({
   const { showToast } = useToast();
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
 
+  const isSectionEnabled = (key: string) => {
+    const s = data.sections?.find((sec) => sec.section_key === key);
+    return s ? s.enabled : true;
+  };
+  const getSec = (key: string) => data.sections?.find((sec) => sec.section_key === key);
+
   if (!isOpen) return null;
 
   const handleCopy = (text: string, id: string) => {
@@ -60,57 +66,89 @@ export const MarioFullBookModal: React.FC<MarioFullBookModalProps> = ({
           {/* Scrollable Content */}
           <div className="p-4 sm:p-6 overflow-y-auto space-y-6 text-xs sm:text-sm">
             {/* Greeting */}
-            <div className="text-center pb-4 border-b border-stone-200">
-              <h4 className="font-mono text-xl font-black text-[#E60012]">
-                {bride.full_name} &amp; {groom.full_name}
-              </h4>
-              <p className="text-xs text-stone-600 mt-1 font-mono">
-                {invitation.wedding_date || '18 & 26 April 2026'}
-              </p>
-              <p className="mt-2 text-stone-700 leading-relaxed italic max-w-md mx-auto">
-                &ldquo;{invitation.greeting_text}&rdquo;
-              </p>
-            </div>
+            {isSectionEnabled('greeting') && (
+              <div className="text-center pb-4 border-b border-stone-200">
+                <h4 className="font-mono text-xl font-black text-[#E60012]">
+                  {bride.full_name} &amp; {groom.full_name}
+                </h4>
+                <p className="text-xs text-stone-600 mt-1 font-mono">
+                  {invitation.wedding_date || '18 & 26 April 2026'}
+                </p>
+                <p className="mt-2 text-stone-700 leading-relaxed italic max-w-md mx-auto">
+                  &ldquo;{invitation.greeting_text}&rdquo;
+                </p>
+              </div>
+            )}
 
             {/* Couple Profiles */}
-            <div>
-              <h5 className="font-mono font-bold text-stone-900 border-l-4 border-[#5C94FC] pl-2 mb-3">
-                KEDUA MEMPELAI
-              </h5>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="bg-[#FFF0F5] border border-[#FF85A2] rounded-xl p-3">
-                  <span className="text-[10px] font-mono font-bold text-[#E03164]">
-                    MEMPELAI WANITA
-                  </span>
-                  <h6 className="font-bold text-sm text-[#283D52]">{bride.full_name}</h6>
-                  <p className="text-xs text-stone-600 mt-0.5">
-                    Putri dari Bpk. {bride.father_name} &amp; Ibu {bride.mother_name}
-                  </p>
-                  <p className="text-[11px] text-stone-500 font-mono mt-1">
-                    📍 Balonggarut, Krembung, Sidoarjo
-                  </p>
-                </div>
+            {isSectionEnabled('couple') && (
+              <div>
+                <h5 className="font-mono font-bold text-stone-900 border-l-4 border-[#5C94FC] pl-2 mb-3 uppercase">
+                  {getSec('couple')?.title || 'KEDUA MEMPELAI'}
+                </h5>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="bg-[#FFF0F5] border border-[#FF85A2] rounded-xl p-3">
+                    <span className="text-[10px] font-mono font-bold text-[#E03164]">
+                      MEMPELAI WANITA
+                    </span>
+                    <h6 className="font-bold text-sm text-[#283D52]">{bride.full_name}</h6>
+                    <p className="text-xs text-stone-600 mt-0.5">
+                      Putri dari Bpk. {bride.father_name} &amp; Ibu {bride.mother_name}
+                    </p>
+                    <p className="text-[11px] text-stone-500 font-mono mt-1">
+                      📍 Balonggarut, Krembung, Sidoarjo
+                    </p>
+                  </div>
 
-                <div className="bg-[#EBF4FF] border border-[#5C94FC] rounded-xl p-3">
-                  <span className="text-[10px] font-mono font-bold text-[#1D4ED8]">
-                    MEMPELAI PRIA
-                  </span>
-                  <h6 className="font-bold text-sm text-[#283D52]">{groom.full_name}</h6>
-                  <p className="text-xs text-stone-600 mt-0.5">
-                    Putra dari Bpk. {groom.father_name} &amp; Ibu {groom.mother_name}
-                  </p>
-                  <p className="text-[11px] text-stone-500 font-mono mt-1">
-                    📍 Kandangan, Kediri, Jawa Timur
-                  </p>
+                  <div className="bg-[#EBF4FF] border border-[#5C94FC] rounded-xl p-3">
+                    <span className="text-[10px] font-mono font-bold text-[#1D4ED8]">
+                      MEMPELAI PRIA
+                    </span>
+                    <h6 className="font-bold text-sm text-[#283D52]">{groom.full_name}</h6>
+                    <p className="text-xs text-stone-600 mt-0.5">
+                      Putra dari Bpk. {groom.father_name} &amp; Ibu {groom.mother_name}
+                    </p>
+                    <p className="text-[11px] text-stone-500 font-mono mt-1">
+                      📍 Kandangan, Kediri, Jawa Timur
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* Stories */}
+            {isSectionEnabled('story') && stories && stories.length > 0 && (
+              <div>
+                <h5 className="font-mono font-bold text-stone-900 border-l-4 border-[#E60012] pl-2 mb-3 uppercase">
+                  {getSec('story')?.title || 'KISAH CINTA KAMI'}
+                </h5>
+                <div className="space-y-2">
+                  {stories.map((st, idx) => (
+                    <div
+                      key={st.id || idx}
+                      className="bg-stone-50 border border-stone-300 rounded-xl p-3 flex items-start gap-2.5"
+                    >
+                      <span className="bg-[#E60012] text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded-md shrink-0">
+                        {(st as any).year || st.date || `CH ${idx + 1}`}
+                      </span>
+                      <div>
+                        <h6 className="font-bold text-xs text-[#283D52]">{st.title}</h6>
+                        <p className="text-xs text-stone-600 mt-0.5 leading-relaxed font-sans">
+                          {st.description || (st as any).story}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Events */}
-            <div>
-              <h5 className="font-mono font-bold text-stone-900 border-l-4 border-[#00A800] pl-2 mb-3">
-                JADWAL RANGKAIAN ACARA
-              </h5>
+            {isSectionEnabled('events') && (
+              <div>
+                <h5 className="font-mono font-bold text-stone-900 border-l-4 border-[#00A800] pl-2 mb-3 uppercase">
+                  {getSec('events')?.title || 'JADWAL RANGKAIAN ACARA'}
+                </h5>
               <div className="space-y-2.5">
                 {events.map((ev, idx) => (
                   <div
@@ -148,11 +186,13 @@ export const MarioFullBookModal: React.FC<MarioFullBookModalProps> = ({
                 ))}
               </div>
             </div>
+          )}
 
-            {/* Gifts */}
+          {/* Gifts */}
+          {isSectionEnabled('gifts') && (
             <div>
               <h5 className="font-mono font-bold text-stone-900 border-l-4 border-[#FFD166] pl-2 mb-3">
-                AMPLOP DIGITAL &amp; TANDA KASIH
+                {getSec('gifts')?.title || 'AMPLOP DIGITAL & TANDA KASIH'}
               </h5>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {gifts.map((gift) => (
@@ -190,7 +230,8 @@ export const MarioFullBookModal: React.FC<MarioFullBookModalProps> = ({
                 ))}
               </div>
             </div>
-          </div>
+          )}
+        </div>
 
           {/* Footer */}
           <div className="bg-stone-100 px-4 py-2.5 border-t border-stone-300 text-center">

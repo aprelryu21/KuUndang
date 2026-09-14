@@ -1,16 +1,17 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { MapPin, Clock, Calendar, ExternalLink, CalendarPlus } from 'lucide-react';
-import { WeddingEvent, Invitation } from '../../types/wedding';
+import { WeddingEvent, Invitation, SectionSetting } from '../../types/wedding';
 import { useLanguage } from '../../context/LanguageContext';
 import { FloralCornerOrnament, VintageDivider } from './WeddingDecorations';
 
 interface EventsSectionProps {
   events: WeddingEvent[];
   invitation?: Invitation;
+  section?: SectionSetting;
 }
 
-export const EventsSection: React.FC<EventsSectionProps> = ({ events, invitation }) => {
+export const EventsSection: React.FC<EventsSectionProps> = ({ events, invitation, section }) => {
   const { t, language } = useLanguage();
 
   // Helper to format date
@@ -91,10 +92,10 @@ export const EventsSection: React.FC<EventsSectionProps> = ({ events, invitation
       <div className="relative z-10 max-w-4xl mx-auto text-center">
         <div className="mb-14">
           <h2 className="font-accent text-4xl sm:text-5xl md:text-6xl text-[#E8C682] capitalize tracking-wide font-normal drop-shadow-md">
-            {t.weddingEvents}
+            {section?.title || t.weddingEvents}
           </h2>
           <p className="mt-3 max-w-md mx-auto text-xs sm:text-sm text-[#DFBFC1] leading-relaxed font-sans">
-            {t.weAreGettingMarried}
+            {section?.subtitle || t.weAreGettingMarried}
           </p>
         </div>
 

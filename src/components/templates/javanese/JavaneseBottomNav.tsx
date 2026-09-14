@@ -2,7 +2,11 @@ import React from 'react';
 import { useLanguage } from '../../../context/LanguageContext';
 import { Home, Users, Calendar, MapPin, Heart, Image, CheckSquare } from 'lucide-react';
 
-export const JavaneseBottomNav: React.FC = () => {
+interface JavaneseBottomNavProps {
+  enabledKeys?: string[];
+}
+
+export const JavaneseBottomNav: React.FC<JavaneseBottomNavProps> = ({ enabledKeys }) => {
   const { language } = useLanguage();
 
   const scrollTo = (id: string) => {
@@ -12,15 +16,19 @@ export const JavaneseBottomNav: React.FC = () => {
     }
   };
 
-  const navItems = [
-    { id: 'javanese-hero', label: language === 'JW' ? 'Gapura' : 'Beranda', icon: Home },
-    { id: 'javanese-couple', label: language === 'JW' ? 'Manten' : 'Mempelai', icon: Users },
-    { id: 'javanese-events', label: language === 'JW' ? 'Adicara' : 'Acara', icon: Calendar },
-    { id: 'javanese-location', label: language === 'JW' ? 'Papan' : 'Lokasi', icon: MapPin },
-    { id: 'javanese-story', label: language === 'JW' ? 'Kisah' : 'Kisah', icon: Heart },
-    { id: 'javanese-gallery', label: language === 'JW' ? 'Potret' : 'Galeri', icon: Image },
-    { id: 'javanese-rsvp', label: language === 'JW' ? 'Rawuh' : 'RSVP', icon: CheckSquare },
+  const allNavItems = [
+    { id: 'javanese-hero', key: 'hero', label: language === 'JW' ? 'Gapura' : 'Beranda', icon: Home },
+    { id: 'javanese-couple', key: 'couple', label: language === 'JW' ? 'Manten' : 'Mempelai', icon: Users },
+    { id: 'javanese-events', key: 'events', label: language === 'JW' ? 'Adicara' : 'Acara', icon: Calendar },
+    { id: 'javanese-location', key: 'location', label: language === 'JW' ? 'Papan' : 'Lokasi', icon: MapPin },
+    { id: 'javanese-story', key: 'story', label: language === 'JW' ? 'Kisah' : 'Kisah', icon: Heart },
+    { id: 'javanese-gallery', key: 'gallery', label: language === 'JW' ? 'Potret' : 'Galeri', icon: Image },
+    { id: 'javanese-rsvp', key: 'rsvp', label: language === 'JW' ? 'Rawuh' : 'RSVP', icon: CheckSquare },
   ];
+
+  const navItems = enabledKeys
+    ? allNavItems.filter((item) => enabledKeys.includes(item.key))
+    : allNavItems;
 
   return (
     <nav

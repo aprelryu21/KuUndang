@@ -1,15 +1,16 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Heart, Sparkles } from 'lucide-react';
-import { StoryItem } from '../../types/wedding';
+import { StoryItem, SectionSetting } from '../../types/wedding';
 import { useLanguage } from '../../context/LanguageContext';
 import { LoveLetterIllustration } from './WeddingDecorations';
 
 interface StorySectionProps {
   stories: StoryItem[];
+  section?: SectionSetting;
 }
 
-export const StorySection: React.FC<StorySectionProps> = ({ stories }) => {
+export const StorySection: React.FC<StorySectionProps> = ({ stories, section }) => {
   const { t } = useLanguage();
 
   return (
@@ -27,10 +28,10 @@ export const StorySection: React.FC<StorySectionProps> = ({ stories }) => {
           </motion.div>
 
           <h2 className="font-accent text-4xl sm:text-5xl md:text-6xl text-[#C2A56B] capitalize tracking-wide font-normal leading-tight">
-            {t.loveStory}
+            {section?.title || t.loveStory}
           </h2>
           <p className="mt-3 max-w-md mx-auto text-xs sm:text-sm text-[#768692] leading-relaxed">
-            {t.loveStorySubtitle}
+            {section?.subtitle || t.loveStorySubtitle}
           </p>
         </div>
 

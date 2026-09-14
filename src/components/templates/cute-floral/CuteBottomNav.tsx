@@ -1,18 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Calendar, Users, Camera, MessageSquare, Home } from 'lucide-react';
+import { Heart, Calendar, Users, Camera, MessageSquare, Home, MapPin } from 'lucide-react';
 import { CuteSakuraFlower } from './cuteFloralAssets';
 
-export const CuteBottomNav: React.FC = () => {
+interface CuteBottomNavProps {
+  enabledKeys?: string[];
+}
+
+export const CuteBottomNav: React.FC<CuteBottomNavProps> = ({ enabledKeys }) => {
   const [activeSection, setActiveSection] = useState('cute-hero');
 
-  const navItems = [
-    { id: 'cute-hero', label: 'Awal', icon: Home },
-    { id: 'cute-couple', label: 'Mempelai', icon: Users },
-    { id: 'cute-events', label: 'Acara', icon: Calendar },
-    { id: 'cute-story', label: 'Kisah', icon: Heart },
-    { id: 'cute-gallery', label: 'Galeri', icon: Camera },
-    { id: 'cute-rsvp', label: 'Ucapan', icon: MessageSquare },
+  const allNavItems = [
+    { id: 'cute-hero', key: 'hero', label: 'Awal', icon: Home },
+    { id: 'cute-couple', key: 'couple', label: 'Mempelai', icon: Users },
+    { id: 'cute-events', key: 'events', label: 'Acara', icon: Calendar },
+    { id: 'cute-location', key: 'location', label: 'Lokasi', icon: MapPin },
+    { id: 'cute-story', key: 'story', label: 'Kisah', icon: Heart },
+    { id: 'cute-gallery', key: 'gallery', label: 'Galeri', icon: Camera },
+    { id: 'cute-rsvp', key: 'rsvp', label: 'Ucapan', icon: MessageSquare },
   ];
+
+  const navItems = enabledKeys
+    ? allNavItems.filter((item) => enabledKeys.includes(item.key))
+    : allNavItems;
 
   const handleScrollTo = (id: string) => {
     const el = document.getElementById(id);

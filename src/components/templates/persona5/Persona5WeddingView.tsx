@@ -35,7 +35,14 @@ export const Persona5WeddingView: React.FC<Persona5WeddingViewProps> = ({
   const [activeGuestName, setActiveGuestName] = useState(guestName || 'Tamu Terhormat');
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
 
-  const { invitation, bride, groom, events, stories, gallery, gifts, wishes } = data;
+  const { invitation, bride, groom, events, stories, gallery, gifts, wishes, sections = [] } = data;
+
+  const isSectionEnabled = (key: string) => {
+    const s = sections.find((sec) => sec.section_key === key);
+    return s ? s.enabled : true;
+  };
+  const getSec = (key: string) => sections.find((sec) => sec.section_key === key);
+  const enabledKeys = sections.filter((s) => s.enabled).map((s) => s.section_key);
 
   // Determine Persona 5 soundtrack: ensure Persona 5 has its distinctive Tokyo Acid Jazz vibe
   const persona5MusicUrl =
@@ -49,12 +56,19 @@ export const Persona5WeddingView: React.FC<Persona5WeddingViewProps> = ({
       : PERSONA5_DEFAULT_MUSIC.title;
 
   const persona5MusicArtist =
-    invitation.music_artist && !invitation.music_artist.includes('Pachelbel')
+    invitation.music_artist && !invitation.music_artist.includes('Johann')
       ? invitation.music_artist
       : PERSONA5_DEFAULT_MUSIC.artist;
 
-  const handleOpenInvitation = (enteredName: string) => {
-    setActiveGuestName(enteredName || guestName || 'Tamu Terhormat');
+  const handleOpenInvitation = async (enteredName: string) => {
+    const finalName = enteredName || activeGuestName;
+    setActiveGuestName(finalName);
+    localStorage.setItem('wedding_guest_name', finalName);
+
+    if (guest && guest.guest_code) {
+      await weddingService.markGuestOpened(invitation.id, guest.guest_code);
+    }
+
     setIsCoverOpen(false);
     setMusicStarted(true);
   };
@@ -65,17 +79,18 @@ export const Persona5WeddingView: React.FC<Persona5WeddingViewProps> = ({
   };
 
   return (
-    <div className="relative min-h-screen bg-[#0D0D0D] text-[#FFFFFF] font-sans selection:bg-[#E60012] selection:text-white pb-20 sm:pb-24">
-      {/* 1. OPENING COVER MODAL (CALLING CARD) */}
-      {isCoverOpen && (
-        <Persona5OpeningCover
-          invitation={invitation}
-          guestName={activeGuestName}
-          guest={guest}
-          onOpen={handleOpenInvitation}
-          onOpenAdminModal={() => setIsAdminModalOpen(true)}
-        />
-      )}
+    <div
+      id="persona5-wedding-root"
+      className="relative min-h-screen bg-[#0D0D0D] text-[#FFFFFF] overflow-x-hidden font-sans select-none selection:bg-[#E60012] selection:text-white"
+    >
+      {/* 1. FULLSCREEN OPENING COVER */}
+      <Persona5CoverOpening
+        invitation={invitation}
+        guestName={activeGuestName}
+        isOpen={isCoverOpen}
+        onOpen={handleOpenInvitation}
+        onOpenAdmin={() => setIsAdminModalOpen(true)}
+      />
 
       {/* 2. TOP HEADER (STICKY) - RECIPIENT NAME & CONTROLS */}
       {!isCoverOpen && (
@@ -99,10 +114,12 @@ export const Persona5WeddingView: React.FC<Persona5WeddingViewProps> = ({
       {/* 4. MAIN INVITATION BODY */}
       <main className="relative">
         {/* Section: Personal Greeting & Holy Verse */}
-        <Persona5GreetingBanner
-          guestName={activeGuestName}
-          invitation={invitation}
-        />
+        {isSectionEnabled('greeting') && (
+          <Persona5GreetingBanner
+            guestName={activeGuestName}
+            invitation={invitation}
+          />
+        )}
 
         {/* Dynamic Stylized Diagonal Marquee Strip 1 */}
         <div className="bg-[#E60012] text-white py-2 overflow-hidden select-none -rotate-1 shadow-md border-y border-white">
@@ -119,16 +136,16 @@ export const Persona5WeddingView: React.FC<Persona5WeddingViewProps> = ({
         </div>
 
         {/* Section 1: Home (Hero & Countdown) */}
-        <Persona5HeroSection invitation={invitation} />
+        {isSectionEnabled('hero') && <Persona5HeroSection invitation={invitation} />}
 
         {/* Section 2: Mempelai (Character Status Screen - April & Siti) */}
-        <Persona5StatusSection bride={bride} groom={groom} />
+        {isSectionEnabled('couple') && <Persona5StatusSection bride={bride} groom={groom} />}
 
         {/* Section 3: Acara (Target Infiltration Operations - Akad, Resepsi, Unduh Mantu) */}
-        <Persona5EventsSection events={events} invitation={invitation} />
+        {isSectionEnabled('events') && <Persona5EventsSection events={events} invitation={invitation} />}
 
         {/* Section 4: Lokasi (Dedicated Tactical Coordinates & Google Maps) */}
-        <Persona5LocationSection events={events} />
+        {isSectionEnabled('location') && <Persona5LocationSection events={events} />}
 
         {/* Dynamic Stylized Diagonal Marquee Strip 2 */}
         <div className="bg-[#FFF000] text-black py-2 overflow-hidden select-none rotate-1 shadow-md border-y-2 border-black">
@@ -143,27 +160,31 @@ export const Persona5WeddingView: React.FC<Persona5WeddingViewProps> = ({
         </div>
 
         {/* Section 5: Timeline Kisah (Confidant Story Chronicle with Photo Illustrations) */}
-        <Persona5SocialLinkStory stories={stories} />
+        {isSectionEnabled('story') && <Persona5SocialLinkStory stories={stories} section={getSec('story')} />}
 
         {/* Section 6: Galeri Foto (All-Out Attack Finishing Touch & Finisher Lightbox) */}
-        <Persona5GallerySection gallery={gallery} />
+        {isSectionEnabled('gallery') && <Persona5GallerySection gallery={gallery} />}
 
         {/* Section 7: RSVP & Amplop Digital & Ucapan (Velvet Room Tribute & Battle Command RSVP) */}
-        <Persona5RSVPAndWishes
-          invitationId={invitation.id}
-          gifts={gifts}
-          wishes={wishes}
-          defaultGuestName={activeGuestName}
-          guestId={guest?.id}
-          onRefreshData={onRefreshData}
-        />
+        {(isSectionEnabled('rsvp') || isSectionEnabled('gifts') || isSectionEnabled('wishes')) && (
+          <Persona5RSVPAndWishes
+            invitationId={invitation.id}
+            gifts={gifts}
+            wishes={wishes}
+            defaultGuestName={activeGuestName}
+            guestId={guest?.id}
+            onRefreshData={onRefreshData}
+          />
+        )}
 
         {/* Section 8: Penutup (Mission Complete Closing) */}
-        <Persona5ClosingSection invitation={invitation} onBackToCover={handleBackToCover} />
+        {isSectionEnabled('closing') && (
+          <Persona5ClosingSection invitation={invitation} onBackToCover={handleBackToCover} />
+        )}
       </main>
 
       {/* 6. PERSONA 5 STYLIZED FLOATING BOTTOM NAVIGATION */}
-      {!isCoverOpen && <Persona5BottomNav />}
+      {!isCoverOpen && <Persona5BottomNav enabledKeys={enabledKeys} />}
 
       {/* 7. ADMIN LOGIN MODAL */}
       <AdminLoginModal

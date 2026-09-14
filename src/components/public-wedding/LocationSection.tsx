@@ -11,16 +11,17 @@ import {
   Car,
   Info,
 } from 'lucide-react';
-import { WeddingEvent } from '../../types/wedding';
+import { WeddingEvent, SectionSetting } from '../../types/wedding';
 import { useLanguage } from '../../context/LanguageContext';
 import { useToast } from '../../context/ToastContext';
 import { MapPinFloralIllustration, VintageDivider } from './WeddingDecorations';
 
 interface LocationSectionProps {
   events: WeddingEvent[];
+  section?: SectionSetting;
 }
 
-export const LocationSection: React.FC<LocationSectionProps> = ({ events }) => {
+export const LocationSection: React.FC<LocationSectionProps> = ({ events, section }) => {
   const { t, language } = useLanguage();
   const { showToast } = useToast();
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -111,10 +112,10 @@ export const LocationSection: React.FC<LocationSectionProps> = ({ events }) => {
             <span>Venue & Navigation</span>
           </div>
           <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl tracking-wide uppercase text-[#283D52] font-semibold">
-            {t.locationTitle}
+            {section?.title || t.locationTitle}
           </h2>
           <p className="mt-3 max-w-xl mx-auto text-xs sm:text-sm text-[#768692] leading-relaxed">
-            {t.locationSubtitle}
+            {section?.subtitle || t.locationSubtitle}
           </p>
           <div className="w-16 h-[1.5px] bg-[#C2A56B]/40 mx-auto mt-5" />
         </motion.div>

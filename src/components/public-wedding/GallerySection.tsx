@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ChevronLeft, ChevronRight, Maximize2, Sparkles } from 'lucide-react';
-import { GalleryItem } from '../../types/wedding';
+import { GalleryItem, SectionSetting } from '../../types/wedding';
 import { useLanguage } from '../../context/LanguageContext';
 import { FloatingPetalsOverlay } from './FloatingPetalsOverlay';
 
 interface GallerySectionProps {
   gallery: GalleryItem[];
+  section?: SectionSetting;
 }
 
-export const GallerySection: React.FC<GallerySectionProps> = ({ gallery }) => {
+export const GallerySection: React.FC<GallerySectionProps> = ({ gallery, section }) => {
   const { t } = useLanguage();
   const [activePhotoIndex, setActivePhotoIndex] = useState<number | null>(null);
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -66,10 +67,10 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ gallery }) => {
       <div className="relative z-10 max-w-5xl mx-auto text-center">
         <div className="mb-14">
           <h2 className="font-accent text-4xl sm:text-5xl md:text-6xl text-[#C2A56B] capitalize tracking-wide font-normal leading-tight">
-            {t.photoGallery}
+            {section?.title || t.photoGallery}
           </h2>
           <p className="mt-3 max-w-md mx-auto text-xs sm:text-sm text-[#768692] leading-relaxed">
-            {t.photoGallerySubtitle}
+            {section?.subtitle || t.photoGallerySubtitle}
           </p>
         </div>
 
