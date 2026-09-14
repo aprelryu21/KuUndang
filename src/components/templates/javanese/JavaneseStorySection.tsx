@@ -107,7 +107,7 @@ export const JavaneseStorySection: React.FC<JavaneseStorySectionProps> = ({ stor
         {/* Timeline */}
         <div className="relative border-l-2 border-[#D4AF37]/40 ml-4 sm:ml-32 space-y-12">
           {displayStories.map((story, idx) => {
-            const photoUrl = story.image_url || DEFAULT_STORY_IMAGES[idx % DEFAULT_STORY_IMAGES.length];
+            const photoUrl = story.photo_url || (story as any).image_url || DEFAULT_STORY_IMAGES[idx % DEFAULT_STORY_IMAGES.length];
 
             return (
               <motion.div
@@ -126,7 +126,7 @@ export const JavaneseStorySection: React.FC<JavaneseStorySectionProps> = ({ stor
                 {/* Year Badge (Desktop positioned to the left) */}
                 <div className="sm:absolute sm:-left-32 sm:top-0 sm:text-right sm:w-24">
                   <span className="inline-block px-3 py-1 rounded-full bg-[#1A1009] border border-[#D4AF37]/60 text-xs font-serif font-bold text-[#E5C158] shadow-md">
-                    {story.year}
+                    {story.year || story.date}
                   </span>
                 </div>
 
@@ -167,7 +167,7 @@ export const JavaneseStorySection: React.FC<JavaneseStorySectionProps> = ({ stor
                       {/* Photo Badge */}
                       <div className="absolute bottom-2 right-2 px-2.5 py-1 rounded-full bg-[#1A1009]/90 border border-[#D4AF37]/60 backdrop-blur-xs flex items-center gap-1.5 text-[10px] text-[#E5C158] font-serif">
                         <Camera className="w-3 h-3 text-[#D4AF37]" />
-                        <span>Kenangan {story.year}</span>
+                        <span>Kenangan {story.year || story.date}</span>
                       </div>
                     </div>
                   </div>

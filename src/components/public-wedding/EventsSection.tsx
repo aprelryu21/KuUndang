@@ -122,12 +122,12 @@ export const EventsSection: React.FC<EventsSectionProps> = ({ events, invitation
                 </div>
 
                 <h3 className="font-heading text-2xl sm:text-3xl text-[#283D52] font-semibold tracking-wide">
-                  {t.content?.events?.[event.event_type as 'akad' | 'reception']?.title || event.title}
+                  {event.title || t.content?.events?.[event.event_type as 'akad' | 'reception']?.title}
                 </h3>
 
-                {(t.content?.events?.[event.event_type as 'akad' | 'reception']?.description || event.description) && (
+                {(event.description || t.content?.events?.[event.event_type as 'akad' | 'reception']?.description) && (
                   <p className="mt-2 text-xs text-[#768692] italic leading-relaxed">
-                    {t.content?.events?.[event.event_type as 'akad' | 'reception']?.description || event.description}
+                    {event.description || t.content?.events?.[event.event_type as 'akad' | 'reception']?.description}
                   </p>
                 )}
 

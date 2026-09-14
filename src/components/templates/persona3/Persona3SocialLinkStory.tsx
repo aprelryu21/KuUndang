@@ -56,7 +56,7 @@ export const Persona3SocialLinkStory: React.FC<Persona3SocialLinkStoryProps> = (
                         {rankLabel}
                       </span>
                       <span className="text-[10px] font-mono text-[#00D2FF] font-bold">
-                        {item.date}
+                        {item.date || item.year}
                       </span>
                     </div>
 

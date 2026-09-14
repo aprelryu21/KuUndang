@@ -85,16 +85,16 @@ export const CoupleSection: React.FC<CoupleSectionProps> = ({ bride, groom, sect
 
             <div className="mt-3 text-xs sm:text-sm text-[#768692] leading-relaxed max-w-xs">
               <p className="font-medium text-[#24313A]">
-                {t.content?.bride?.childOrder || bride.child_order}
+                {bride.child_order || t.content?.bride?.childOrder}
               </p>
               <p className="mt-1">
                 {t.daughterOf} {bride.father_name} & {bride.mother_name}
               </p>
             </div>
 
-            {(t.content?.bride?.bio || bride.description) && (
+            {(bride.description || t.content?.bride?.bio) && (
               <p className="mt-4 text-xs italic text-[#768692] max-w-xs leading-relaxed">
-                "{t.content?.bride?.bio || bride.description}"
+                "{bride.description || t.content?.bride?.bio}"
               </p>
             )}
 
@@ -145,16 +145,16 @@ export const CoupleSection: React.FC<CoupleSectionProps> = ({ bride, groom, sect
 
             <div className="mt-3 text-xs sm:text-sm text-[#768692] leading-relaxed max-w-xs">
               <p className="font-medium text-[#24313A]">
-                {t.content?.groom?.childOrder || groom.child_order}
+                {groom.child_order || t.content?.groom?.childOrder}
               </p>
               <p className="mt-1">
                 {t.sonOf} {groom.father_name} & {groom.mother_name}
               </p>
             </div>
 
-            {(t.content?.groom?.bio || groom.description) && (
+            {(groom.description || t.content?.groom?.bio) && (
               <p className="mt-4 text-xs italic text-[#768692] max-w-xs leading-relaxed">
-                "{t.content?.groom?.bio || groom.description}"
+                "{groom.description || t.content?.groom?.bio}"
               </p>
             )}
 

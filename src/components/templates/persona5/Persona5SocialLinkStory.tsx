@@ -70,7 +70,7 @@ export const Persona5SocialLinkStory: React.FC<Persona5SocialLinkStoryProps> = (
           {stories.map((item, idx) => {
             const rankLabel = idx === 0 ? 'RANK 1' : idx === stories.length - 1 ? 'RANK 10 [MAX]' : `RANK ${idx * 4 + 1}`;
             const isLeft = idx % 2 === 0;
-            const photoUrl = item.photo_url || DEFAULT_STORY_IMAGES[idx % DEFAULT_STORY_IMAGES.length];
+            const photoUrl = item.photo_url || (item as any).image_url || DEFAULT_STORY_IMAGES[idx % DEFAULT_STORY_IMAGES.length];
 
             return (
               <motion.div
@@ -96,7 +96,7 @@ export const Persona5SocialLinkStory: React.FC<Persona5SocialLinkStoryProps> = (
                         {rankLabel}
                       </span>
                       <span className="text-xs font-mono font-bold text-[#FFF000]">
-                        {item.date}
+                        {item.date || item.year}
                       </span>
                     </div>
 

@@ -69,7 +69,7 @@ export const PastelPopStorySection: React.FC<PastelPopStorySectionProps> = ({ st
 
                     <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-rose-50 border border-slate-100">
                       <img
-                        src={item.image_url || 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=600&q=80'}
+                        src={item.photo_url || item.image_url || 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=600&q=80'}
                         alt={item.title}
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                       />
@@ -82,7 +82,7 @@ export const PastelPopStorySection: React.FC<PastelPopStorySectionProps> = ({ st
                   <div className="bg-white p-6 rounded-3xl border-3 border-[#2B2D42] shadow-[6px_6px_0px_0px_#4D96FF]">
                     {/* Year / Date Tag */}
                     <div className="inline-block px-3 py-1 rounded-full bg-[#FFE5EC] border border-[#FF6B8B] text-[#FF6B8B] text-xs font-black mb-2 shadow-xs">
-                      {item.year}
+                      {item.date || item.year}
                     </div>
 
                     <h3 className="text-xl font-black text-[#2B2D42]">
@@ -90,7 +90,7 @@ export const PastelPopStorySection: React.FC<PastelPopStorySectionProps> = ({ st
                     </h3>
 
                     <p className="text-xs sm:text-sm text-[#2B2D42]/80 mt-2 leading-relaxed whitespace-pre-line">
-                      {item.story}
+                      {item.description || (item as any).story}
                     </p>
                   </div>
                 </div>

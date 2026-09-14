@@ -66,7 +66,7 @@ export const CuteStorySection: React.FC<CuteStorySectionProps> = ({ stories, sec
 
           {sortedStories.map((story, idx) => {
             const isEven = idx % 2 === 0;
-            const photoUrl = story.photo_url || DEFAULT_STORY_IMAGES[idx % DEFAULT_STORY_IMAGES.length];
+            const photoUrl = story.photo_url || (story as any).image_url || DEFAULT_STORY_IMAGES[idx % DEFAULT_STORY_IMAGES.length];
 
             return (
               <motion.div
@@ -114,7 +114,7 @@ export const CuteStorySection: React.FC<CuteStorySectionProps> = ({ stories, sec
                   <div className="bg-white/90 p-6 rounded-3xl border-2 border-[#FFCCD7] shadow-sm relative">
                     <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFE4EC] text-[#FF5C8D] text-xs font-sans font-bold mb-3">
                       <Calendar className="w-3.5 h-3.5" />
-                      <span>{story.date}</span>
+                      <span>{story.date || story.year}</span>
                     </div>
 
                     <h3 className="font-heading text-xl font-bold text-[#4A2E35] mb-2">

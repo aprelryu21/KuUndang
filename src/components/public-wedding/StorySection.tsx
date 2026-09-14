@@ -59,15 +59,15 @@ export const StorySection: React.FC<StorySectionProps> = ({ stories, section }) 
                   <div className={`w-full md:w-1/2 text-left ${isEven ? 'md:pl-10' : 'md:pr-10 md:text-right'}`}>
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#DFBFC1]/30 text-xs font-semibold text-[#283D52] mb-3">
                       <Sparkles className="w-3 h-3 text-[#C2A56B]" />
-                      <span>{item.date}</span>
+                      <span>{item.date || item.year || `Chapter ${index + 1}`}</span>
                     </div>
 
                     <h3 className="font-heading text-2xl sm:text-3xl text-[#283D52] font-semibold tracking-wide">
-                      {t.content?.stories?.[index]?.title || item.title}
+                      {item.title || t.content?.stories?.[index]?.title}
                     </h3>
 
                     <p className="mt-3 text-xs sm:text-sm text-[#768692] leading-relaxed font-serif italic">
-                      "{t.content?.stories?.[index]?.desc || item.description}"
+                      "{item.description || t.content?.stories?.[index]?.desc}"
                     </p>
                   </div>
 
@@ -78,10 +78,10 @@ export const StorySection: React.FC<StorySectionProps> = ({ stories, section }) 
 
                   {/* Photo Column */}
                   <div className={`w-full md:w-1/2 ${isEven ? 'md:pr-10' : 'md:pl-10'}`}>
-                    {item.photo_url ? (
+                    {(item.photo_url || item.image_url) ? (
                       <div className="overflow-hidden rounded-2xl border-2 border-[#FFFCF7] shadow-md max-h-64 sm:max-h-72 w-full group">
                         <img
-                          src={item.photo_url}
+                          src={item.photo_url || item.image_url}
                           alt={item.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                         />
