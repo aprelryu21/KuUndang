@@ -7,12 +7,14 @@ import { marioAudio } from './marioAudio';
 export interface MarioOpeningCoverProps {
   invitation: Invitation;
   initialGuestName?: string;
+  isMobileDevice?: boolean;
   onStart: (name: string, gender: 'tuan' | 'nyonya') => void;
 }
 
 export const MarioOpeningCover: React.FC<MarioOpeningCoverProps> = ({
   invitation,
   initialGuestName = '',
+  isMobileDevice = false,
   onStart,
 }) => {
   const [name, setName] = useState(initialGuestName);
@@ -151,7 +153,32 @@ export const MarioOpeningCover: React.FC<MarioOpeningCoverProps> = ({
           </button>
         </form>
 
-        <p className="text-[11px] font-mono text-stone-400 text-center mt-4">
+        {/* Device-Specific Controls Guide */}
+        {!isMobileDevice ? (
+          <div className="mt-4 p-2.5 bg-black/40 border-2 border-[#FFD166]/50 rounded-xl text-center space-y-1">
+            <p className="text-[11px] font-mono font-bold text-[#FFE082]">
+              ⌨️ PETUNJUK KONTROL KEYBOARD
+            </p>
+            <div className="flex items-center justify-center gap-2 text-[10px] font-mono text-white flex-wrap">
+              <span>Jalan:</span>
+              <kbd className="px-1.5 py-0.5 bg-stone-700 rounded border border-white/30">A / ◄</kbd>
+              <kbd className="px-1.5 py-0.5 bg-stone-700 rounded border border-white/30">D / ►</kbd>
+              <span className="ml-1">Lompat:</span>
+              <kbd className="px-1.5 py-0.5 bg-stone-700 rounded border border-white/30">SPASI / W / ▲</kbd>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-4 p-2.5 bg-black/40 border-2 border-[#FFD166]/50 rounded-xl text-center space-y-1">
+            <p className="text-[11px] font-mono font-bold text-[#FFE082]">
+              📱 PETUNJUK KONTROL LAYAR
+            </p>
+            <p className="text-[10px] font-mono text-stone-200">
+              Gunakan tombol D-Pad &amp; tombol Lompat di layar untuk menggerakkan karakter.
+            </p>
+          </div>
+        )}
+
+        <p className="text-[10px] font-mono text-stone-400 text-center mt-3">
           ★ Berjalanlah untuk membaca isi undangan dan temukan pasanganmu di pelaminan! ★
         </p>
       </motion.div>

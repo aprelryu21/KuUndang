@@ -16,13 +16,14 @@ export interface MarioWeddingViewProps {
 }
 
 const ZONE_X_TARGETS = [
-  100,  // Zone 0: Start / Sambutan
-  900,  // Zone 1: Mempelai
-  1550, // Zone 2: Kisah Kasih
-  2250, // Zone 3: Rangkaian Acara
-  2900, // Zone 4: Tanda Kasih
-  3550, // Zone 5: Buku Tamu & RSVP
-  4050, // Zone 6: Finish / Wedding Altar
+  120,  // Zone 0: Sambutan (World 1-1)
+  1200, // Zone 1: Mempelai (World 1-2)
+  2150, // Zone 2: Kisah Kasih (World 1-3)
+  3100, // Zone 3: Rangkaian Acara (World 1-4)
+  4050, // Zone 4: Galeri Kenangan (World 1-5)
+  5000, // Zone 5: Tanda Kasih (World 1-6)
+  5950, // Zone 6: Buku Tamu & RSVP (World 1-7)
+  6900, // Zone 7: Pelaminan Impian & Finish (World 1-8)
 ];
 
 export const MarioWeddingView: React.FC<MarioWeddingViewProps> = ({
@@ -40,6 +41,22 @@ export const MarioWeddingView: React.FC<MarioWeddingViewProps> = ({
   const [score, setScore] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isFullModalOpen, setIsFullModalOpen] = useState(false);
+
+  // Detect mobile / touch device without physical keyboard
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+
+  useEffect(() => {
+    const checkDevice = () => {
+      const hasTouch =
+        'ontouchstart' in window ||
+        navigator.maxTouchPoints > 0 ||
+        window.matchMedia('(pointer: coarse)').matches;
+      setIsMobileDevice(hasTouch);
+    };
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+    return () => window.removeEventListener('resize', checkDevice);
+  }, []);
 
   // Control triggers for mobile / touch buttons
   const [isMovingLeft, setIsMovingLeft] = useState(false);
@@ -79,7 +96,7 @@ export const MarioWeddingView: React.FC<MarioWeddingViewProps> = ({
   }, []);
 
   const handleJumpToZone = (zone: number) => {
-    const targetX = ZONE_X_TARGETS[zone] || 100;
+    const targetX = ZONE_X_TARGETS[zone] || 120;
     setTeleportX(targetX);
     setCurrentZone(zone);
   };
@@ -91,6 +108,7 @@ export const MarioWeddingView: React.FC<MarioWeddingViewProps> = ({
         <MarioOpeningCover
           invitation={data.invitation}
           initialGuestName={playerName}
+          isMobileDevice={isMobileDevice}
           onStart={handleStartGame}
         />
       ) : (
@@ -126,6 +144,7 @@ export const MarioWeddingView: React.FC<MarioWeddingViewProps> = ({
             playerGender={playerGender}
             guestName={playerName}
             isMuted={isMuted}
+            isMobileDevice={isMobileDevice}
             onToggleMute={handleToggleMute}
             onMoveLeftStart={() => setIsMovingLeft(true)}
             onMoveLeftEnd={() => setIsMovingLeft(false)}

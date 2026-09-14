@@ -547,3 +547,62 @@ export function drawWeddingCastle(
 
   ctx.restore();
 }
+
+/**
+ * Draw 8-Bit Metal / Stone Spikes
+ */
+export function drawSpikes(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  groundY: number,
+  width: number,
+  height = 20
+) {
+  ctx.save();
+  ctx.translate(Math.round(x), groundY);
+
+  const spikeW = 16;
+  const count = Math.max(1, Math.floor(width / spikeW));
+
+  for (let i = 0; i < count; i++) {
+    const sx = i * spikeW;
+    // Outer black outline triangle
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.moveTo(sx, 0);
+    ctx.lineTo(sx + spikeW / 2, -height);
+    ctx.lineTo(sx + spikeW, 0);
+    ctx.closePath();
+    ctx.fill();
+
+    // Inner grey metal
+    ctx.fillStyle = '#9E9E9E';
+    ctx.beginPath();
+    ctx.moveTo(sx + 2, 0);
+    ctx.lineTo(sx + spikeW / 2, -height + 3);
+    ctx.lineTo(sx + spikeW - 2, 0);
+    ctx.closePath();
+    ctx.fill();
+
+    // White shine on left facet
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.moveTo(sx + 3, 0);
+    ctx.lineTo(sx + spikeW / 2, -height + 3);
+    ctx.lineTo(sx + spikeW / 2, 0);
+    ctx.closePath();
+    ctx.fill();
+
+    // Danger red tip
+    ctx.fillStyle = '#E60012';
+    ctx.beginPath();
+    ctx.moveTo(sx + spikeW / 2 - 2, -height + 7);
+    ctx.lineTo(sx + spikeW / 2, -height + 1);
+    ctx.lineTo(sx + spikeW / 2 + 2, -height + 7);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
