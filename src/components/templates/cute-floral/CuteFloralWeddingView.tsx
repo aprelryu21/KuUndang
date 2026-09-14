@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FullInvitationData, Guest } from '../../../types/wedding';
 import { CuteOpeningCover } from './CuteOpeningCover';
 import { CuteTopHeader } from './CuteTopHeader';
+import { CuteGreetingBanner } from './CuteGreetingBanner';
 import { CuteHeroSection } from './CuteHeroSection';
 import { CuteCoupleSection } from './CuteCoupleSection';
 import { CuteEventsSection } from './CuteEventsSection';
@@ -68,6 +69,12 @@ export const CuteFloralWeddingView: React.FC<CuteFloralWeddingViewProps> = ({
       >
         {/* Sticky Top Header */}
         <CuteTopHeader invitation={invitation} />
+
+        {/* Recipient Honorific Greeting Banner (Nama Penerima di Bagian Paling Atas Isi) */}
+        <CuteGreetingBanner
+          guestName={currentGuestName}
+          invitation={invitation}
+        />
 
         {/* Hero Section & Countdown */}
         <CuteHeroSection invitation={invitation} />

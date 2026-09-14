@@ -48,7 +48,7 @@ export const PastelPopClosingSection: React.FC<PastelPopClosingSectionProps> = (
               KAMI YANG BERBAHAGIA
             </p>
             <h3 className="text-2xl sm:text-3xl font-black text-[#2B2D42] mt-1">
-              {invitation.bride_nickname || 'Siti'} &amp; {invitation.groom_nickname || 'April'}
+              {invitation.bride_nickname || 'Mempelai Wanita'} &amp; {invitation.groom_nickname || 'Mempelai Pria'}
             </h3>
             <p className="text-xs text-[#2B2D42]/60 mt-1">
               Beserta Seluruh Keluarga Besar

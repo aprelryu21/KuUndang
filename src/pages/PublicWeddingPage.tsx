@@ -20,6 +20,7 @@ import { FloatingNav } from '../components/public-wedding/FloatingNav';
 import { Persona5WeddingView } from '../components/templates/persona5/Persona5WeddingView';
 import { JavaneseWeddingView } from '../components/templates/javanese/JavaneseWeddingView';
 import { CuteFloralWeddingView } from '../components/templates/cute-floral/CuteFloralWeddingView';
+import { MarioWeddingView } from '../components/templates/mario/MarioWeddingView';
 import { LanguageSwitcher } from '../components/common/LanguageSwitcher';
 import { AdminLoginModal } from '../components/admin/AdminLoginModal';
 import { Heart, ArrowLeft, Eye, RefreshCw } from 'lucide-react';
@@ -66,11 +67,42 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
     weddingService.init();
 
     let fullData: FullInvitationData | null = null;
-    if (isPreview && id) {
-      fullData = await weddingService.getInvitationById(id);
+    const rawKey = id || slug;
+    const targetKey = rawKey ? decodeURIComponent(rawKey).trim() : null;
+
+    if (targetKey) {
+      // 1. Try by ID first
+      fullData = await weddingService.getInvitationById(targetKey);
+
+      // 2. If not found, try by Slug
+      if (!fullData) {
+        fullData = await weddingService.getInvitationBySlug(targetKey);
+      }
+
+      // 3. If still not found, check all local & remote invitations for slug/title/id match
+      if (!fullData) {
+        const allInvs = await weddingService.getAllInvitations();
+        const matched = allInvs.find(
+          (inv) =>
+            inv.id.toLowerCase() === targetKey.toLowerCase() ||
+            inv.slug.toLowerCase() === targetKey.toLowerCase()
+        );
+        if (matched) {
+          fullData = await weddingService.getFullInvitationData(matched.id, matched);
+        }
+      }
     } else {
-      const targetSlug = slug || 'april-siti';
-      fullData = await weddingService.getInvitationBySlug(targetSlug);
+      // No targetKey provided (e.g. visiting /preview directly)
+      // Pick the latest user-created invitation, or fallback to demo
+      const allInvs = await weddingService.getAllInvitations();
+      const userCreatedInv = allInvs.find(
+        (inv) => inv.id !== 'inv-demo-1' && inv.slug !== 'april-siti'
+      );
+      if (userCreatedInv) {
+        fullData = await weddingService.getFullInvitationData(userCreatedInv.id, userCreatedInv);
+      } else {
+        fullData = await weddingService.getInvitationBySlug('april-siti');
+      }
     }
 
     if (fullData) {
@@ -272,9 +304,53 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
         templateQuery === 'pastel-pop' ||
         templateQuery === 'pink'
       ? 'cute-pink-floral'
+      : templateQuery === 'super-mario' ||
+        templateQuery === 'mario' ||
+        templateQuery === '8bit' ||
+        templateQuery === 'pixel'
+      ? 'super-mario'
       : templateQuery;
 
-  const activeTemplate = normalizedQuery || invitation.template_id || 'royal-arch';
+  const activeTemplate =
+    normalizedQuery ||
+    invitation.template_id ||
+    (data as any).theme?.template_id ||
+    (data as any).template_id ||
+    'royal-arch';
+
+  // Render Super Mario 8-Bit Platformer Template
+  if (activeTemplate === 'super-mario') {
+    return (
+      <div className="relative min-h-screen bg-[#5C94FC]">
+        {/* Admin Preview Mode Floating Bar */}
+        {isPreview && (
+          <div className="fixed top-0 inset-x-0 z-50 bg-[#283D52] text-[#FFE082] border-b-2 border-white px-4 py-2 flex items-center justify-between text-xs shadow-md font-mono">
+            <div className="flex items-center gap-2">
+              <Eye className="w-4 h-4 text-[#FFD166]" />
+              <span>
+                PREVIEW [TEMA 8-BIT SUPER MARIO PLATFORMER] — {invitation.title} ({(invitation.status || 'published').toUpperCase()})
+              </span>
+            </div>
+            <Link
+              to={`/admin/invitations/${invitation.id}/edit`}
+              className="flex items-center gap-1.5 px-3 py-1 bg-[#E60012] text-white rounded-md font-mono font-bold text-[11px] hover:bg-[#CC0010] transition-colors border border-white"
+            >
+              <ArrowLeft className="w-3 h-3" />
+              <span>Pengaturan Undangan</span>
+            </Link>
+          </div>
+        )}
+
+        <MarioWeddingView
+          data={data}
+          guest={guest}
+          guestName={guestName}
+          isPreview={isPreview}
+          onRefreshData={loadData}
+        />
+      </div>
+    );
+  }
 
   // Render Javanese Royal Heritage Template
   if (activeTemplate === 'javanese-royal') {

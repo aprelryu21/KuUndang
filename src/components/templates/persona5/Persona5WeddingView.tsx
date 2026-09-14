@@ -136,7 +136,7 @@ export const Persona5WeddingView: React.FC<Persona5WeddingViewProps> = ({
             <span className="mx-4">★ CONFIDANT BOND MAX ★</span>
             <span className="mx-4">ALL-OUT ATTACK FINISHER</span>
             <span className="mx-4">★ VELVET ROOM COGNITION ★</span>
-            <span className="mx-4">APRIL & SITI WEDDING CELEBRATION</span>
+            <span className="mx-4">{(invitation.groom_nickname || 'GROOM').toUpperCase()} &amp; {(invitation.bride_nickname || 'BRIDE').toUpperCase()} WEDDING CELEBRATION</span>
             <span className="mx-4">★ CONFIDANT BOND MAX ★</span>
             <span className="mx-4">ALL-OUT ATTACK FINISHER</span>
           </div>

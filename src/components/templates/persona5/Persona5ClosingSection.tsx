@@ -77,7 +77,7 @@ export const Persona5ClosingSection: React.FC<Persona5ClosingSectionProps> = ({
 
         {/* Copyright & Disclaimer */}
         <div className="pt-8 border-t border-white/10 text-[11px] font-mono text-[#FFFFFF]/40 space-y-1">
-          <p>© 2021 — 2026 The Wedding of April Pratama & Siti Nurjannah.</p>
+          <p>© The Wedding of {invitation.groom_nickname || 'Groom'} &amp; {invitation.bride_nickname || 'Bride'}.</p>
           <p>Crafted with Persona 5 Stylistic Visual Direction // KU UNDANG Platform.</p>
         </div>
       </div>

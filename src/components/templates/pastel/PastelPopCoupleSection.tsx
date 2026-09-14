@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Heart, Instagram, Sparkles, Star, Smile, Crown } from 'lucide-react';
 import { Couple } from '../../../types/wedding';
+import { CoupleAvatar } from '../../common/CoupleAvatar';
 
 interface PastelPopCoupleSectionProps {
   bride: Couple;
@@ -81,10 +82,12 @@ export const PastelPopCoupleSection: React.FC<PastelPopCoupleSectionProps> = ({ 
             {/* Photo Avatar */}
             <div className="relative w-36 h-36 sm:w-44 sm:h-44 mx-auto my-4">
               <div className="w-full h-full rounded-full overflow-hidden border-4 border-white shadow-md bg-white">
-                <img
-                  src={bride.photo_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&q=80'}
-                  alt={bride.full_name}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                <CoupleAvatar
+                  photoUrl={bride.photo_url}
+                  role="bride"
+                  name={bride.full_name}
+                  theme="pastel"
+                  className="w-full h-full rounded-full hover:scale-105 transition-transform duration-300"
                 />
               </div>
               <span className="absolute bottom-1 right-1 w-10 h-10 rounded-full bg-[#FFD166] border-2 border-white flex items-center justify-center text-lg shadow-xs">
@@ -154,10 +157,12 @@ export const PastelPopCoupleSection: React.FC<PastelPopCoupleSectionProps> = ({ 
             {/* Photo Avatar */}
             <div className="relative w-36 h-36 sm:w-44 sm:h-44 mx-auto my-4">
               <div className="w-full h-full rounded-full overflow-hidden border-4 border-white shadow-md bg-white">
-                <img
-                  src={groom.photo_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&q=80'}
-                  alt={groom.full_name}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                <CoupleAvatar
+                  photoUrl={groom.photo_url}
+                  role="groom"
+                  name={groom.full_name}
+                  theme="pastel"
+                  className="w-full h-full rounded-full hover:scale-105 transition-transform duration-300"
                 />
               </div>
               <span className="absolute bottom-1 right-1 w-10 h-10 rounded-full bg-[#06D6A0] border-2 border-white flex items-center justify-center text-lg shadow-xs">

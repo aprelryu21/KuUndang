@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Heart, Lock, Mail, Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
@@ -131,16 +131,14 @@ export const AdminLoginPage: React.FC = () => {
           </form>
         </div>
 
-        {/* Back to Public Link */}
+        {/* Back to Landing Page Link */}
         <div className="mt-6 text-center">
-          <a
-            href="/april-siti"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-[#768692] hover:text-[#283D52] font-medium"
+          <Link
+            to="/"
+            className="text-xs text-[#768692] hover:text-[#283D52] font-medium transition-colors inline-flex items-center gap-1.5"
           >
-            ← Buka Undangan Publik (April & Siti)
-          </a>
+            ← Ke Beranda Utama (Landing Page)
+          </Link>
         </div>
       </div>
     </div>

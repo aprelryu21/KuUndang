@@ -150,11 +150,11 @@ export const PastelPopOpeningCover: React.FC<PastelPopOpeningCoverProps> = ({
         <div className="my-2">
           <h1 className="text-3xl sm:text-5xl font-black text-[#2B2D42] tracking-tight flex items-center justify-center gap-3 flex-wrap">
             <span className="text-[#FF6B8B] hover:scale-105 transition-transform inline-block">
-              {invitation.bride_nickname || 'Siti'}
+              {invitation.bride_nickname || 'Mempelai Wanita'}
             </span>
             <span className="text-2xl sm:text-3xl text-[#FFD166]">&amp;</span>
             <span className="text-[#4D96FF] hover:scale-105 transition-transform inline-block">
-              {invitation.groom_nickname || 'April'}
+              {invitation.groom_nickname || 'Mempelai Pria'}
             </span>
           </h1>
           <p className="text-xs sm:text-sm font-semibold text-[#2B2D42]/70 mt-1.5">

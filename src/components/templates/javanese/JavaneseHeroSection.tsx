@@ -28,6 +28,23 @@ export const JavaneseHeroSection: React.FC<JavaneseHeroSectionProps> = ({ invita
     seconds: 0,
   });
 
+  // Format wedding date dynamically
+  const formattedDate = React.useMemo(() => {
+    if (!invitation.wedding_date) return '17 SEPTEMBER 2026';
+    try {
+      const d = new Date(invitation.wedding_date);
+      if (isNaN(d.getTime())) return invitation.wedding_date.toUpperCase();
+      return d.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      }).toUpperCase();
+    } catch {
+      return invitation.wedding_date.toUpperCase();
+    }
+  }, [invitation.wedding_date]);
+
   useEffect(() => {
     const targetDate = new Date(`${invitation.wedding_date}T08:00:00`).getTime();
 
@@ -115,7 +132,7 @@ export const JavaneseHeroSection: React.FC<JavaneseHeroSectionProps> = ({ invita
             {invitation.bride_nickname}
           </h1>
           <p className="font-serif text-sm sm:text-base text-[#E5C158] font-medium tracking-widest">
-            April Pratama & Siti Nurjannah
+            {invitation.groom_nickname} &amp; {invitation.bride_nickname}
           </p>
         </div>
 
@@ -123,7 +140,7 @@ export const JavaneseHeroSection: React.FC<JavaneseHeroSectionProps> = ({ invita
         <div className="inline-flex flex-col items-center gap-1.5 px-6 py-3 rounded-2xl bg-[#24160E]/90 border border-[#D4AF37]/60 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
           <div className="flex items-center gap-2 text-xs font-serif text-[#FAF6EE]/90">
             <Calendar className="w-3.5 h-3.5 text-[#D4AF37]" />
-            <span className="font-bold text-[#E5C158]">JUMAT PAHING, 17 SEPTEMBER 2021</span>
+            <span className="font-bold text-[#E5C158]">{formattedDate}</span>
           </div>
           <p className="text-[11px] font-serif text-[#D4AF37]/80">
             {language === 'JW' ? 'Wuku Kulawu // Tanggal Jawi Manten' : 'Wuku Kulawu // Kalender Adat Jawa'}

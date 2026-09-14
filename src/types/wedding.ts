@@ -16,6 +16,7 @@ export type SectionKey =
 export interface ThemeConfig {
   primary_color: string;
   accent_color: string;
+  secondary_color?: string;
   background_color: string;
   secondary_bg: string;
   text_color: string;
@@ -25,8 +26,8 @@ export interface ThemeConfig {
   font_heading: string;
   font_body: string;
   font_accent?: string;
-  corner_radius: string;
-  decorative_intensity: 'minimal' | 'subtle' | 'moderate';
+  corner_radius?: string;
+  decorative_intensity?: 'minimal' | 'subtle' | 'moderate';
 }
 
 export interface SectionSetting {
@@ -74,9 +75,11 @@ export interface StoryItem {
   id: string;
   invitation_id: string;
   title: string;
-  date: string;
+  date?: string;
+  year?: string;
   description: string;
   photo_url?: string;
+  image_url?: string;
   sort_order: number;
 }
 
@@ -95,7 +98,8 @@ export interface GiftAccount {
   id: string;
   invitation_id: string;
   type: 'bank' | 'ewallet' | 'address';
-  provider: string;
+  provider?: string;
+  bank_name?: string;
   account_name: string;
   account_number: string;
   description?: string;
@@ -109,6 +113,7 @@ export interface Guest {
   guest_code: string;
   category: string;
   max_guests: number;
+  has_opened?: boolean;
   opened_at?: string | null;
   created_at: string;
 }
@@ -117,10 +122,13 @@ export interface RSVP {
   id: string;
   invitation_id: string;
   guest_id?: string | null;
-  guest_name: string;
+  guest_name?: string;
+  name?: string;
   attendance: 'attending' | 'not_attending';
-  guest_count: number;
+  guest_count?: number;
+  pax?: number;
   message?: string;
+  notes?: string;
   created_at: string;
 }
 
@@ -128,13 +136,20 @@ export interface Wish {
   id: string;
   invitation_id: string;
   guest_id?: string | null;
-  guest_name: string;
+  guest_name?: string;
+  name?: string;
   message: string;
   status: 'approved' | 'pending' | 'hidden';
   created_at: string;
 }
 
-export type TemplateId = 'royal-arch' | 'persona-5' | 'pastel-pop' | 'javanese-royal' | 'cute-pink-floral';
+export type TemplateId =
+  | 'royal-arch'
+  | 'persona-5'
+  | 'pastel-pop'
+  | 'javanese-royal'
+  | 'cute-pink-floral'
+  | 'super-mario';
 
 export interface Invitation {
   id: string;

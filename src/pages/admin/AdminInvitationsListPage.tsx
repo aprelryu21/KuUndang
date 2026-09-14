@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { weddingService } from '../../services/weddingService';
 import { Invitation, TemplateId } from '../../types/wedding';
 import {
@@ -14,16 +14,38 @@ import {
   CheckCircle,
   X,
   Sparkles,
+  Database,
+  Loader2,
+  AlertTriangle,
+  UploadCloud,
+  Settings,
+  RefreshCw,
+  CheckCircle2,
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { SupabaseDataExplorerModal } from '../../components/admin/SupabaseDataExplorerModal';
+import { SupabaseConfigModal } from '../../components/admin/SupabaseConfigModal';
+import { getSupabaseConfig } from '../../lib/supabase';
 
 export const AdminInvitationsListPage: React.FC = () => {
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Supabase State
+  const [showConfigModal, setShowConfigModal] = useState(false);
+  const [showExplorer, setShowExplorer] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [supabaseStatus, setSupabaseStatus] = useState(getSupabaseConfig());
+
+  // Delete Modal State
+  const [deleteTarget, setDeleteTarget] = useState<Invitation | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // Create Modal State
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newGroom, setNewGroom] = useState('');
   const [newBride, setNewBride] = useState('');
@@ -43,12 +65,39 @@ export const AdminInvitationsListPage: React.FC = () => {
     weddingService.init();
     const invs = await weddingService.getAllInvitations();
     setInvitations(invs);
+    setSupabaseStatus(getSupabaseConfig());
     setLoading(false);
   };
 
   useEffect(() => {
     loadInvitations();
+    const handleConfigChange = () => {
+      setSupabaseStatus(getSupabaseConfig());
+      loadInvitations();
+    };
+    window.addEventListener('supabase_config_changed', handleConfigChange);
+    return () => window.removeEventListener('supabase_config_changed', handleConfigChange);
   }, []);
+
+  const handleSyncAllToSupabase = async () => {
+    if (!supabaseStatus.isConfigured) {
+      setShowConfigModal(true);
+      return;
+    }
+    setIsSyncing(true);
+    try {
+      const res = await weddingService.syncAllLocalDataToSupabase();
+      if (res.success) {
+        showToast(res.message, 'success');
+      } else {
+        showToast(res.message, 'error');
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Gagal sinkronisasi data', 'error');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   // Handle Slug auto-generation for create modal
   const handleNamesChange = (groom: string, bride: string) => {
@@ -66,11 +115,12 @@ export const AdminInvitationsListPage: React.FC = () => {
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newSlug || !newGroom || !newBride) {
+    if (!newSlug.trim() || !newGroom.trim() || !newBride.trim()) {
       showToast('Harap lengkapi nama mempelai dan slug URL', 'error');
       return;
     }
 
+    setIsCreating(true);
     try {
       const created = await weddingService.createInvitation({
         title: newTitle || `The Wedding of ${newGroom} & ${newBride}`,
@@ -81,16 +131,29 @@ export const AdminInvitationsListPage: React.FC = () => {
         template_id: newTemplate,
       });
 
-      showToast(`Undangan "${created.title}" berhasil dibuat! ♡`, 'success');
+      const syncStatus = (created as any)._supabaseStatus;
+      if (syncStatus?.synced) {
+        showToast(`Undangan "${created.title}" berhasil dibuat dan tersimpan di database Supabase Cloud! ♡`, 'success');
+      } else if (syncStatus?.error) {
+        showToast(`Undangan tersimpan lokal. Supabase info: ${syncStatus.error}`, 'error');
+      } else if (!syncStatus?.isConfigured) {
+        showToast(`Undangan "${created.title}" tersimpan lokal. Hubungkan Supabase untuk menyimpan ke cloud.`, 'info');
+      } else {
+        showToast(`Undangan "${created.title}" berhasil dibuat! ♡`, 'success');
+      }
+
       setShowCreateModal(false);
       // Reset form
       setNewTitle('');
       setNewGroom('');
       setNewBride('');
       setNewSlug('');
-      loadInvitations();
+      await loadInvitations();
+      navigate(`/admin/invitations/${created.id}/edit`);
     } catch (err: any) {
       showToast(err.message || 'Gagal membuat undangan', 'error');
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -122,11 +185,18 @@ export const AdminInvitationsListPage: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: string, title: string) => {
-    if (confirm(`Apakah Anda yakin ingin menghapus undangan "${title}"?`)) {
-      await weddingService.deleteInvitation(id);
-      showToast('Undangan berhasil dihapus', 'info');
-      loadInvitations();
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    try {
+      await weddingService.deleteInvitation(deleteTarget.id);
+      showToast(`Undangan "${deleteTarget.title}" berhasil dihapus.`, 'info');
+      setDeleteTarget(null);
+      await loadInvitations();
+    } catch (err: any) {
+      showToast(err.message || 'Gagal menghapus undangan', 'error');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -150,14 +220,91 @@ export const AdminInvitationsListPage: React.FC = () => {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#283D52] hover:bg-[#1E2E3E] text-[#FFFCF7] text-xs font-semibold uppercase tracking-wider transition-all shadow-sm cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Buat Undangan Baru</span>
-        </button>
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => setShowExplorer(true)}
+            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#F7F2EA] hover:bg-[#EFE8DE] border border-[#283D52]/15 text-[#283D52] text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer"
+            title="Lihat Data yang Tersimpan di Supabase"
+          >
+            <Database className="w-4 h-4 text-emerald-600" />
+            <span>Lihat Data Supabase</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowCreateModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#283D52] hover:bg-[#1E2E3E] text-[#FFFCF7] text-xs font-semibold uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Buat Undangan Baru</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Supabase Cloud Connection & Sync Banner */}
+      <div className="p-4 sm:p-5 rounded-3xl bg-[#F7F2EA] border border-[#283D52]/15 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex items-start sm:items-center gap-3.5">
+          <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 border border-emerald-200">
+            <Database className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-sm font-bold text-[#283D52]">Koneksi Supabase Cloud Database</h3>
+              {supabaseStatus.isConfigured ? (
+                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-semibold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Cloud Terhubung
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-semibold">
+                  Mode Lokal Browser (Offline)
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-[#768692] mt-0.5">
+              {supabaseStatus.isConfigured
+                ? 'Data undangan yang Anda tambah atau edit tersimpan realtime di database PostgreSQL Supabase.'
+                : 'Undangan yang ditambahkan tersimpan di browser lokal. Hubungkan ke Supabase agar data muncul di dashboard Supabase.'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 w-full md:w-auto flex-wrap justify-end">
+          {supabaseStatus.isConfigured && (
+            <button
+              type="button"
+              onClick={() => setShowExplorer(true)}
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer shadow-xs"
+              title="Periksa isi tabel langsung di Supabase"
+            >
+              <Database className="w-3.5 h-3.5 text-emerald-700" />
+              <span>Lihat Data Supabase</span>
+            </button>
+          )}
+
+          {supabaseStatus.isConfigured && (
+            <button
+              type="button"
+              onClick={handleSyncAllToSupabase}
+              disabled={isSyncing}
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#FFFCF7] hover:bg-[#EFE8DE] border border-[#283D52]/15 text-[#283D52] text-xs font-semibold uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer shadow-xs"
+              title="Unggah semua undangan lokal ke database Supabase"
+            >
+              <UploadCloud className={`w-3.5 h-3.5 text-emerald-700 ${isSyncing ? 'animate-bounce' : ''}`} />
+              <span>{isSyncing ? 'Sinkronisasi...' : 'Sinkron ke Cloud'}</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setShowConfigModal(true)}
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#283D52] hover:bg-[#1E2E3E] text-[#FFFCF7] text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer shadow-xs"
+          >
+            <Settings className="w-3.5 h-3.5" />
+            <span>{supabaseStatus.isConfigured ? 'Pengaturan' : 'Hubungkan Supabase'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Invitations Table / Cards */}
@@ -207,7 +354,9 @@ export const AdminInvitationsListPage: React.FC = () => {
                   <span>Tema Desain:</span>
                   <span
                     className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase ${
-                      inv.template_id === 'persona-5'
+                      inv.template_id === 'super-mario'
+                        ? 'bg-[#5C94FC] text-white font-mono'
+                        : inv.template_id === 'persona-5'
                         ? 'bg-[#E60012] text-white -skew-x-3'
                         : inv.template_id === 'javanese-royal'
                         ? 'bg-[#D4AF37] text-[#1A1009]'
@@ -216,7 +365,9 @@ export const AdminInvitationsListPage: React.FC = () => {
                         : 'bg-[#283D52] text-[#FFFCF7]'
                     }`}
                   >
-                    {inv.template_id === 'persona-5'
+                    {inv.template_id === 'super-mario'
+                      ? '8-Bit Mario Game'
+                      : inv.template_id === 'persona-5'
                       ? 'Persona 5 Style'
                       : inv.template_id === 'javanese-royal'
                       ? 'Adat Jawa Sakral'
@@ -274,16 +425,14 @@ export const AdminInvitationsListPage: React.FC = () => {
                 </a>
 
                 {/* Delete Button */}
-                {invitations.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(inv.id, inv.title)}
-                    className="p-2 rounded-xl bg-[#FFFCF7] hover:bg-rose-50 border border-rose-200 text-rose-700 transition-colors cursor-pointer"
-                    title="Hapus Undangan"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => setDeleteTarget(inv)}
+                  className="p-2 rounded-xl bg-[#FFFCF7] hover:bg-rose-50 border border-rose-200 text-rose-700 transition-colors cursor-pointer"
+                  title="Hapus Undangan"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
           </div>
@@ -401,6 +550,7 @@ export const AdminInvitationsListPage: React.FC = () => {
                   <option value="persona-5">Phantom Crimson & Black (Persona 5 Theme)</option>
                   <option value="javanese-royal">Adat Jawa Keraton & Gamelan Sakral</option>
                   <option value="cute-pink-floral">Pastel Bloom & Bunga Lucu (Pink Manis)</option>
+                  <option value="super-mario">8-Bit Retro Platformer (Super Mario Bros)</option>
                 </select>
               </div>
 
@@ -408,15 +558,24 @@ export const AdminInvitationsListPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2.5 rounded-xl border border-[#283D52]/20 text-xs font-semibold uppercase tracking-wider text-[#283D52]"
+                  disabled={isCreating}
+                  className="px-4 py-2.5 rounded-xl border border-[#283D52]/20 text-xs font-semibold uppercase tracking-wider text-[#283D52] hover:bg-[#EFE8DE] cursor-pointer disabled:opacity-50"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-[#283D52] hover:bg-[#1E2E3E] text-[#FFFCF7] text-xs font-semibold uppercase tracking-wider shadow-sm"
+                  disabled={isCreating}
+                  className="px-5 py-2.5 rounded-xl bg-[#283D52] hover:bg-[#1E2E3E] text-[#FFFCF7] text-xs font-semibold uppercase tracking-wider shadow-sm flex items-center gap-2 cursor-pointer disabled:opacity-50"
                 >
-                  Buat Undangan
+                  {isCreating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Menyiapkan Undangan...</span>
+                    </>
+                  ) : (
+                    <span>Buat Undangan</span>
+                  )}
                 </button>
               </div>
             </form>
@@ -531,6 +690,81 @@ export const AdminInvitationsListPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* DELETE CONFIRMATION MODAL */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 bg-[#283D52]/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-[#FFFCF7] max-w-md w-full rounded-3xl p-6 sm:p-7 border border-rose-200 shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0 border border-rose-200">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-heading text-xl font-bold text-[#283D52]">
+                  Hapus Undangan?
+                </h3>
+                <p className="text-xs text-[#768692]">Penghapusan permanen dari sistem</p>
+              </div>
+            </div>
+
+            <div className="bg-rose-50/80 border border-rose-200 rounded-2xl p-4 mb-5 space-y-1.5 text-left">
+              <p className="text-xs font-semibold text-rose-900">
+                Undangan yang akan dihapus: <br />
+                <span className="font-bold underline text-sm">{deleteTarget.title}</span>
+              </p>
+              <p className="text-[11px] text-rose-700 leading-relaxed mt-1">
+                Seluruh data pasangan, jadwal acara, galeri foto, amplop digital, daftar tamu, RSVP, dan ucapan yang terkait akan dihapus secara permanen dari browser dan Supabase Cloud.
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                disabled={isDeleting}
+                className="px-4 py-2.5 rounded-xl border border-[#283D52]/20 text-xs font-semibold uppercase tracking-wider text-[#283D52] hover:bg-[#EFE8DE] transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+                className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold uppercase tracking-wider shadow-sm transition-colors cursor-pointer flex items-center gap-2 disabled:opacity-50"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Menghapus...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    <span>Ya, Hapus Sekarang</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Supabase Data Explorer Modal */}
+      <SupabaseDataExplorerModal
+        isOpen={showExplorer}
+        onClose={() => {
+          setShowExplorer(false);
+          loadInvitations();
+        }}
+        onOpenConfig={() => setShowConfigModal(true)}
+      />
+
+      {/* Supabase Config Modal */}
+      <SupabaseConfigModal
+        isOpen={showConfigModal}
+        onClose={() => setShowConfigModal(false)}
+        onSuccess={loadInvitations}
+      />
     </div>
   );
 };

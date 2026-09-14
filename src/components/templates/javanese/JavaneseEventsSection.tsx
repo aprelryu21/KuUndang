@@ -20,7 +20,7 @@ export const JavaneseEventsSection: React.FC<JavaneseEventsSectionProps> = ({ ev
   const { t, language } = useLanguage();
 
   const handleAddToCalendar = (event: WeddingEvent) => {
-    const coupleText = invitation ? `${invitation.groom_nickname} & ${invitation.bride_nickname}` : 'April & Siti';
+    const coupleText = invitation ? `${invitation.groom_nickname} & ${invitation.bride_nickname}` : 'Kedua Mempelai';
     const title = encodeURIComponent(`${event.title} - ${coupleText}`);
     const details = encodeURIComponent(
       `Pahargyan Dhauping Penganten Adat Jawa. Lokasi: ${event.venue_name || event.venue}. ${event.description || ''}`

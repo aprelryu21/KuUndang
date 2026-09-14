@@ -53,57 +53,65 @@ export const LandingFooter: React.FC<LandingFooterProps> = ({ onOpenAdminLogin }
 
           {/* Quick Links */}
           <div className="md:col-span-3 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C2A56B]">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9A86A]">
               Navigasi Halaman
             </p>
-            <ul className="space-y-2 text-xs text-[#FFFCF7]/80">
+            <ul className="space-y-2 text-xs text-[#FAF7F2]/80">
               <li>
-                <a href="#fitur" className="hover:text-[#C2A56B] transition-colors">
+                <a href="#fitur" className="hover:text-[#C9A86A] transition-colors">
                   Fitur Unggulan
                 </a>
               </li>
               <li>
-                <a href="#cuplikan" className="hover:text-[#C2A56B] transition-colors">
+                <a href="#pilihan-tema" className="hover:text-[#C9A86A] transition-colors">
+                  Pilihan Tema
+                </a>
+              </li>
+              <li>
+                <a href="#cuplikan" className="hover:text-[#C9A86A] transition-colors">
                   Cuplikan Desain Undangan
                 </a>
               </li>
               <li>
-                <a href="#bahasa" className="hover:text-[#C2A56B] transition-colors">
-                  5 Pilihan Bahasa
+                <a href="#pesan" className="hover:text-[#C9A86A] transition-colors font-semibold text-[#DFC28A]">
+                  Pemesanan Undangan
                 </a>
               </li>
               <li>
-                <a href="#faq" className="hover:text-[#C2A56B] transition-colors">
+                <a href="#faq" className="hover:text-[#C9A86A] transition-colors">
                   Pertanyaan Sering Diajukan
                 </a>
-              </li>
-              <li>
-                <Link to="/april-siti" className="text-[#C2A56B] hover:underline font-semibold flex items-center gap-1">
-                  <span>Lihat Contoh Undangan (April & Siti)</span>
-                  <ExternalLink className="w-3 h-3" />
-                </Link>
               </li>
             </ul>
           </div>
 
-          {/* Privacy & Integrity Column (No visible admin hints - completely hidden) */}
+          {/* Contact & Studio Ordering */}
           <div className="md:col-span-4 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C2A56B]">
-              Keamanan & Privasi
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9A86A]">
+              Kontak &amp; Konsultasi Studio
             </p>
-            <p className="text-xs text-[#FFFCF7]/80 leading-relaxed">
-              Platform dilengkapi sistem perlindungan data mutakhir untuk memastikan data kehadiran tamu,
-              pesan doa restu, serta konfirmasi amplop digital tersimpan secara aman dan terenkripsi.
+            <p className="text-xs text-[#FAF7F2]/80 leading-relaxed">
+              Hubungi tim kami untuk konsultasi pemilihan tema, input data mempelai, atau pemesanan paket khusus pernikahan Anda.
             </p>
 
-            <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs text-[#FFFCF7]/70 space-y-1.5">
-              <div className="flex items-center gap-2 text-[#C2A56B]">
-                <Shield className="w-3.5 h-3.5" />
-                <span className="font-semibold text-[11px]">Privasi Terjaga Penuh</span>
-              </div>
-              <p className="text-[10px] text-[#768692] leading-relaxed">
-                Tautan undangan privat dengan nama tamu yang dipersonalisasi, bebas gangguan dan aman digunakan.
+            <div className="p-3.5 rounded-2xl bg-white/5 border border-[#C9A86A]/30 text-xs space-y-2">
+              <a
+                href="https://wa.me/6282114445631?text=Halo%20Tim%20KU%20UNDANG,%20saya%20ingin%20konsultasi%20pemesanan%20undangan%20digital%20pernikahan."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between text-[#25D366] hover:underline font-bold"
+              >
+                <span>WhatsApp: 0821-1444-5631</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+              <p className="text-[10px] text-[#A6B4C0] leading-relaxed">
+                Respon Cepat setiap hari pukul 08.00 – 22.00 WIB. Konsultasi ramah dan tanpa biaya.
               </p>
+            </div>
+
+            <div className="flex items-center gap-2 text-[#C9A86A] pt-1">
+              <Shield className="w-3.5 h-3.5" />
+              <span className="font-semibold text-[11px]">Privasi Terjaga &amp; Bebas Iklan</span>
             </div>
           </div>
         </div>

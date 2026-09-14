@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FullInvitationData, Guest } from '../../../types/wedding';
 import { JavaneseCover } from './JavaneseCover';
 import { JavaneseHeader } from './JavaneseHeader';
+import { JavaneseGreetingBanner } from './JavaneseGreetingBanner';
 import { JavaneseHeroSection } from './JavaneseHeroSection';
 import { JavaneseCoupleSection } from './JavaneseCoupleSection';
 import { JavaneseEventsSection } from './JavaneseEventsSection';
@@ -70,6 +71,12 @@ export const JavaneseWeddingView: React.FC<JavaneseWeddingViewProps> = ({
       >
         {/* Top Sacred Bar with Language Switcher */}
         <JavaneseHeader invitation={invitation} />
+
+        {/* Recipient Honorific Greeting Banner (Nama Penerima di Bagian Atas Isi) */}
+        <JavaneseGreetingBanner
+          guestName={currentGuestName}
+          invitation={invitation}
+        />
 
         {/* Hero & Ceremonial Countdown Section */}
         <JavaneseHeroSection invitation={invitation} />

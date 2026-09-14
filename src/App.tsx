@@ -28,11 +28,12 @@ export default function App() {
               {/* Public Landing Page */}
               <Route path="/" element={<LandingPage />} />
 
-              {/* Public Wedding Page by slug (e.g. /shofwan-allya) */}
-              <Route path="/:slug" element={<PublicWeddingPage />} />
-
-              {/* Admin Preview Mode */}
+              {/* Admin Preview Mode (Matches /preview/:id or /preview/:slug or /preview) */}
               <Route path="/preview/:id" element={<PublicWeddingPage isPreview={true} />} />
+              <Route path="/preview" element={<PublicWeddingPage isPreview={true} />} />
+
+              {/* Public Wedding Page by slug (e.g. /shofwan-allya or /april-siti) */}
+              <Route path="/:slug" element={<PublicWeddingPage />} />
 
               {/* Admin Authentication */}
               <Route path="/admin/login" element={<AdminLoginPage />} />

@@ -8,8 +8,8 @@ interface CuteTopHeaderProps {
 }
 
 export const CuteTopHeader: React.FC<CuteTopHeaderProps> = ({ invitation }) => {
-  const groomName = invitation?.groom_nickname || 'April';
-  const brideName = invitation?.bride_nickname || 'Siti';
+  const groomName = invitation?.groom_nickname || 'Mempelai Pria';
+  const brideName = invitation?.bride_nickname || 'Mempelai Wanita';
 
   return (
     <header

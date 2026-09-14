@@ -64,7 +64,7 @@ export const JavaneseRSVPAndWishes: React.FC<JavaneseRSVPAndWishesProps> = ({
             invitation_id: invitationId,
             bank_name: 'BCA',
             account_number: '0181928371',
-            account_holder: 'Siti Nurjannah',
+            account_holder: 'Mempelai Wanita',
             is_active: true,
           },
           {
@@ -72,7 +72,7 @@ export const JavaneseRSVPAndWishes: React.FC<JavaneseRSVPAndWishesProps> = ({
             invitation_id: invitationId,
             bank_name: 'Bank Mandiri',
             account_number: '1420019283746',
-            account_holder: 'April Pratama',
+            account_holder: 'Mempelai Pria',
             is_active: true,
           },
         ];

@@ -442,11 +442,12 @@ export const stopWebAudioGamelan = () => {
 };
 
 /**
- * Traditional Gamelan Audio Source Links:
- * Multiple mirrors for high availability:
+ * Traditional Javanese Wedding Gamelan Audio Tracks (Gending Temanten Kebo Giro & Ladrang Wilujeng):
+ * Authentic ceremonial gamelan for Javanese royal weddings:
  */
 export const GAMELAN_AUDIO_SOURCES = [
-  'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=gamelan-traditional-indonesian-music-111818.mp3',
-  'https://upload.wikimedia.org/wikipedia/commons/transcoded/8/87/Javanese_Gamelan_-_Udan_Mas.ogg/Javanese_Gamelan_-_Udan_Mas.ogg.mp3',
-  'https://upload.wikimedia.org/wikipedia/commons/transcoded/e/ec/Gamelan_degung_sabilulungan.ogg/Gamelan_degung_sabilulungan.ogg.mp3',
+  'https://archive.org/download/gending-temanten-adat-jawa-kebo-giro/Gending%20Temanten%20Adat%20Jawa%20%20kebo%20giro.mp3',
+  'https://archive.org/download/ladrang-tirto-kencana-pahargyan-temanten-kebo-giro-giro-temanten/Ladrang%20Wilujeng%20_%20Pahargyan%20Temanten%20_%20Kebo%20Giro-Giro%20Temanten.mp3',
+  'https://archive.org/download/GendingTemantenAdatJawaKeboGiro_201802/Gending%20Temanten%20Adat%20Jawa%20%E2%81%84%20kebo%20giro.mp3',
+  'https://archive.org/download/ladrang-tirto-kencana-pahargyan-temanten-kebo-giro-giro-temanten/Gending%20Temanten%20Adat%20Jawa%20_%20kebo%20giro.mp3',
 ];

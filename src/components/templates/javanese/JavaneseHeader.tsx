@@ -10,8 +10,8 @@ interface JavaneseHeaderProps {
 export const JavaneseHeader: React.FC<JavaneseHeaderProps> = ({ invitation }) => {
   const { language } = useLanguage();
 
-  const groomName = invitation?.groom_nickname || 'April';
-  const brideName = invitation?.bride_nickname || 'Siti';
+  const groomName = invitation?.groom_nickname || 'Mempelai Pria';
+  const brideName = invitation?.bride_nickname || 'Mempelai Wanita';
 
   return (
     <header

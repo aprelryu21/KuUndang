@@ -20,6 +20,22 @@ interface CuteHeroSectionProps {
 export const CuteHeroSection: React.FC<CuteHeroSectionProps> = ({ invitation }) => {
   const { language } = useLanguage();
 
+  const formattedDate = React.useMemo(() => {
+    if (!invitation.wedding_date) return 'Jumat, 17 September 2026';
+    try {
+      const d = new Date(invitation.wedding_date);
+      if (isNaN(d.getTime())) return invitation.wedding_date;
+      return d.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      });
+    } catch {
+      return invitation.wedding_date;
+    }
+  }, [invitation.wedding_date]);
+
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -86,13 +102,13 @@ export const CuteHeroSection: React.FC<CuteHeroSectionProps> = ({ invitation }) 
             MOHON DOA RESTU PERNIKAHAN
           </p>
           <h2 className="font-heading text-4xl sm:text-6xl font-bold text-[#E03164] tracking-wide">
-            {invitation.groom_nickname || 'April'}{' '}
+            {invitation.groom_nickname || 'Mempelai Pria'}{' '}
             <span className="text-[#FF85A2] font-accent text-5xl sm:text-7xl">&</span>{' '}
-            {invitation.bride_nickname || 'Siti'}
+            {invitation.bride_nickname || 'Mempelai Wanita'}
           </h2>
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#FFA3B8] shadow-xs text-xs sm:text-sm font-sans font-bold text-[#6B3E48]">
             <Calendar className="w-4 h-4 text-[#FF5C8D]" />
-            <span>Jumat, 17 September 2021</span>
+            <span>{formattedDate}</span>
           </div>
         </div>
 

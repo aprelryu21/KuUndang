@@ -78,31 +78,30 @@ export const LandingHero: React.FC = () => {
               multibahasa (termasuk Basa Jawa Krama), RSVP buku tamu, serta kemudahan tanda kasih digital.
             </motion.p>
 
-            {/* Quick Action Buttons (Internal anchors only, no outbound hyperlink) */}
+            {/* Quick Action Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.7, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-3 w-full"
+              transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-3.5 w-full"
             >
               <motion.a
-                href="#cuplikan"
-                whileHover={{ scale: 1.03, y: -2 }}
+                href="#pesan"
+                whileHover={{ scale: 1.02, y: -2 }}
                 whileTap={{ scale: 0.98 }}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#283D52] hover:bg-[#1E2E3E] text-[#FFFCF7] text-sm font-semibold tracking-wide shadow-md hover:shadow-lg transition-all cursor-pointer"
+                className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white text-sm font-bold tracking-wide shadow-md hover:shadow-xl transition-all cursor-pointer group"
               >
-                <Layers className="w-4 h-4 text-[#C2A56B]" />
-                <span>Lihat Cuplikan Undangan</span>
+                <span>Pesan via WhatsApp (0821-1444-5631)</span>
               </motion.a>
               <motion.a
-                href="#fitur"
-                whileHover={{ scale: 1.03, y: -2 }}
+                href="#cuplikan"
+                whileHover={{ scale: 1.02, y: -2 }}
                 whileTap={{ scale: 0.98 }}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#FFFCF7] hover:bg-[#EFE8DE] border border-[#C2A56B]/40 text-[#283D52] text-sm font-semibold tracking-wide shadow-xs transition-all cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#1E2E3E] hover:bg-[#15222E] text-[#FAF7F2] text-sm font-semibold tracking-wide shadow-md hover:shadow-lg transition-all cursor-pointer"
               >
-                <span>Pelajari Fitur Studio</span>
-                <ChevronDown className="w-4 h-4 text-[#C2A56B]" />
+                <Layers className="w-4 h-4 text-[#C9A86A]" />
+                <span>Lihat Cuplikan Undangan</span>
               </motion.a>
             </motion.div>
 

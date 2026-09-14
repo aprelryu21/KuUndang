@@ -196,7 +196,7 @@ export const Persona3RSVPAndWishes: React.FC<Persona3RSVPAndWishesProps> = ({
                   Konfirmasi Berhasil Diterima!
                 </h3>
                 <p className="text-sm font-mono text-[#A0C4E2] max-w-md mx-auto">
-                  Terima kasih atas konfirmasi kehadiran Anda. Kehadiran dan doa restu Anda adalah kehormatan besar bagi April & Siti.
+                  Terima kasih atas konfirmasi kehadiran Anda. Kehadiran dan doa restu Anda adalah kehormatan besar bagi kedua mempelai dan keluarga.
                 </p>
                 <button
                   type="button"

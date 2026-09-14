@@ -31,6 +31,22 @@ export const CuteOpeningCover: React.FC<CuteOpeningCoverProps> = ({
   const { t, language } = useLanguage();
   const [guestName, setGuestName] = useState(initialGuestName || 'Tamu Terhormat');
 
+  const formattedDate = React.useMemo(() => {
+    if (!invitation.wedding_date) return '17 September 2026';
+    try {
+      const d = new Date(invitation.wedding_date);
+      if (isNaN(d.getTime())) return invitation.wedding_date;
+      return d.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      });
+    } catch {
+      return invitation.wedding_date;
+    }
+  }, [invitation.wedding_date]);
+
   const handleOpenClick = () => {
     // 1. Play sweet magical chime sound
     playCuteChimeSfx();
@@ -97,14 +113,14 @@ export const CuteOpeningCover: React.FC<CuteOpeningCoverProps> = ({
             THE WEDDING OF
           </p>
           <h1 className="font-heading text-3xl sm:text-4xl font-bold text-[#E03164] tracking-wide">
-            {invitation.groom_nickname || 'April'}{' '}
+            {invitation.groom_nickname || 'Mempelai Pria'}{' '}
             <span className="text-[#FFA3B8] font-accent text-4xl">&</span>{' '}
-            {invitation.bride_nickname || 'Siti'}
+            {invitation.bride_nickname || 'Mempelai Wanita'}
           </h1>
           <div className="flex items-center justify-center gap-2 pt-1">
             <CuteBowSvg className="w-7 h-5" />
             <span className="text-xs font-sans font-semibold text-[#8A505F]">
-              {invitation.wedding_date ? 'Jumat, 17 September 2021' : '17 September 2021'}
+              {formattedDate}
             </span>
             <CuteBowSvg className="w-7 h-5 -scale-x-100" />
           </div>

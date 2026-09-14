@@ -16,7 +16,7 @@ export const Persona3EventsSection: React.FC<Persona3EventsSectionProps> = ({ ev
   const getGoogleCalendarUrl = (event: WeddingEvent) => {
     const title = encodeURIComponent(event.title);
     const details = encodeURIComponent(
-      `${event.description || 'Pernikahan April & Siti'}\nLokasi: ${event.venue}, ${event.address}`
+      `${event.description || 'Pernikahan Mempelai'}\nLokasi: ${event.venue}, ${event.address}`
     );
     const location = encodeURIComponent(`${event.venue}, ${event.address}`);
     const dateFormatted = event.date.replace(/-/g, '');

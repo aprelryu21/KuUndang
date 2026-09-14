@@ -19,11 +19,10 @@ import {
 } from 'lucide-react';
 
 export const AdminLayout: React.FC = () => {
-  const { user, signOut, isDemoAuth } = useAuth();
+  const { user, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showSupabaseInfoModal, setShowSupabaseInfoModal] = useState(false);
 
   const handleLogout = async () => {
     await signOut();
@@ -128,7 +127,7 @@ export const AdminLayout: React.FC = () => {
               >
                 <span className="flex items-center gap-2">
                   <Sparkles className="w-3.5 h-3.5 text-[#C2A56B]" />
-                  <span>Demo April & Siti</span>
+                  <span>Lihat Contoh Undangan</span>
                 </span>
                 <ExternalLink className="w-3.5 h-3.5 text-[#768692]" />
               </a>
@@ -138,24 +137,19 @@ export const AdminLayout: React.FC = () => {
 
         {/* Bottom User Profile & Status */}
         <div className="p-4 border-t border-[#283D52]/10 space-y-3">
-          {/* Supabase Status Pill */}
-          <button
-            type="button"
-            onClick={() => setShowSupabaseInfoModal(true)}
-            className="w-full flex items-center justify-between p-2 rounded-xl bg-[#F7F2EA] hover:bg-[#EFE8DE] text-left text-xs transition-colors cursor-pointer"
-          >
+          {/* Cloud Storage Status Pill */}
+          <div className="w-full flex items-center justify-between p-2 rounded-xl bg-[#F7F2EA] text-left text-xs">
             <div className="flex items-center gap-2">
-              <Database className="w-3.5 h-3.5 text-[#C2A56B]" />
-              <span className="text-[11px] font-medium text-[#24313A]">
-                {isDemoAuth ? 'Mode Lokal / Demo' : 'Supabase Terhubung'}
+              <Database className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="text-[11px] font-semibold text-[#283D52]">
+                Supabase Cloud DB
               </span>
             </div>
-            <span
-              className={`w-2 h-2 rounded-full ${
-                isDemoAuth ? 'bg-amber-400' : 'bg-emerald-500'
-              }`}
-            />
-          </button>
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded-md">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Aktif
+            </span>
+          </div>
 
           {/* User info */}
           <div className="flex items-center justify-between pt-1">
@@ -168,7 +162,7 @@ export const AdminLayout: React.FC = () => {
             <button
               type="button"
               onClick={handleLogout}
-              className="p-1.5 rounded-lg text-[#768692] hover:text-rose-600 hover:bg-rose-50 transition-colors"
+              className="p-1.5 rounded-lg text-[#768692] hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
               title="Keluar"
               aria-label="Logout"
             >
@@ -184,60 +178,6 @@ export const AdminLayout: React.FC = () => {
           <Outlet />
         </main>
       </div>
-
-      {/* Supabase connection info modal */}
-      {showSupabaseInfoModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-[#FFFCF7] max-w-md w-full rounded-3xl p-6 border border-[#C2A56B]/40 shadow-xl">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2 text-[#283D52] font-heading text-xl font-bold">
-                <Database className="w-5 h-5 text-[#C2A56B]" />
-                <span>Status Backend & Database</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowSupabaseInfoModal(false)}
-                className="p-1 rounded-md text-[#768692] hover:text-[#24313A]"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="text-xs space-y-3 text-[#24313A] leading-relaxed">
-              <p>
-                Aplikasi ini mendukung arsitektur <strong className="text-[#283D52]">Dual-Storage</strong>:
-              </p>
-              <div className="p-3 bg-[#F7F2EA] rounded-xl border border-[#283D52]/10 space-y-1.5">
-                <p className="font-semibold text-[#283D52]">
-                  1. Local Persistent Engine (Aktif)
-                </p>
-                <p className="text-[#768692]">
-                  Seluruh data undangan, tamu, RSVP, ucapan, dan tema tersimpan secara interaktif dan real-time di browser Anda tanpa perlu pengaturan awal.
-                </p>
-              </div>
-
-              <div className="p-3 bg-[#F7F2EA] rounded-xl border border-[#283D52]/10 space-y-1.5">
-                <p className="font-semibold text-[#283D52]">
-                  2. Supabase PostgreSQL & Auth (Siap Pakai)
-                </p>
-                <p className="text-[#768692]">
-                  Skema SQL lengkap tersedia di <code className="bg-white px-1 rounded">supabase/schema.sql</code>. Cukup masukkan <code className="bg-white px-1 rounded">VITE_SUPABASE_URL</code> dan <code className="bg-white px-1 rounded">VITE_SUPABASE_ANON_KEY</code> di file <code className="bg-white px-1 rounded">.env</code> untuk mengaktifkan cloud database.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-6 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setShowSupabaseInfoModal(false)}
-                className="px-4 py-2 bg-[#283D52] text-[#FFFCF7] rounded-xl text-xs font-semibold uppercase tracking-wider"
-              >
-                Mengerti
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -21,7 +21,7 @@ export const CuteEventsSection: React.FC<CuteEventsSectionProps> = ({ events, in
   const { language } = useLanguage();
 
   const handleAddToCalendar = (event: WeddingEvent) => {
-    const coupleText = invitation ? `${invitation.groom_nickname} & ${invitation.bride_nickname}` : 'April & Siti';
+    const coupleText = invitation ? `${invitation.groom_nickname} & ${invitation.bride_nickname}` : 'Kedua Mempelai';
     const title = encodeURIComponent(`${event.title} - ${coupleText}`);
     const details = encodeURIComponent(
       `Pernikahan Bahagia ${coupleText}. Lokasi: ${event.venue_name || event.venue}. ${event.description || ''}`

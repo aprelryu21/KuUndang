@@ -10,6 +10,7 @@ import {
 } from './javaneseAssets';
 import { JavaneseGoldenParticles } from './JavaneseGoldenParticles';
 import { Heart } from 'lucide-react';
+import { CoupleAvatar } from '../../common/CoupleAvatar';
 
 interface JavaneseCoupleSectionProps {
   bride: Couple;
@@ -68,13 +69,12 @@ export const JavaneseCoupleSection: React.FC<JavaneseCoupleSectionProps> = ({ br
 
             {/* Photo with Paes / Javanese Arch Frame */}
             <div className="relative mx-auto w-44 h-56 sm:w-48 sm:h-60 rounded-t-full rounded-b-xl overflow-hidden border-2 border-[#D4AF37] p-1 bg-[#1A1009] shadow-md mb-5">
-              <img
-                src={
-                  bride.photo_url ||
-                  'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?q=80&w=1000&auto=format&fit=crop'
-                }
-                alt={bride.full_name}
-                className="w-full h-full object-cover rounded-t-full rounded-b-lg"
+              <CoupleAvatar
+                photoUrl={bride.photo_url}
+                role="bride"
+                name={bride.full_name}
+                theme="javanese"
+                className="w-full h-full rounded-t-full rounded-b-lg"
               />
             </div>
 
@@ -123,13 +123,12 @@ export const JavaneseCoupleSection: React.FC<JavaneseCoupleSectionProps> = ({ br
 
             {/* Photo with Javanese Beskap Arch Frame */}
             <div className="relative mx-auto w-44 h-56 sm:w-48 sm:h-60 rounded-t-full rounded-b-xl overflow-hidden border-2 border-[#D4AF37] p-1 bg-[#1A1009] shadow-md mb-5">
-              <img
-                src={
-                  groom.photo_url ||
-                  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop'
-                }
-                alt={groom.full_name}
-                className="w-full h-full object-cover rounded-t-full rounded-b-lg"
+              <CoupleAvatar
+                photoUrl={groom.photo_url}
+                role="groom"
+                name={groom.full_name}
+                theme="javanese"
+                className="w-full h-full rounded-t-full rounded-b-lg"
               />
             </div>
 
@@ -155,7 +154,7 @@ export const JavaneseCoupleSection: React.FC<JavaneseCoupleSectionProps> = ({ br
                 {groom.father_name} & {groom.mother_name}
               </p>
               <p className="text-[11px] text-[#FAF6EE]/60 pt-1">
-                Papar, Kediri, Jawa Timur
+                Kandangan, Kediri, Jawa Timur
               </p>
             </div>
           </motion.div>

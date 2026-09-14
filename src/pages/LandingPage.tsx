@@ -6,6 +6,7 @@ import { LandingInvitationSnippet } from '../components/landing/LandingInvitatio
 import { LandingMultiLangShowcase } from '../components/landing/LandingMultiLangShowcase';
 import { LandingTemplatesGallery } from '../components/landing/LandingTemplatesGallery';
 import { LandingHowItWorks } from '../components/landing/LandingHowItWorks';
+import { LandingOrderSection } from '../components/landing/LandingOrderSection';
 import { LandingFAQAndCTA } from '../components/landing/LandingFAQAndCTA';
 import { LandingFooter } from '../components/landing/LandingFooter';
 import { LandingMobileBottomNav } from '../components/landing/LandingMobileBottomNav';
@@ -61,7 +62,10 @@ export const LandingPage: React.FC = () => {
         {/* 6. How it Works (4 Steps) */}
         <LandingHowItWorks />
 
-        {/* 7. FAQ Accordion & Big Invitation CTA */}
+        {/* 7. Dedicated Order & Consultation Section with Automated WhatsApp Form */}
+        <LandingOrderSection />
+
+        {/* 8. FAQ Accordion & Big Invitation CTA */}
         <LandingFAQAndCTA onOpenAdminLogin={() => setIsAdminModalOpen(true)} />
       </main>
 

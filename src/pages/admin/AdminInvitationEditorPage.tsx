@@ -44,7 +44,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { DriveUploader } from '../../components/DriveUploader';
-import { googleDriveService } from '../../services/googleDriveService';
+import { getTemplatePreset } from '../../data/templatePresets';
 
 type EditorTab =
   | 'general'
@@ -147,24 +147,6 @@ export const AdminInvitationEditorPage: React.FC = () => {
       await weddingService.updateGallery(id, gallery);
       await weddingService.updateGifts(id, gifts);
       await weddingService.updateSections(id, sections);
-
-      // Sinkronkan data ke Google Sheets jika Apps Script terhubung
-      if (googleDriveService.isConfigured()) {
-        try {
-          await googleDriveService.saveInvitationToSheets({
-            ...invitation,
-            bride,
-            groom,
-            events,
-            stories,
-            gallery,
-            gifts,
-            sections,
-          });
-        } catch (gasErr) {
-          console.warn('Apps Script sync warning:', gasErr);
-        }
-      }
 
       setSaveStatus('saved');
       showToast('Seluruh perubahan berhasil disimpan! ♡', 'success');
@@ -273,15 +255,17 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
     );
   }
 
+  const coupleDisplayName = `${groom?.nickname || invitation?.groom_nickname || ''} & ${bride?.nickname || invitation?.bride_nickname || ''}`.trim() || invitation?.couple_name || invitation?.title || 'Umum';
+
   const tabs: { id: EditorTab; label: string; icon: any }[] = [
     { id: 'general', label: 'Informasi Umum', icon: Info },
+    { id: 'theme', label: 'Tampilan & Tema', icon: Palette },
     { id: 'couple', label: 'Profil Mempelai', icon: Users },
     { id: 'events', label: 'Rangkaian Acara', icon: Calendar },
     { id: 'story', label: 'Kisah Cinta', icon: Sparkles },
     { id: 'gallery', label: 'Galeri Foto', icon: Image },
     { id: 'gifts', label: 'Tanda Kasih (Gifts)', icon: Gift },
     { id: 'music', label: 'Musik Latar', icon: Music },
-    { id: 'theme', label: 'Tampilan & Tema', icon: Palette },
     { id: 'sections', label: 'Manajer Bagian', icon: Layers },
     { id: 'guests', label: 'Daftar Tamu & Link', icon: Users },
     { id: 'rsvps', label: 'Konfirmasi RSVP', icon: UserCheck },
@@ -346,7 +330,7 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
           </div>
 
           <Link
-            to={`/preview/${invitation.id}`}
+            to={`/preview/${invitation.id}?template=${invitation.template_id || 'royal-arch'}`}
             target="_blank"
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#F7F2EA] hover:bg-[#EFE8DE] border border-[#283D52]/15 text-[#283D52] text-xs font-semibold uppercase tracking-wider transition-colors"
           >
@@ -448,6 +432,7 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                     <option value="persona-5">Phantom Crimson & Black (Persona 5 Theme)</option>
                     <option value="javanese-royal">Adat Jawa Keraton & Gamelan Sakral</option>
                     <option value="cute-pink-floral">Pastel Bloom & Bunga Lucu (Pink & Floral Style)</option>
+                    <option value="super-mario">8-Bit Retro Platformer (Super Wedding Bros - Game Mario)</option>
                   </select>
                 </div>
               </div>
@@ -579,6 +564,7 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                       markDirty();
                     }}
                     placeholder="Pilih foto sampul cover..."
+                    coupleName={coupleDisplayName}
                   />
                   <DriveUploader
                     label="Foto Home / Hero Section"
@@ -588,6 +574,7 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                       markDirty();
                     }}
                     placeholder="Pilih foto home / hero..."
+                    coupleName={coupleDisplayName}
                   />
                   <DriveUploader
                     label="Foto Latar Rangkaian Acara (Events)"
@@ -597,6 +584,7 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                       markDirty();
                     }}
                     placeholder="Pilih foto latar acara..."
+                    coupleName={coupleDisplayName}
                   />
                   <DriveUploader
                     label="Foto Latar Penutup / Footer (Closing)"
@@ -606,8 +594,506 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                       markDirty();
                     }}
                     placeholder="Pilih foto penutup..."
+                    coupleName={coupleDisplayName}
                   />
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: TAMPILAN & TEMA (APPEARANCE) */}
+        {activeTab === 'theme' && (
+          <div className="space-y-8 max-w-3xl">
+            {/* 1. PILIHAN TEMPLATE UTAMA */}
+            <div className="p-5 rounded-2xl bg-[#F7F2EA] border border-[#283D52]/15">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-base font-bold text-[#283D52] flex items-center gap-2">
+                    <Palette className="w-4 h-4 text-[#C2A56B]" />
+                    <span>Pilihan Template Desain Undangan</span>
+                  </h2>
+                  <p className="text-xs text-[#768692] mt-0.5">
+                    Pilih template desain yang digunakan khusus untuk undangan ini. Masing-masing undangan dapat memilih template yang berbeda.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                {/* Template 1: Royal Arch */}
+                <div
+                  onClick={() => {
+                    const preset = getTemplatePreset('royal-arch');
+                    setInvitation({
+                      ...invitation,
+                      template_id: 'royal-arch',
+                      theme_config: {
+                        ...preset.theme_config,
+                        ...invitation.theme_config,
+                        primary_color: preset.theme_config.primary_color,
+                        secondary_color: preset.theme_config.secondary_color,
+                        accent_color: preset.theme_config.accent_color,
+                        background_color: preset.theme_config.background_color,
+                        font_heading: preset.theme_config.font_heading,
+                        font_body: preset.theme_config.font_body,
+                      },
+                    });
+                    markDirty();
+                  }}
+                  className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                    (invitation.template_id || 'royal-arch') === 'royal-arch'
+                      ? 'bg-[#FFFCF7] border-[#283D52] shadow-md ring-2 ring-[#C2A56B]/40'
+                      : 'bg-[#FFFCF7]/70 border-[#283D52]/15 hover:border-[#283D52]/40'
+                  }`}
+                >
+                  <div className="w-full h-24 rounded-xl bg-[#182736] p-3 text-[#FFFCF7] flex flex-col justify-between mb-3 border border-[#C2A56B]/30 relative overflow-hidden">
+                    <span className="text-[9px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-white/10 w-fit text-[#C2A56B] border border-[#C2A56B]/40">
+                      Classic Royal
+                    </span>
+                    <div className="text-center">
+                      <p className="font-heading text-sm font-bold text-[#FFFCF7] truncate">
+                        {invitation.groom_nickname || 'Mempelai Pria'} <span className="text-[#C2A56B]">&</span> {invitation.bride_nickname || 'Mempelai Wanita'}
+                      </p>
+                      <p className="text-[9px] text-[#FFFCF7]/70 font-mono">{invitation.wedding_date || '2026-10-10'}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[8px] text-[#C2A56B] uppercase font-mono">
+                        Frame Arch Klasik
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-bold text-sm text-[#283D52]">The Royal Navy & Gold Arch</h3>
+                      <p className="text-[11px] text-[#768692] mt-0.5">
+                        Elegan, agung, bernuansa deep navy dengan ornamen arch keemasan.
+                      </p>
+                    </div>
+                    {(invitation.template_id || 'royal-arch') === 'royal-arch' && (
+                      <CheckCircle2 className="w-5 h-5 text-[#283D52] shrink-0" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Template 2: Persona 5 */}
+                <div
+                  onClick={() => {
+                    const preset = getTemplatePreset('persona-5');
+                    setInvitation({
+                      ...invitation,
+                      template_id: 'persona-5',
+                      theme_config: {
+                        ...preset.theme_config,
+                        ...invitation.theme_config,
+                        primary_color: preset.theme_config.primary_color,
+                        secondary_color: preset.theme_config.secondary_color,
+                        accent_color: preset.theme_config.accent_color,
+                        background_color: preset.theme_config.background_color,
+                        font_heading: preset.theme_config.font_heading,
+                        font_body: preset.theme_config.font_body,
+                      },
+                    });
+                    markDirty();
+                  }}
+                  className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                    invitation.template_id === 'persona-5'
+                      ? 'bg-[#141418] text-white border-[#E60012] shadow-md ring-2 ring-[#E60012]/40'
+                      : 'bg-[#FFFCF7]/70 border-[#283D52]/15 hover:border-[#283D52]/40'
+                  }`}
+                >
+                  <div className="w-full h-24 rounded-xl bg-[#0D0D0D] p-3 text-white flex flex-col justify-between mb-3 border-2 border-[#E60012] relative overflow-hidden -skew-x-2">
+                    <span className="text-[9px] uppercase font-black tracking-widest px-2 py-0.5 bg-[#E60012] text-white w-fit -skew-x-6 border border-white">
+                      PERSONA 5 THEME
+                    </span>
+                    <div className="text-center">
+                      <p className="text-sm font-black italic uppercase text-white tracking-tight truncate">
+                        {(invitation.groom_nickname || 'GROOM').toUpperCase()} <span className="text-[#E60012]">&</span> {(invitation.bride_nickname || 'BRIDE').toUpperCase()}
+                      </p>
+                      <p className="text-[9px] text-[#FFF000] font-mono font-bold">★ TAKE YOUR HEART ★</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[8px] text-white/70 uppercase font-mono">
+                        Calling Card & Combat
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className={`font-bold text-sm ${invitation.template_id === 'persona-5' ? 'text-white' : 'text-[#283D52]'}`}>
+                        Phantom Crimson & Black (Persona 5)
+                      </h3>
+                      <p className={`text-[11px] mt-0.5 ${invitation.template_id === 'persona-5' ? 'text-white/70' : 'text-[#768692]'}`}>
+                        Visual ala Persona 5: Calling Card, Confidant story, dan All-Out Attack.
+                      </p>
+                    </div>
+                    {invitation.template_id === 'persona-5' && (
+                      <CheckCircle2 className="w-5 h-5 text-[#E60012] shrink-0" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Template 3: Adat Jawa Kasultanan */}
+                <div
+                  onClick={() => {
+                    const preset = getTemplatePreset('javanese-royal');
+                    setInvitation({
+                      ...invitation,
+                      template_id: 'javanese-royal',
+                      theme_config: {
+                        ...preset.theme_config,
+                        ...invitation.theme_config,
+                        primary_color: preset.theme_config.primary_color,
+                        secondary_color: preset.theme_config.secondary_color,
+                        accent_color: preset.theme_config.accent_color,
+                        background_color: preset.theme_config.background_color,
+                        font_heading: preset.theme_config.font_heading,
+                        font_body: preset.theme_config.font_body,
+                      },
+                    });
+                    markDirty();
+                  }}
+                  className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                    invitation.template_id === 'javanese-royal'
+                      ? 'bg-[#24160E] text-[#FAF6EE] border-[#D4AF37] shadow-md ring-2 ring-[#D4AF37]/40'
+                      : 'bg-[#FFFCF7]/70 border-[#283D52]/15 hover:border-[#283D52]/40'
+                  }`}
+                >
+                  <div className="w-full h-24 rounded-xl bg-[#1A1009] p-3 text-[#FAF6EE] flex flex-col justify-between mb-3 border-2 border-[#D4AF37] relative overflow-hidden font-serif">
+                    <span className="text-[9px] uppercase font-bold tracking-widest px-2 py-0.5 bg-[#D4AF37] text-[#1A1009] rounded-md w-fit font-sans">
+                      ADAT JAWA SAKRAL
+                    </span>
+                    <div className="text-center">
+                      <p className="text-xs text-[#E5C158] tracking-wider">ꦱꦼꦫꦠ꧀ꦲꦸꦊꦩ꧀</p>
+                      <p className="text-sm font-bold text-[#FAF6EE] truncate">
+                        {invitation.groom_nickname || 'Mempelai Pria'} <span className="text-[#D4AF37]">&</span> {invitation.bride_nickname || 'Mempelai Wanita'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[8px] text-[#D4AF37] uppercase font-sans">
+                        Gamelan & Gunungan
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className={`font-bold text-sm ${invitation.template_id === 'javanese-royal' ? 'text-[#E5C158]' : 'text-[#283D52]'}`}>
+                        Adat Jawa Keraton & Gamelan
+                      </h3>
+                      <p className={`text-[11px] mt-0.5 ${invitation.template_id === 'javanese-royal' ? 'text-[#FAF6EE]/80' : 'text-[#768692]'}`}>
+                        Sakral & elegan: Gunungan Wayang emas, batik kawung, & backsound gamelan.
+                      </p>
+                    </div>
+                    {invitation.template_id === 'javanese-royal' && (
+                      <CheckCircle2 className="w-5 h-5 text-[#D4AF37] shrink-0" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Template 4: Pastel Bloom & Bunga Lucu (Pink) */}
+                <div
+                  onClick={() => {
+                    const preset = getTemplatePreset('cute-pink-floral');
+                    setInvitation({
+                      ...invitation,
+                      template_id: 'cute-pink-floral',
+                      theme_config: {
+                        ...preset.theme_config,
+                        ...invitation.theme_config,
+                        primary_color: preset.theme_config.primary_color,
+                        secondary_color: preset.theme_config.secondary_color,
+                        accent_color: preset.theme_config.accent_color,
+                        background_color: preset.theme_config.background_color,
+                        font_heading: preset.theme_config.font_heading,
+                        font_body: preset.theme_config.font_body,
+                      },
+                    });
+                    markDirty();
+                  }}
+                  className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                    invitation.template_id === 'cute-pink-floral'
+                      ? 'bg-[#FFF0F5] text-[#4A2E35] border-[#FF5C8D] shadow-md ring-2 ring-[#FF85A2]/40'
+                      : 'bg-[#FFFCF7]/70 border-[#283D52]/15 hover:border-[#283D52]/40'
+                  }`}
+                >
+                  <div className="w-full h-24 rounded-xl bg-[#FFE4EC] p-3 text-[#4A2E35] flex flex-col justify-between mb-3 border-2 border-[#FFA3B8] relative overflow-hidden font-sans">
+                    <span className="text-[9px] uppercase font-bold tracking-widest px-2 py-0.5 bg-[#FF5C8D] text-white rounded-full w-fit">
+                      🌸 LUCU &amp; MANIS
+                    </span>
+                    <div className="text-center">
+                      <p className="text-[9px] text-[#FF5C8D] font-bold">🌸 UNDANGAN MANIS 🌸</p>
+                      <p className="text-sm font-bold text-[#E03164] truncate">
+                        {invitation.groom_nickname || 'Mempelai Pria'} <span className="text-[#FF5C8D]">&amp;</span> {invitation.bride_nickname || 'Mempelai Wanita'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[8px] text-[#8A505F] uppercase font-sans font-semibold">
+                        Bunga &amp; Pita Pink
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className={`font-bold text-sm ${invitation.template_id === 'cute-pink-floral' ? 'text-[#E03164]' : 'text-[#283D52]'}`}>
+                        Pastel Bloom &amp; Bunga Lucu
+                      </h3>
+                      <p className={`text-[11px] mt-0.5 ${invitation.template_id === 'cute-pink-floral' ? 'text-[#4A2E35]' : 'text-[#768692]'}`}>
+                        Ceria &amp; menggemaskan: warna merah muda, kelopak bunga, stiker lucu &amp; memo.
+                      </p>
+                    </div>
+                    {invitation.template_id === 'cute-pink-floral' && (
+                      <CheckCircle2 className="w-5 h-5 text-[#FF5C8D] shrink-0" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Template 5: 8-Bit Super Mario Platformer */}
+                <div
+                  onClick={() => {
+                    const preset = getTemplatePreset('super-mario');
+                    setInvitation({
+                      ...invitation,
+                      template_id: 'super-mario',
+                      theme_config: {
+                        ...preset.theme_config,
+                        ...invitation.theme_config,
+                        primary_color: preset.theme_config.primary_color,
+                        secondary_color: preset.theme_config.secondary_color,
+                        accent_color: preset.theme_config.accent_color,
+                        background_color: preset.theme_config.background_color,
+                        font_heading: preset.theme_config.font_heading,
+                        font_body: preset.theme_config.font_body,
+                      },
+                    });
+                    markDirty();
+                  }}
+                  className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                    invitation.template_id === 'super-mario'
+                      ? 'bg-[#5C94FC]/15 border-[#5C94FC] shadow-md ring-2 ring-[#5C94FC]/40'
+                      : 'bg-white border-[#283D52]/15 hover:border-[#5C94FC]/40'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-[#E60012] text-white border border-white">
+                      8-BIT RETRO GAME
+                    </span>
+                    <div className="w-6 h-6 rounded-full bg-[#FFD166] border border-[#283D52] flex items-center justify-center text-xs">
+                      🎮
+                    </div>
+                  </div>
+
+                  {/* Mockup Preview Box */}
+                  <div className="w-full h-24 rounded-xl bg-gradient-to-b from-[#5C94FC] via-[#5C94FC] to-[#00A800] border-2 border-[#283D52] p-2 flex flex-col justify-between mb-3 relative overflow-hidden">
+                    <div className="flex items-center justify-between font-mono text-[9px] text-white font-bold drop-shadow-xs">
+                      <span>WORLD 1-1</span>
+                      <span>❤ x03</span>
+                    </div>
+                    <div className="flex items-end justify-between px-1">
+                      <div className="text-base">🤵</div>
+                      <div className="w-4 h-4 bg-[#FFD166] border border-[#283D52] flex items-center justify-center text-[9px] font-mono font-bold">
+                        ?
+                      </div>
+                      <div className="text-base">👰</div>
+                    </div>
+                    <div className="h-2 bg-[#B84418] -mx-2 -mb-2 border-t border-[#005800]" />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3
+                        className={`font-mono font-bold text-sm ${
+                          invitation.template_id === 'super-mario' ? 'text-[#1D4ED8]' : 'text-[#283D52]'
+                        }`}
+                      >
+                        Super Mario 8-Bit
+                      </h3>
+                      <p
+                        className={`text-[11px] mt-0.5 ${
+                          invitation.template_id === 'super-mario' ? 'text-stone-800' : 'text-[#768692]'
+                        }`}
+                      >
+                        Game 2D platformer: petualangan mempelai, koin, balok [?] &amp; istana cinta.
+                      </p>
+                    </div>
+                    {invitation.template_id === 'super-mario' && (
+                      <CheckCircle2 className="w-5 h-5 text-[#5C94FC] shrink-0" />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Preview Button */}
+              <div className="mt-4 pt-3 border-t border-[#283D52]/10 flex items-center justify-between text-xs">
+                <span className="text-[#768692]">
+                  Template aktif saat ini:{' '}
+                  <strong className="text-[#283D52]">
+                    {invitation.template_id === 'persona-5'
+                      ? 'Phantom Crimson & Black (Persona 5)'
+                      : invitation.template_id === 'javanese-royal'
+                      ? 'Adat Jawa Keraton & Gamelan Sakral'
+                      : invitation.template_id === 'cute-pink-floral'
+                      ? 'Pastel Bloom & Bunga Lucu (Pink)'
+                      : invitation.template_id === 'super-mario'
+                      ? '8-Bit Retro Platformer (Super Mario Bros)'
+                      : 'The Royal Navy & Gold Arch'}
+                  </strong>
+                </span>
+                <Link
+                  to={`/preview/${invitation.id}?template=${invitation.template_id || 'royal-arch'}`}
+                  target="_blank"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#283D52] hover:bg-[#1E2E3E] text-white font-semibold text-xs transition-colors"
+                >
+                  <Eye className="w-3.5 h-3.5 text-[#DFBFC1]" />
+                  <span>Pratinjau Template Terpilih</span>
+                </Link>
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-base font-bold text-[#283D52]">Tampilan, Warna & Tipografi</h2>
+              <p className="text-xs text-[#768692]">
+                Sesuaikan palet warna, tipografi, dan gaya visual tanpa menyentuh kode HTML/CSS.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-[11px] font-semibold text-[#768692] mb-1.5">
+                  Warna Primer
+                </label>
+                <div className="flex items-center gap-2 p-1.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl">
+                  <input
+                    type="color"
+                    value={invitation.theme_config.primary_color}
+                    onChange={(e) => {
+                      setInvitation({
+                        ...invitation,
+                        theme_config: { ...invitation.theme_config, primary_color: e.target.value },
+                      });
+                      markDirty();
+                    }}
+                    className="w-8 h-8 rounded-lg cursor-pointer border-0"
+                  />
+                  <span className="text-xs font-mono font-semibold">
+                    {invitation.theme_config.primary_color}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-[#768692] mb-1.5">
+                  Aksen Emas
+                </label>
+                <div className="flex items-center gap-2 p-1.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl">
+                  <input
+                    type="color"
+                    value={invitation.theme_config.gold_color}
+                    onChange={(e) => {
+                      setInvitation({
+                        ...invitation,
+                        theme_config: { ...invitation.theme_config, gold_color: e.target.value },
+                      });
+                      markDirty();
+                    }}
+                    className="w-8 h-8 rounded-lg cursor-pointer border-0"
+                  />
+                  <span className="text-xs font-mono font-semibold">
+                    {invitation.theme_config.gold_color}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-[#768692] mb-1.5">
+                  Latar Belakang
+                </label>
+                <div className="flex items-center gap-2 p-1.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl">
+                  <input
+                    type="color"
+                    value={invitation.theme_config.background_color}
+                    onChange={(e) => {
+                      setInvitation({
+                        ...invitation,
+                        theme_config: { ...invitation.theme_config, background_color: e.target.value },
+                      });
+                      markDirty();
+                    }}
+                    className="w-8 h-8 rounded-lg cursor-pointer border-0"
+                  />
+                  <span className="text-xs font-mono font-semibold">
+                    {invitation.theme_config.background_color}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-[#768692] mb-1.5">
+                  Aksen Blush
+                </label>
+                <div className="flex items-center gap-2 p-1.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl">
+                  <input
+                    type="color"
+                    value={invitation.theme_config.blush_color}
+                    onChange={(e) => {
+                      setInvitation({
+                        ...invitation,
+                        theme_config: { ...invitation.theme_config, blush_color: e.target.value },
+                      });
+                      markDirty();
+                    }}
+                    className="w-8 h-8 rounded-lg cursor-pointer border-0"
+                  />
+                  <span className="text-xs font-mono font-semibold">
+                    {invitation.theme_config.blush_color}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-[#EFE8DE]">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#283D52] mb-1">
+                  Font Heading & Mempelai
+                </label>
+                <select
+                  value={invitation.theme_config.font_heading}
+                  onChange={(e) => {
+                    setInvitation({
+                      ...invitation,
+                      theme_config: { ...invitation.theme_config, font_heading: e.target.value },
+                    });
+                    markDirty();
+                  }}
+                  className="w-full px-3.5 py-2.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs"
+                >
+                  <option value="Cormorant Garamond">Cormorant Garamond (Editorial Luxury)</option>
+                  <option value="Playfair Display">Playfair Display (Classic Elegant)</option>
+                  <option value="Cinzel">Cinzel (Royal Roman)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#283D52] mb-1">
+                  Font Body & Konten
+                </label>
+                <select
+                  value={invitation.theme_config.font_body}
+                  onChange={(e) => {
+                    setInvitation({
+                      ...invitation,
+                      theme_config: { ...invitation.theme_config, font_body: e.target.value },
+                    });
+                    markDirty();
+                  }}
+                  className="w-full px-3.5 py-2.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs"
+                >
+                  <option value="Manrope">Manrope (Clean Modern Sans)</option>
+                  <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+                  <option value="Inter">Inter</option>
+                </select>
               </div>
             </div>
           </div>
@@ -732,6 +1218,7 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                   }}
                   placeholder="Pilih foto mempelai wanita..."
                   helperText="Format: Foto rasio portrait (3:4 atau 1:1)"
+                  coupleName={coupleDisplayName}
                 />
 
                 <div>
@@ -858,6 +1345,7 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                   }}
                   placeholder="Pilih foto mempelai pria..."
                   helperText="Format: Foto rasio portrait (3:4 atau 1:1)"
+                  coupleName={coupleDisplayName}
                 />
 
                 <div>
@@ -1275,6 +1763,7 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                       markDirty();
                     }}
                     placeholder="Pilih foto kenangan momen ini..."
+                    coupleName={coupleDisplayName}
                   />
 
                   <div>
@@ -1318,7 +1807,8 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                   value={newImageUrl}
                   onChange={(url) => setNewImageUrl(url)}
                   placeholder="Pilih foto untuk galeri..."
-                  helperText="Tersimpan langsung di Google Drive folder KUUNDANG"
+                  helperText="Tersimpan langsung di Google Drive folder /KUUNDANG/{coupleName}/"
+                  coupleName={coupleDisplayName}
                 />
 
                 <div className="space-y-3">
@@ -1595,7 +2085,8 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                 accept="audio/*,.mp3,.m4a,.wav"
                 fileType="audio"
                 placeholder="Upload file musik MP3 dari perangkat..."
-                helperText="Otomatis disimpan di folder KUUNDANG Google Drive"
+                helperText="Otomatis disimpan di folder /KUUNDANG/{coupleName}/ Google Drive"
+                coupleName={coupleDisplayName}
               />
 
               {invitation.music_url && (
@@ -1606,371 +2097,6 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                   <audio controls src={invitation.music_url} className="w-full h-10" />
                 </div>
               )}
-            </div>
-          </div>
-        )}
-
-        {/* TAB 8: TAMPILAN & TEMA (APPEARANCE) */}
-        {activeTab === 'theme' && (
-          <div className="space-y-8 max-w-3xl">
-            {/* 1. PILIHAN TEMPLATE UTAMA */}
-            <div className="p-5 rounded-2xl bg-[#F7F2EA] border border-[#283D52]/15">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="text-base font-bold text-[#283D52] flex items-center gap-2">
-                    <Palette className="w-4 h-4 text-[#C2A56B]" />
-                    <span>Pilihan Template Desain Undangan</span>
-                  </h2>
-                  <p className="text-xs text-[#768692] mt-0.5">
-                    Pilih template desain yang digunakan khusus untuk undangan ini. Masing-masing undangan dapat memilih template yang berbeda.
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Template 1: Royal Arch */}
-                <div
-                  onClick={() => {
-                    setInvitation({ ...invitation, template_id: 'royal-arch' });
-                    markDirty();
-                  }}
-                  className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
-                    (invitation.template_id || 'royal-arch') === 'royal-arch'
-                      ? 'bg-[#FFFCF7] border-[#283D52] shadow-md ring-2 ring-[#C2A56B]/40'
-                      : 'bg-[#FFFCF7]/70 border-[#283D52]/15 hover:border-[#283D52]/40'
-                  }`}
-                >
-                  <div className="w-full h-24 rounded-xl bg-[#182736] p-3 text-[#FFFCF7] flex flex-col justify-between mb-3 border border-[#C2A56B]/30 relative overflow-hidden">
-                    <span className="text-[9px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-white/10 w-fit text-[#C2A56B] border border-[#C2A56B]/40">
-                      Classic Royal
-                    </span>
-                    <div className="text-center">
-                      <p className="font-heading text-sm font-bold text-[#FFFCF7]">
-                        April <span className="text-[#C2A56B]">&</span> Siti
-                      </p>
-                      <p className="text-[9px] text-[#FFFCF7]/70 font-mono">17 . 09 . 2021</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-[8px] text-[#C2A56B] uppercase font-mono">
-                        Frame Arch Klasik
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-bold text-sm text-[#283D52]">The Royal Navy & Gold Arch</h3>
-                      <p className="text-[11px] text-[#768692] mt-0.5">
-                        Elegan, agung, bernuansa deep navy dengan ornamen arch keemasan.
-                      </p>
-                    </div>
-                    {(invitation.template_id || 'royal-arch') === 'royal-arch' && (
-                      <CheckCircle2 className="w-5 h-5 text-[#283D52] shrink-0" />
-                    )}
-                  </div>
-                </div>
-
-                {/* Template 2: Persona 5 */}
-                <div
-                  onClick={() => {
-                    setInvitation({ ...invitation, template_id: 'persona-5' });
-                    markDirty();
-                  }}
-                  className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
-                    invitation.template_id === 'persona-5'
-                      ? 'bg-[#141418] text-white border-[#E60012] shadow-md ring-2 ring-[#E60012]/40'
-                      : 'bg-[#FFFCF7]/70 border-[#283D52]/15 hover:border-[#283D52]/40'
-                  }`}
-                >
-                  <div className="w-full h-24 rounded-xl bg-[#0D0D0D] p-3 text-white flex flex-col justify-between mb-3 border-2 border-[#E60012] relative overflow-hidden -skew-x-2">
-                    <span className="text-[9px] uppercase font-black tracking-widest px-2 py-0.5 bg-[#E60012] text-white w-fit -skew-x-6 border border-white">
-                      PERSONA 5 THEME
-                    </span>
-                    <div className="text-center">
-                      <p className="text-sm font-black italic uppercase text-white tracking-tight">
-                        APRIL <span className="text-[#E60012]">&</span> SITI
-                      </p>
-                      <p className="text-[9px] text-[#FFF000] font-mono font-bold">★ TAKE YOUR HEART ★</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-[8px] text-white/70 uppercase font-mono">
-                        Calling Card & Combat
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className={`font-bold text-sm ${invitation.template_id === 'persona-5' ? 'text-white' : 'text-[#283D52]'}`}>
-                        Phantom Crimson & Black (Persona 5)
-                      </h3>
-                      <p className={`text-[11px] mt-0.5 ${invitation.template_id === 'persona-5' ? 'text-white/70' : 'text-[#768692]'}`}>
-                        Visual ala Persona 5: Calling Card, Confidant story, dan All-Out Attack.
-                      </p>
-                    </div>
-                    {invitation.template_id === 'persona-5' && (
-                      <CheckCircle2 className="w-5 h-5 text-[#E60012] shrink-0" />
-                    )}
-                  </div>
-                </div>
-
-                {/* Template 3: Adat Jawa Kasultanan */}
-                <div
-                  onClick={() => {
-                    setInvitation({ ...invitation, template_id: 'javanese-royal' });
-                    markDirty();
-                  }}
-                  className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
-                    invitation.template_id === 'javanese-royal'
-                      ? 'bg-[#24160E] text-[#FAF6EE] border-[#D4AF37] shadow-md ring-2 ring-[#D4AF37]/40'
-                      : 'bg-[#FFFCF7]/70 border-[#283D52]/15 hover:border-[#283D52]/40'
-                  }`}
-                >
-                  <div className="w-full h-24 rounded-xl bg-[#1A1009] p-3 text-[#FAF6EE] flex flex-col justify-between mb-3 border-2 border-[#D4AF37] relative overflow-hidden font-serif">
-                    <span className="text-[9px] uppercase font-bold tracking-widest px-2 py-0.5 bg-[#D4AF37] text-[#1A1009] rounded-md w-fit font-sans">
-                      ADAT JAWA SAKRAL
-                    </span>
-                    <div className="text-center">
-                      <p className="text-xs text-[#E5C158] tracking-wider">ꦱꦼꦫꦠ꧀ꦲꦸꦊꦩ꧀</p>
-                      <p className="text-sm font-bold text-[#FAF6EE]">
-                        April <span className="text-[#D4AF37]">&</span> Siti
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-[8px] text-[#D4AF37] uppercase font-sans">
-                        Gamelan & Gunungan
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className={`font-bold text-sm ${invitation.template_id === 'javanese-royal' ? 'text-[#E5C158]' : 'text-[#283D52]'}`}>
-                        Adat Jawa Keraton & Gamelan
-                      </h3>
-                      <p className={`text-[11px] mt-0.5 ${invitation.template_id === 'javanese-royal' ? 'text-[#FAF6EE]/80' : 'text-[#768692]'}`}>
-                        Sakral & elegan: Gunungan Wayang emas, batik kawung, & backsound gamelan.
-                      </p>
-                    </div>
-                    {invitation.template_id === 'javanese-royal' && (
-                      <CheckCircle2 className="w-5 h-5 text-[#D4AF37] shrink-0" />
-                    )}
-                  </div>
-                </div>
-
-                {/* Template 4: Pastel Bloom & Bunga Lucu (Pink) */}
-                <div
-                  onClick={() => {
-                    setInvitation({ ...invitation, template_id: 'cute-pink-floral' });
-                    markDirty();
-                  }}
-                  className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
-                    invitation.template_id === 'cute-pink-floral'
-                      ? 'bg-[#FFF0F5] text-[#4A2E35] border-[#FF5C8D] shadow-md ring-2 ring-[#FF85A2]/40'
-                      : 'bg-[#FFFCF7]/70 border-[#283D52]/15 hover:border-[#283D52]/40'
-                  }`}
-                >
-                  <div className="w-full h-24 rounded-xl bg-[#FFE4EC] p-3 text-[#4A2E35] flex flex-col justify-between mb-3 border-2 border-[#FFA3B8] relative overflow-hidden font-sans">
-                    <span className="text-[9px] uppercase font-bold tracking-widest px-2 py-0.5 bg-[#FF5C8D] text-white rounded-full w-fit">
-                      🌸 LUCU &amp; MANIS
-                    </span>
-                    <div className="text-center">
-                      <p className="text-[9px] text-[#FF5C8D] font-bold">🌸 UNDANGAN MANIS 🌸</p>
-                      <p className="text-sm font-bold text-[#E03164]">
-                        April <span className="text-[#FF5C8D]">&amp;</span> Siti
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-[8px] text-[#8A505F] uppercase font-sans font-semibold">
-                        Bunga &amp; Pita Pink
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className={`font-bold text-sm ${invitation.template_id === 'cute-pink-floral' ? 'text-[#E03164]' : 'text-[#283D52]'}`}>
-                        Pastel Bloom &amp; Bunga Lucu
-                      </h3>
-                      <p className={`text-[11px] mt-0.5 ${invitation.template_id === 'cute-pink-floral' ? 'text-[#4A2E35]' : 'text-[#768692]'}`}>
-                        Ceria &amp; menggemaskan: warna merah muda, kelopak bunga, stiker lucu &amp; memo.
-                      </p>
-                    </div>
-                    {invitation.template_id === 'cute-pink-floral' && (
-                      <CheckCircle2 className="w-5 h-5 text-[#FF5C8D] shrink-0" />
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Preview Button */}
-              <div className="mt-4 pt-3 border-t border-[#283D52]/10 flex items-center justify-between text-xs">
-                <span className="text-[#768692]">
-                  Template aktif saat ini:{' '}
-                  <strong className="text-[#283D52]">
-                    {invitation.template_id === 'persona-5'
-                      ? 'Phantom Crimson & Black (Persona 5)'
-                      : invitation.template_id === 'javanese-royal'
-                      ? 'Adat Jawa Keraton & Gamelan Sakral'
-                      : invitation.template_id === 'cute-pink-floral'
-                      ? 'Pastel Bloom & Bunga Lucu (Pink)'
-                      : 'The Royal Navy & Gold Arch'}
-                  </strong>
-                </span>
-                <Link
-                  to={`/preview/${invitation.id}?template=${invitation.template_id || 'royal-arch'}`}
-                  target="_blank"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#283D52] hover:bg-[#1E2E3E] text-white font-semibold text-xs transition-colors"
-                >
-                  <Eye className="w-3.5 h-3.5 text-[#DFBFC1]" />
-                  <span>Pratinjau Template Terpilih</span>
-                </Link>
-              </div>
-            </div>
-
-            <div>
-              <h2 className="text-base font-bold text-[#283D52]">Tampilan, Warna & Tipografi</h2>
-              <p className="text-xs text-[#768692]">
-                Sesuaikan palet warna, tipografi, dan gaya visual tanpa menyentuh kode HTML/CSS.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-[11px] font-semibold text-[#768692] mb-1.5">
-                  Warna Primer
-                </label>
-                <div className="flex items-center gap-2 p-1.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl">
-                  <input
-                    type="color"
-                    value={invitation.theme_config.primary_color}
-                    onChange={(e) => {
-                      setInvitation({
-                        ...invitation,
-                        theme_config: { ...invitation.theme_config, primary_color: e.target.value },
-                      });
-                      markDirty();
-                    }}
-                    className="w-8 h-8 rounded-lg cursor-pointer border-0"
-                  />
-                  <span className="text-xs font-mono font-semibold">
-                    {invitation.theme_config.primary_color}
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-[#768692] mb-1.5">
-                  Aksen Emas
-                </label>
-                <div className="flex items-center gap-2 p-1.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl">
-                  <input
-                    type="color"
-                    value={invitation.theme_config.gold_color}
-                    onChange={(e) => {
-                      setInvitation({
-                        ...invitation,
-                        theme_config: { ...invitation.theme_config, gold_color: e.target.value },
-                      });
-                      markDirty();
-                    }}
-                    className="w-8 h-8 rounded-lg cursor-pointer border-0"
-                  />
-                  <span className="text-xs font-mono font-semibold">
-                    {invitation.theme_config.gold_color}
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-[#768692] mb-1.5">
-                  Latar Belakang
-                </label>
-                <div className="flex items-center gap-2 p-1.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl">
-                  <input
-                    type="color"
-                    value={invitation.theme_config.background_color}
-                    onChange={(e) => {
-                      setInvitation({
-                        ...invitation,
-                        theme_config: { ...invitation.theme_config, background_color: e.target.value },
-                      });
-                      markDirty();
-                    }}
-                    className="w-8 h-8 rounded-lg cursor-pointer border-0"
-                  />
-                  <span className="text-xs font-mono font-semibold">
-                    {invitation.theme_config.background_color}
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-[#768692] mb-1.5">
-                  Aksen Blush
-                </label>
-                <div className="flex items-center gap-2 p-1.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl">
-                  <input
-                    type="color"
-                    value={invitation.theme_config.blush_color}
-                    onChange={(e) => {
-                      setInvitation({
-                        ...invitation,
-                        theme_config: { ...invitation.theme_config, blush_color: e.target.value },
-                      });
-                      markDirty();
-                    }}
-                    className="w-8 h-8 rounded-lg cursor-pointer border-0"
-                  />
-                  <span className="text-xs font-mono font-semibold">
-                    {invitation.theme_config.blush_color}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-[#EFE8DE]">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#283D52] mb-1">
-                  Font Heading & Mempelai
-                </label>
-                <select
-                  value={invitation.theme_config.font_heading}
-                  onChange={(e) => {
-                    setInvitation({
-                      ...invitation,
-                      theme_config: { ...invitation.theme_config, font_heading: e.target.value },
-                    });
-                    markDirty();
-                  }}
-                  className="w-full px-3.5 py-2.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs"
-                >
-                  <option value="Cormorant Garamond">Cormorant Garamond (Editorial Luxury)</option>
-                  <option value="Playfair Display">Playfair Display (Classic Elegant)</option>
-                  <option value="Cinzel">Cinzel (Royal Roman)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#283D52] mb-1">
-                  Font Body & Konten
-                </label>
-                <select
-                  value={invitation.theme_config.font_body}
-                  onChange={(e) => {
-                    setInvitation({
-                      ...invitation,
-                      theme_config: { ...invitation.theme_config, font_body: e.target.value },
-                    });
-                    markDirty();
-                  }}
-                  className="w-full px-3.5 py-2.5 bg-[#F7F2EA] border border-[#283D52]/15 rounded-xl text-xs"
-                >
-                  <option value="Manrope">Manrope (Clean Modern Sans)</option>
-                  <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
-                  <option value="Inter">Inter</option>
-                </select>
-              </div>
             </div>
           </div>
         )}

@@ -57,7 +57,7 @@ export const CuteClosingSection: React.FC<CuteClosingSectionProps> = ({
             KAMI YANG BERBAHAGIA
           </p>
           <div className="font-heading text-3xl sm:text-5xl font-bold text-[#E03164]">
-            {invitation.groom_nickname || 'April'} &amp; {invitation.bride_nickname || 'Siti'}
+            {invitation.groom_nickname || 'Mempelai Pria'} &amp; {invitation.bride_nickname || 'Mempelai Wanita'}
           </div>
           <p className="text-xs font-sans text-[#8A505F] pt-1">
             Beserta Seluruh Keluarga Besar

@@ -73,11 +73,11 @@ export const PastelPopHeroSection: React.FC<PastelPopHeroSectionProps> = ({ invi
         {/* Hero Title */}
         <h1 className="text-4xl sm:text-6xl font-black text-[#2B2D42] tracking-tight leading-tight">
           <span className="text-[#FF6B8B] inline-block hover:scale-105 transition-transform">
-            {invitation.bride_nickname || 'Siti'}
+            {invitation.bride_nickname || 'Mempelai Wanita'}
           </span>{' '}
           <span className="text-3xl sm:text-5xl text-[#FFD166] font-normal">&amp;</span>{' '}
           <span className="text-[#4D96FF] inline-block hover:scale-105 transition-transform">
-            {invitation.groom_nickname || 'April'}
+            {invitation.groom_nickname || 'Mempelai Pria'}
           </span>
         </h1>
 
@@ -101,7 +101,7 @@ export const PastelPopHeroSection: React.FC<PastelPopHeroSectionProps> = ({ invi
             <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-rose-50 border-2 border-slate-100 relative">
               <img
                 src={invitation.hero_image || 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800&q=80'}
-                alt="Siti & April Wedding"
+                alt={`${invitation.bride_nickname || 'Bride'} & ${invitation.groom_nickname || 'Groom'} Wedding`}
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-xs px-3 py-1 rounded-full border border-[#FF6B8B]/40 text-[#FF6B8B] text-xs font-black shadow-xs flex items-center gap-1">

@@ -99,6 +99,26 @@ const TEMPLATES: TemplateOption[] = [
     ],
     tags: ['Persona 5', 'Crimson & Black', 'Take Your Heart', 'All-Out Attack'],
   },
+  {
+    id: 'super-mario',
+    name: '8-Bit Retro Platformer (Super Wedding Bros)',
+    tagline: 'Undangan Interaktif HTML5 Canvas ala Game Super Mario & Suara Chiptune',
+    badge: 'GAME PLATFORMER 8-BIT',
+    accentColor: '#5C94FC',
+    bgGradient: 'from-[#5C94FC] via-[#283D52] to-[#B84418]',
+    borderColor: 'border-[#5C94FC]',
+    description:
+      'Konsep inovatif undangan pernikahan berbasis permainan platformer retro 8-bit. Tamu memilih karakter (Tuan / Nyonya), melompat memukul blok [?], mengumpulkan koin, membaca setiap babak undangan di awan langit, dan bertemu pasangan di istana pelaminan cinta.',
+    highlights: [
+      'Layar Awal Retro Arcade dengan form nama tamu, pilihan karakter Tuan / Nyonya, & tombol Mulai',
+      'Mesin Fisika Platformer 2D Canvas (Jalan, Lompat, Gravitasi, Kamera Halus & Kontrol Sentuh D-Pad)',
+      'Kartu Informasi Mengapung di Awan Langit yang terorganisir rapi & bisa dijelajahi bolak-balik',
+      'Efek Suara 8-Bit Web Audio API & Backsound Melodi Chiptune Pernikahan Ceria',
+      'Pertemuan Romantis dengan Pasangan di Garis Finish (Istana Pernikahan) dengan pesta kembang api',
+      'Buku Tamu RSVP & Amplop Digital Lengkap dengan tombol salin rekening langsung',
+    ],
+    tags: ['Super Mario', '8-Bit Retro', 'HTML5 Canvas', 'Game Platformer', 'Chiptune'],
+  },
 ];
 
 export const AdminTemplatesPage: React.FC = () => {
@@ -184,13 +204,13 @@ export const AdminTemplatesPage: React.FC = () => {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EFE8DE] text-xs font-semibold text-[#C2A56B] mb-2">
             <Palette className="w-3.5 h-3.5" />
-            <span>Koleksi 4 Tema Undangan</span>
+            <span>Koleksi 5 Tema Undangan</span>
           </div>
           <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#283D52]">
             Katalog Tema Desain Undangan
           </h1>
           <p className="text-xs sm:text-sm text-[#768692] mt-1 max-w-xl">
-            Pilih antara sakralnya Adat Jawa Kasultanan &amp; Gamelan, manisnya nuansa merah muda bunga lucu, keanggunan klasik Royal Arch bangsawan, atau gaya cyber-RPG Persona 5 yang revolusioner.
+            Pilih antara sakralnya Adat Jawa Kasultanan &amp; Gamelan, manisnya nuansa merah muda bunga lucu, keanggunan klasik Royal Arch bangsawan, gaya cyber-RPG Persona 5, atau tema platformer interaktif Super Mario 8-Bit.
           </p>
         </div>
 
@@ -208,7 +228,9 @@ export const AdminTemplatesPage: React.FC = () => {
               {invitations.map((inv) => (
                 <option key={inv.id} value={inv.id}>
                   {inv.title} (
-                  {inv.template_id === 'persona-5'
+                  {inv.template_id === 'super-mario'
+                    ? 'Super Mario 8-Bit'
+                    : inv.template_id === 'persona-5'
                     ? 'Persona 5'
                     : inv.template_id === 'javanese-royal'
                     ? 'Adat Jawa'
@@ -251,26 +273,31 @@ export const AdminTemplatesPage: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* 4 Templates Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* 5 Templates Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {TEMPLATES.map((tmpl) => {
           const isCurrentActive = activeTemplate === tmpl.id;
           const isP5 = tmpl.id === 'persona-5';
           const isJawa = tmpl.id === 'javanese-royal';
           const isCute = tmpl.id === 'cute-pink-floral';
+          const isMario = tmpl.id === 'super-mario';
 
           return (
             <div
               key={tmpl.id}
               className={`rounded-3xl border-2 transition-all p-5 sm:p-6 flex flex-col justify-between ${
                 isCurrentActive
-                  ? isP5
+                  ? isMario
+                    ? 'bg-[#1C2C40] border-[#5C94FC] shadow-xl text-white'
+                    : isP5
                     ? 'bg-[#141418] border-[#E60012] shadow-xl text-white'
                     : isJawa
                     ? 'bg-[#24160E] border-[#D4AF37] shadow-xl text-[#FAF6EE]'
                     : isCute
                     ? 'bg-[#FFF0F5] border-[#FF5C8D] shadow-xl text-[#4A2E35]'
                     : 'bg-[#F7F2EA] border-[#C2A56B] shadow-xl text-[#283D52]'
+                  : isMario
+                  ? 'bg-[#182635] border-[#5C94FC]/40 hover:border-[#5C94FC] shadow-xs text-[#E0EFFF]'
                   : isJawa
                   ? 'bg-[#1A1009] border-[#D4AF37]/30 hover:border-[#D4AF37]/60 shadow-xs text-[#FAF6EE]'
                   : isCute
@@ -283,7 +310,9 @@ export const AdminTemplatesPage: React.FC = () => {
                 <div className="flex items-center justify-between mb-4">
                   <span
                     className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full ${
-                      isP5
+                      isMario
+                        ? 'bg-[#5C94FC] text-white font-mono'
+                        : isP5
                         ? 'bg-[#E60012] text-white -skew-x-6'
                         : isJawa
                         ? 'bg-[#D4AF37] text-[#1A1009]'
@@ -308,7 +337,9 @@ export const AdminTemplatesPage: React.FC = () => {
                 {/* Card Banner Preview */}
                 <div
                   className={`mt-4 w-full h-40 rounded-2xl bg-gradient-to-br ${tmpl.bgGradient} p-4 flex flex-col justify-between border relative overflow-hidden shadow-inner ${
-                    isP5
+                    isMario
+                      ? 'border-[#5C94FC] text-white font-mono'
+                      : isP5
                       ? 'border-[#E60012] text-white'
                       : isJawa
                       ? 'border-[#D4AF37] text-white'
@@ -325,8 +356,8 @@ export const AdminTemplatesPage: React.FC = () => {
                   </div>
 
                   <div className="text-center my-auto">
-                    <p className={`text-[9px] uppercase tracking-widest ${isCute ? 'text-[#FF5C8D] font-bold' : 'text-white/70'}`}>
-                      {isJawa ? 'Serat Ulem Palakrama' : isCute ? 'Undangan Manis & Ceria' : 'The Wedding Of'}
+                    <p className={`text-[9px] uppercase tracking-widest ${isCute ? 'text-[#FF5C8D] font-bold' : isMario ? 'text-[#FFE082] font-mono' : 'text-white/70'}`}>
+                      {isMario ? 'WORLD 1-1 WEDDING QUEST' : isJawa ? 'Serat Ulem Palakrama' : isCute ? 'Undangan Manis & Ceria' : 'The Wedding Of'}
                     </p>
                     <h4 className="text-base sm:text-lg font-bold mt-0.5">April Pratama & Siti Nurjannah</h4>
                   </div>
@@ -335,10 +366,14 @@ export const AdminTemplatesPage: React.FC = () => {
                     <span className={isCute ? 'text-[#8A505F]' : 'text-white/60'}>Tamu Terhormat</span>
                     <span
                       className={`px-2 py-0.5 rounded-md text-xs font-semibold ${
-                        isCute ? 'bg-[#FF5C8D] text-white' : 'bg-white/20 text-white'
+                        isMario
+                          ? 'bg-[#E60012] text-white border border-white font-mono'
+                          : isCute
+                          ? 'bg-[#FF5C8D] text-white'
+                          : 'bg-white/20 text-white'
                       }`}
                     >
-                      {isJawa ? 'Bikak Ulem' : 'Buka Undangan'}
+                      {isMario ? 'START GAME' : isJawa ? 'Bikak Ulem' : 'Buka Undangan'}
                     </span>
                   </div>
                 </div>
@@ -372,6 +407,8 @@ export const AdminTemplatesPage: React.FC = () => {
                   className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                     isCurrentActive
                       ? 'bg-emerald-600 text-white cursor-default'
+                      : isMario
+                      ? 'bg-[#E60012] hover:bg-[#CC0010] text-white font-mono shadow-md border border-white/40'
                       : isP5
                       ? 'bg-[#E60012] hover:bg-[#FF0019] text-white -skew-x-3 shadow-md'
                       : isJawa

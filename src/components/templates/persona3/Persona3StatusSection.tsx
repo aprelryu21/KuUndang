@@ -19,22 +19,24 @@ export const Persona3StatusSection: React.FC<Persona3StatusSectionProps> = ({
   const characters = {
     groom: {
       role: 'GROOM / PENGANTIN PRIA',
-      name: groom.full_name || 'Apriliyanto Ratih Sukarno',
-      nickname: groom.nickname || 'April',
+      name: groom.full_name || groom.nickname || 'Mempelai Pria',
+      nickname: groom.nickname || 'Groom',
       arcana: 'ARCANA IV: THE EMPEROR',
-      persona: 'ORPHEUS OF KEDIRI',
+      persona: 'ORPHEUS OF DEVOTION',
       level: 'LV 99',
       hp: '999 / 999',
       sp: '999 / 999',
-      parents: 'Putra dari Bapak Imam Sodik & Ibu Rofiatin',
-      address: 'Desa Kandangan, Kec. Kandangan, Kab. Kediri',
-      instagram: groom.instagram || 'apriliyantoratih',
+      parents: (groom.father_name || groom.mother_name)
+        ? `Putra dari Bapak ${groom.father_name || ''} & Ibu ${groom.mother_name || ''}`
+        : 'Putra tercinta dari kedua orang tua',
+      address: groom.description || 'Kediaman Mempelai Pria',
+      instagram: groom.instagram || '',
       photo: groom.photo_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop',
       skills: [
         { name: 'Enduring Love', desc: 'Passive: Mengarungi bahtera rumah tangga dengan kesetiaan abadi.' },
         { name: 'Sacred Vow', desc: 'Active: Ijab qabul teguh di hadapan penghulu dan saksi sakral.' },
         { name: 'Family Guardian', desc: 'Support: Melindungi keluarga dan anak keturunan dengan penuh tanggung jawab.' },
-        { name: 'Kediri Pride', desc: 'Passive: Membawa restu leluhur trah Kandangan, Kediri.' },
+        { name: 'Pure Devotion', desc: 'Passive: Membawa restu leluhur dan keberkahan suci.' },
       ],
       stats: [
         { label: 'ST (Kekuatan)', val: 99 },
@@ -46,16 +48,18 @@ export const Persona3StatusSection: React.FC<Persona3StatusSectionProps> = ({
     },
     bride: {
       role: 'BRIDE / PENGANTIN WANITA',
-      name: bride.full_name || 'Siti Nurjannah',
-      nickname: bride.nickname || 'Siti',
+      name: bride.full_name || bride.nickname || 'Mempelai Wanita',
+      nickname: bride.nickname || 'Bride',
       arcana: 'ARCANA III: THE EMPRESS',
-      persona: 'ISIS OF SIDOARJO',
+      persona: 'ISIS OF HARMONY',
       level: 'LV 99',
       hp: '999 / 999',
       sp: '999 / 999',
-      parents: 'Putri dari Bapak Poniman & Ibu Ngatenah',
-      address: 'Desa Balonggarut, Kec. Krembung, Kab. Sidoarjo',
-      instagram: bride.instagram || 'sitinurjannah',
+      parents: (bride.father_name || bride.mother_name)
+        ? `Putri dari Bapak ${bride.father_name || ''} & Ibu ${bride.mother_name || ''}`
+        : 'Putri tercinta dari kedua orang tua',
+      address: bride.description || 'Kediaman Mempelai Wanita',
+      instagram: bride.instagram || '',
       photo: bride.photo_url || 'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?q=80&w=1000&auto=format&fit=crop',
       skills: [
         { name: 'Graceful Heart', desc: 'Passive: Kelembutan budi pekerti yang menyejukkan sanubari.' },

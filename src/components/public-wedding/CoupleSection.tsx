@@ -9,6 +9,7 @@ import {
   VintageDivider,
 } from './WeddingDecorations';
 import { FloatingPetalsOverlay } from './FloatingPetalsOverlay';
+import { CoupleAvatar } from '../common/CoupleAvatar';
 
 interface CoupleSectionProps {
   bride: Couple;
@@ -58,10 +59,12 @@ export const CoupleSection: React.FC<CoupleSectionProps> = ({ bride, groom }) =>
             {/* Elegant Arch Portrait */}
             <div className="relative mb-6">
               <div className="w-52 h-72 sm:w-60 sm:h-80 rounded-t-full rounded-b-2xl overflow-hidden border-4 border-[#FFFCF7] shadow-xl p-1 bg-[#FFFCF7]">
-                <img
-                  src={bride.photo_url}
-                  alt={bride.full_name}
-                  className="w-full h-full object-cover rounded-t-full rounded-b-xl group-hover:scale-105 transition-transform duration-700 ease-out"
+                <CoupleAvatar
+                  photoUrl={bride.photo_url}
+                  role="bride"
+                  name={bride.full_name}
+                  theme="royal"
+                  className="w-full h-full rounded-t-full rounded-b-xl group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
               </div>
               <div className="absolute -bottom-3 -right-3 bg-[#FFFCF7] text-[#DFBFC1] p-2.5 rounded-full shadow-md border border-[#C2A56B]/30">
@@ -116,9 +119,11 @@ export const CoupleSection: React.FC<CoupleSectionProps> = ({ bride, groom }) =>
             {/* Elegant Arch Portrait */}
             <div className="relative mb-6">
               <div className="w-52 h-72 sm:w-60 sm:h-80 rounded-t-full rounded-b-2xl overflow-hidden border-4 border-[#FFFCF7] shadow-xl p-1 bg-[#FFFCF7]">
-                <img
-                  src={groom.photo_url}
-                  alt={groom.full_name}
+                <CoupleAvatar
+                  photoUrl={groom.photo_url}
+                  role="groom"
+                  name={groom.full_name}
+                  theme="royal"
                   className="w-full h-full object-cover rounded-t-full rounded-b-xl group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
               </div>

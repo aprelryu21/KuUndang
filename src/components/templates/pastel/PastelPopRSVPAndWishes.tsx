@@ -422,7 +422,7 @@ export const PastelPopRSVPAndWishes: React.FC<PastelPopRSVPAndWishesProps> = ({
 
                   <div className="mt-4 pt-3 border-t border-[#2B2D42]/10 flex items-center justify-between text-[10px] text-[#2B2D42]/60 font-bold">
                     <span>♡ Doa Restu Hangat</span>
-                    <span>#AprilSiti</span>
+                    <span>#DoaRestu</span>
                   </div>
                 </motion.div>
               );

@@ -12,6 +12,7 @@ import {
 } from './cuteFloralAssets';
 import { CuteFloralParticles } from './CuteFloralParticles';
 import { Heart, Instagram } from 'lucide-react';
+import { CoupleAvatar } from '../../common/CoupleAvatar';
 
 interface CuteCoupleSectionProps {
   bride: Couple;
@@ -68,13 +69,12 @@ export const CuteCoupleSection: React.FC<CuteCoupleSectionProps> = ({ bride, gro
 
             {/* Photo Polaroid Frame */}
             <div className="relative mx-auto w-44 h-56 sm:w-48 sm:h-60 rounded-2xl overflow-hidden border-2 border-[#FFA3B8] p-1.5 bg-[#FFF0F5] shadow-inner mb-5">
-              <img
-                src={
-                  bride.photo_url ||
-                  'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?q=80&w=1000&auto=format&fit=crop'
-                }
-                alt={bride.full_name}
-                className="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-500"
+              <CoupleAvatar
+                photoUrl={bride.photo_url}
+                role="bride"
+                name={bride.full_name}
+                theme="cute"
+                className="w-full h-full rounded-xl group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute bottom-2 right-2">
                 <CuteSakuraFlower className="w-6 h-6" />
@@ -89,23 +89,27 @@ export const CuteCoupleSection: React.FC<CuteCoupleSectionProps> = ({ bride, gro
 
             {/* Names & Parents */}
             <h3 className="font-heading text-2xl sm:text-3xl font-bold text-[#4A2E35]">
-              {bride.full_name || 'Siti Rohimah, S.Pd'}
+              {bride.full_name || bride.nickname || 'Mempelai Wanita'}
             </h3>
-            <p className="text-xs font-sans font-semibold text-[#FF5C8D] mt-0.5">
-              ( {bride.nickname || 'Siti'} )
-            </p>
+            {bride.nickname && (
+              <p className="text-xs font-sans font-semibold text-[#FF5C8D] mt-0.5">
+                ( {bride.nickname} )
+              </p>
+            )}
 
-            <p className="text-xs sm:text-sm font-sans text-[#6B3E48] mt-3 leading-relaxed">
-              Putri tercinta dari pasangan:
-              <br />
-              <strong className="text-[#4A2E35]">
-                {bride.father_name || 'Bpk. H. Mulyadi'}
-              </strong>{' '}
-              &amp;{' '}
-              <strong className="text-[#4A2E35]">
-                {bride.mother_name || 'Ibu Hj. Aminah'}
-              </strong>
-            </p>
+            {(bride.father_name || bride.mother_name) ? (
+              <p className="text-xs sm:text-sm font-sans text-[#6B3E48] mt-3 leading-relaxed">
+                Putri tercinta dari pasangan:
+                <br />
+                <strong className="text-[#4A2E35]">
+                  {bride.father_name || 'Bpk. Orang Tua'}
+                </strong>{' '}
+                &amp;{' '}
+                <strong className="text-[#4A2E35]">
+                  {bride.mother_name || 'Ibu Orang Tua'}
+                </strong>
+              </p>
+            ) : null}
 
             {bride.instagram && (
               <div className="mt-4">
@@ -137,13 +141,12 @@ export const CuteCoupleSection: React.FC<CuteCoupleSectionProps> = ({ bride, gro
 
             {/* Photo Polaroid Frame */}
             <div className="relative mx-auto w-44 h-56 sm:w-48 sm:h-60 rounded-2xl overflow-hidden border-2 border-[#FFA3B8] p-1.5 bg-[#FFF0F5] shadow-inner mb-5">
-              <img
-                src={
-                  groom.photo_url ||
-                  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop'
-                }
-                alt={groom.full_name}
-                className="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-500"
+              <CoupleAvatar
+                photoUrl={groom.photo_url}
+                role="groom"
+                name={groom.full_name}
+                theme="cute"
+                className="w-full h-full rounded-xl group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute bottom-2 right-2">
                 <CuteDaisyFlower className="w-6 h-6" />
@@ -158,23 +161,27 @@ export const CuteCoupleSection: React.FC<CuteCoupleSectionProps> = ({ bride, gro
 
             {/* Names & Parents */}
             <h3 className="font-heading text-2xl sm:text-3xl font-bold text-[#4A2E35]">
-              {groom.full_name || 'Apriliyanto, S.Kom'}
+              {groom.full_name || groom.nickname || 'Mempelai Pria'}
             </h3>
-            <p className="text-xs font-sans font-semibold text-[#FF5C8D] mt-0.5">
-              ( {groom.nickname || 'April'} )
-            </p>
+            {groom.nickname && (
+              <p className="text-xs font-sans font-semibold text-[#FF5C8D] mt-0.5">
+                ( {groom.nickname} )
+              </p>
+            )}
 
-            <p className="text-xs sm:text-sm font-sans text-[#6B3E48] mt-3 leading-relaxed">
-              Putra tercinta dari pasangan:
-              <br />
-              <strong className="text-[#4A2E35]">
-                {groom.father_name || 'Bpk. Soedarmono'}
-              </strong>{' '}
-              &amp;{' '}
-              <strong className="text-[#4A2E35]">
-                {groom.mother_name || 'Ibu Sri Wahyuni'}
-              </strong>
-            </p>
+            {(groom.father_name || groom.mother_name) ? (
+              <p className="text-xs sm:text-sm font-sans text-[#6B3E48] mt-3 leading-relaxed">
+                Putra tercinta dari pasangan:
+                <br />
+                <strong className="text-[#4A2E35]">
+                  {groom.father_name || 'Bpk. Orang Tua'}
+                </strong>{' '}
+                &amp;{' '}
+                <strong className="text-[#4A2E35]">
+                  {groom.mother_name || 'Ibu Orang Tua'}
+                </strong>
+              </p>
+            ) : null}
 
             {groom.instagram && (
               <div className="mt-4">
