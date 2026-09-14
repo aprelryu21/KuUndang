@@ -126,6 +126,19 @@ CREATE TABLE IF NOT EXISTS wishes (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 10. Tabel Pengaturan Bagian (Sections)
+CREATE TABLE IF NOT EXISTS sections (
+  id TEXT PRIMARY KEY,
+  invitation_id TEXT REFERENCES invitations(id) ON DELETE CASCADE,
+  section_key TEXT NOT NULL,
+  title TEXT,
+  subtitle TEXT,
+  enabled BOOLEAN DEFAULT true,
+  sort_order REAL DEFAULT 0
+);
+
+ALTER TABLE sections ADD COLUMN IF NOT EXISTS subtitle TEXT;
+
 -- =========================================================
 -- AKTIFKAN ROW LEVEL SECURITY (RLS) & PUBLIC ACCESS
 -- Mengizinkan tamu membaca undangan dan mengirim RSVP/ucapan

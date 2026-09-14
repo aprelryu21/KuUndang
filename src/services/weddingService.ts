@@ -232,16 +232,19 @@ export function cleanGiftForSupabase(gift: GiftAccount) {
   };
 }
 
-export function cleanSectionForSupabase(sec: SectionSetting) {
-  return {
+export function cleanSectionForSupabase(sec: SectionSetting, includeSubtitle = true) {
+  const item: any = {
     id: sec.id,
     invitation_id: sec.invitation_id,
     section_key: sec.section_key,
     title: sec.title || '',
-    subtitle: sec.subtitle || '',
     enabled: sec.enabled ?? true,
     sort_order: sec.sort_order || 0,
   };
+  if (includeSubtitle && sec.subtitle !== undefined) {
+    item.subtitle = sec.subtitle || '';
+  }
+  return item;
 }
 
 export function cleanGuestForSupabase(guest: Guest) {
@@ -374,8 +377,8 @@ export const weddingService = {
       }
     }
 
-    // Demo slug fallback only for explicit demo slugs
-    if (!invitation && (cleanSlug === 'shofwan-allya' || cleanSlug === 'april-siti')) {
+    // Demo slug fallback only for explicit demo slug
+    if (!invitation && cleanSlug === 'april-siti') {
       invitation = INITIAL_DEMO_DATA.invitation;
     }
 
@@ -458,13 +461,15 @@ export const weddingService = {
     let bride = invCouples.find((c) => c.role === 'bride');
     let groom = invCouples.find((c) => c.role === 'groom');
 
-    // Fetch from Supabase if missing locally
-    if (client && (!bride || !groom)) {
+    // Fetch from Supabase if connected
+    if (client) {
       try {
         const { data: dbCouples } = await client.from('couples').select('*').eq('invitation_id', id);
         if (dbCouples && dbCouples.length > 0) {
-          if (!bride) bride = dbCouples.find((c: any) => c.role === 'bride');
-          if (!groom) groom = dbCouples.find((c: any) => c.role === 'groom');
+          const remoteBride = dbCouples.find((c: any) => c.role === 'bride');
+          const remoteGroom = dbCouples.find((c: any) => c.role === 'groom');
+          if (remoteBride) bride = remoteBride;
+          if (remoteGroom) groom = remoteGroom;
           const localCouples = getLocal<Couple[]>(STORAGE_KEYS.COUPLES, []);
           setLocal(STORAGE_KEYS.COUPLES, [...localCouples.filter((c) => c.invitation_id !== id), ...dbCouples]);
         }
@@ -518,6 +523,23 @@ export const weddingService = {
       .filter((e) => e.invitation_id === id)
       .sort((a, b) => a.sort_order - b.sort_order);
 
+    if (client) {
+      try {
+        const { data: dbEvents, error: evErr } = await client
+          .from('events')
+          .select('*')
+          .eq('invitation_id', id)
+          .order('sort_order', { ascending: true });
+        if (!evErr && dbEvents && dbEvents.length > 0) {
+          events = dbEvents;
+          const localEvents = getLocal<WeddingEvent[]>(STORAGE_KEYS.EVENTS, []);
+          setLocal(STORAGE_KEYS.EVENTS, [...localEvents.filter((e) => e.invitation_id !== id), ...dbEvents]);
+        }
+      } catch (err) {
+        console.warn('Supabase fetch events error:', err);
+      }
+    }
+
     if (events.length === 0) {
       if (isDemo) {
         events = INITIAL_DEMO_DATA.events;
@@ -561,6 +583,23 @@ export const weddingService = {
       .filter((s) => s.invitation_id === id)
       .sort((a, b) => a.sort_order - b.sort_order);
 
+    if (client) {
+      try {
+        const { data: dbStories, error: stErr } = await client
+          .from('stories')
+          .select('*')
+          .eq('invitation_id', id)
+          .order('sort_order', { ascending: true });
+        if (!stErr && dbStories && dbStories.length > 0) {
+          stories = dbStories;
+          const localStories = getLocal<StoryItem[]>(STORAGE_KEYS.STORIES, []);
+          setLocal(STORAGE_KEYS.STORIES, [...localStories.filter((s) => s.invitation_id !== id), ...dbStories]);
+        }
+      } catch (err) {
+        console.warn('Supabase fetch stories error:', err);
+      }
+    }
+
     if (stories.length === 0) {
       if (isDemo) {
         stories = INITIAL_DEMO_DATA.stories;
@@ -595,6 +634,23 @@ export const weddingService = {
       .filter((g) => g.invitation_id === id)
       .sort((a, b) => a.sort_order - b.sort_order);
 
+    if (client) {
+      try {
+        const { data: dbGal, error: galErr } = await client
+          .from('gallery')
+          .select('*')
+          .eq('invitation_id', id)
+          .order('sort_order', { ascending: true });
+        if (!galErr && dbGal && dbGal.length > 0) {
+          gallery = dbGal;
+          const localGallery = getLocal<GalleryItem[]>(STORAGE_KEYS.GALLERY, []);
+          setLocal(STORAGE_KEYS.GALLERY, [...localGallery.filter((g) => g.invitation_id !== id), ...dbGal]);
+        }
+      } catch (err) {
+        console.warn('Supabase fetch gallery error:', err);
+      }
+    }
+
     if (gallery.length === 0 && isDemo) {
       gallery = INITIAL_DEMO_DATA.gallery;
     }
@@ -604,6 +660,23 @@ export const weddingService = {
     let gifts = allGifts
       .filter((g) => g.invitation_id === id)
       .sort((a, b) => a.sort_order - b.sort_order);
+
+    if (client) {
+      try {
+        const { data: dbGifts, error: gfErr } = await client
+          .from('gifts')
+          .select('*')
+          .eq('invitation_id', id)
+          .order('sort_order', { ascending: true });
+        if (!gfErr && dbGifts && dbGifts.length > 0) {
+          gifts = dbGifts;
+          const localGifts = getLocal<GiftAccount[]>(STORAGE_KEYS.GIFTS, []);
+          setLocal(STORAGE_KEYS.GIFTS, [...localGifts.filter((g) => g.invitation_id !== id), ...dbGifts]);
+        }
+      } catch (err) {
+        console.warn('Supabase fetch gifts error:', err);
+      }
+    }
 
     if (gifts.length === 0) {
       if (isDemo) {
@@ -628,6 +701,23 @@ export const weddingService = {
     let sections = allSections
       .filter((sec) => sec.invitation_id === id)
       .sort((a, b) => a.sort_order - b.sort_order);
+
+    if (client) {
+      try {
+        const { data: dbSections, error: secErr } = await client
+          .from('sections')
+          .select('*')
+          .eq('invitation_id', id)
+          .order('sort_order', { ascending: true });
+        if (!secErr && dbSections && dbSections.length > 0) {
+          sections = dbSections;
+          const localSections = getLocal<SectionSetting[]>(STORAGE_KEYS.SECTIONS, []);
+          setLocal(STORAGE_KEYS.SECTIONS, [...localSections.filter((s) => s.invitation_id !== id), ...dbSections]);
+        }
+      } catch (err) {
+        console.warn('Supabase fetch sections error:', err);
+      }
+    }
 
     // Ensure all 13 standard sections exist and have subtitles
     const standardSections = INITIAL_DEMO_DATA.sections;
@@ -654,6 +744,22 @@ export const weddingService = {
     }
 
     // 7. WISHES (Only show wishes belonging to this specific invitation!)
+    if (client) {
+      try {
+        const { data: dbWishes, error: wErr } = await client
+          .from('wishes')
+          .select('*')
+          .eq('invitation_id', id)
+          .order('created_at', { ascending: false });
+        if (!wErr && dbWishes && dbWishes.length > 0) {
+          const localWishes = getLocal<Wish[]>(STORAGE_KEYS.WISHES, []);
+          setLocal(STORAGE_KEYS.WISHES, [...localWishes.filter((w) => w.invitation_id !== id), ...dbWishes]);
+        }
+      } catch (err) {
+        console.warn('Supabase fetch wishes error:', err);
+      }
+    }
+
     const allWishes = getLocal<Wish[]>(STORAGE_KEYS.WISHES, isDemo ? INITIAL_DEMO_DATA.wishes : []);
     const wishes = allWishes
       .filter((w) => w.invitation_id === id)
@@ -1159,7 +1265,7 @@ export const weddingService = {
     const client = getSupabaseClient();
     if (client) {
       try {
-        await client.from('couples').upsert(updatedCouple);
+        await client.from('couples').upsert(cleanCoupleForSupabase(updatedCouple));
       } catch (err) {
         console.warn('Supabase updateCouple sync failed:', err);
       }
@@ -1181,7 +1287,7 @@ export const weddingService = {
       try {
         await client.from('events').delete().eq('invitation_id', invitationId);
         if (events.length > 0) {
-          await client.from('events').upsert(events);
+          await client.from('events').upsert(events.map(cleanEventForSupabase));
         }
       } catch (err) {
         console.warn('Supabase updateEvents sync failed:', err);
@@ -1204,7 +1310,7 @@ export const weddingService = {
       try {
         await client.from('stories').delete().eq('invitation_id', invitationId);
         if (stories.length > 0) {
-          await client.from('stories').upsert(stories);
+          await client.from('stories').upsert(stories.map(cleanStoryForSupabase));
         }
       } catch (err) {
         console.warn('Supabase updateStories sync failed:', err);
@@ -1227,7 +1333,7 @@ export const weddingService = {
       try {
         await client.from('gallery').delete().eq('invitation_id', invitationId);
         if (gallery.length > 0) {
-          await client.from('gallery').upsert(gallery);
+          await client.from('gallery').upsert(gallery.map(cleanGalleryForSupabase));
         }
       } catch (err) {
         console.warn('Supabase updateGallery sync failed:', err);
@@ -1250,7 +1356,7 @@ export const weddingService = {
       try {
         await client.from('gifts').delete().eq('invitation_id', invitationId);
         if (gifts.length > 0) {
-          await client.from('gifts').upsert(gifts);
+          await client.from('gifts').upsert(gifts.map(cleanGiftForSupabase));
         }
       } catch (err) {
         console.warn('Supabase updateGifts sync failed:', err);
@@ -1273,7 +1379,18 @@ export const weddingService = {
       try {
         await client.from('sections').delete().eq('invitation_id', invitationId);
         if (sections.length > 0) {
-          await client.from('sections').upsert(sections);
+          // Attempt upsert with subtitle first
+          let cleanSections = sections.map((s) => cleanSectionForSupabase(s, true));
+          let { error } = await client.from('sections').upsert(cleanSections);
+          if (error && (error.code === 'PGRST204' || error.message?.includes('subtitle'))) {
+            // If table lacks subtitle column, fallback cleanly without failing
+            cleanSections = sections.map((s) => cleanSectionForSupabase(s, false));
+            const retry = await client.from('sections').upsert(cleanSections);
+            error = retry.error;
+          }
+          if (error) {
+            console.warn('Supabase updateSections sync warning:', error.message);
+          }
         }
       } catch (err) {
         console.warn('Supabase updateSections sync failed:', err);
@@ -1739,7 +1856,12 @@ export const weddingService = {
         if (error) throw new Error(`Tabel gifts: ${error.message}`);
       }
       if (cleanSections.length > 0) {
-        const { error } = await client.from('sections').upsert(cleanSections);
+        let { error } = await client.from('sections').upsert(cleanSections);
+        if (error && (error.code === 'PGRST204' || error.message?.includes('subtitle'))) {
+          const fallbackSections = sections.map((s) => cleanSectionForSupabase(s, false));
+          const retry = await client.from('sections').upsert(fallbackSections);
+          error = retry.error;
+        }
         if (error) throw new Error(`Tabel sections: ${error.message}`);
       }
       if (cleanGuests.length > 0) {

@@ -56,8 +56,12 @@ export function normalizeSupabaseKey(rawKey: string): string {
   return rawKey.trim().replace(/^["']|["']$/g, '').replace(/\s+/g, '');
 }
 
+export const DEFAULT_SUPABASE_URL = 'https://xyryhdusxnwwjwkycsvd.supabase.co';
+export const DEFAULT_SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5cnloZHVzeG53d2p3a3ljc3ZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzNzUzOTYsImV4cCI6MjEwNDk1MTM5Nn0.QNfo1oxTBUxb_s25q-wcn8Ue7rgCs6XquTXW_yzaDzc';
+
 /**
- * Get active Supabase configuration from localStorage or Vite environment variables.
+ * Get active Supabase configuration from localStorage, Vite environment variables, or default project.
  * Automatically corrects/normalizes URL in localStorage if it was saved with /rest/v1 or subpaths.
  */
 export function getSupabaseConfig(): { url: string; anonKey: string; isConfigured: boolean; rawUrl?: string } {
@@ -70,10 +74,10 @@ export function getSupabaseConfig(): { url: string; anonKey: string; isConfigure
   }
 
   if (!url) {
-    url = (import.meta as any).env?.VITE_SUPABASE_URL || '';
+    url = (import.meta as any).env?.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL;
   }
   if (!anonKey) {
-    anonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || '';
+    anonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY;
   }
 
   const rawUrl = url;
@@ -480,6 +484,7 @@ ALTER TABLE public.rsvps ADD COLUMN IF NOT EXISTS guest_count INT;
 ALTER TABLE public.rsvps ADD COLUMN IF NOT EXISTS message TEXT;
 ALTER TABLE public.wishes ADD COLUMN IF NOT EXISTS guest_id TEXT;
 ALTER TABLE public.wishes ADD COLUMN IF NOT EXISTS guest_name TEXT;
+ALTER TABLE public.sections ADD COLUMN IF NOT EXISTS subtitle TEXT;
 
 -- ============================================================
 -- STORAGE BUCKET UNTUK FOTO & MEDIA (wedding-media)
