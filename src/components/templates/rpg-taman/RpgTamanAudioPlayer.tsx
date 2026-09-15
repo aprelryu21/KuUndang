@@ -62,3 +62,5 @@ export const SeriMalaysiaAudioPlayer: React.FC<SeriMalaysiaAudioPlayerProps> = (
     </div>
   );
 };
+export const RpgTamanAudioPlayer = SeriMalaysiaAudioPlayer;
+export default SeriMalaysiaAudioPlayer;

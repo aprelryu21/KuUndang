@@ -1,23 +1,23 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { FullInvitationData, Guest, WeddingInvitation } from '../../../types/wedding';
 import { INITIAL_DEMO_DATA } from '../../../data/initialDemo';
-import { SeriMalaysiaCover } from './SeriMalaysiaCover';
-import { SeriMalaysiaCanvas } from './SeriMalaysiaCanvas';
+import { RpgTamanCover } from './RpgTamanCover';
+import { RpgTamanCanvas } from './RpgTamanCanvas';
 import {
-  SeriMalaysiaCharacterSelector,
+  RpgTamanCharacterSelector,
   CHARACTER_OPTIONS,
   CharacterOption,
-} from './SeriMalaysiaCharacterSelector';
-import { SeriMalaysiaAudioPlayer } from './SeriMalaysiaAudioPlayer';
-import { SeriMalaysiaQuickDock } from './SeriMalaysiaQuickDock';
-import { SeriMalaysiaCoupleModal } from './modals/SeriMalaysiaCoupleModal';
-import { SeriMalaysiaEventModal } from './modals/SeriMalaysiaEventModal';
-import { SeriMalaysiaStoryModal } from './modals/SeriMalaysiaStoryModal';
-import { SeriMalaysiaGalleryModal } from './modals/SeriMalaysiaGalleryModal';
-import { SeriMalaysiaGiftModal } from './modals/SeriMalaysiaGiftModal';
-import { SeriMalaysiaWishesModal } from './modals/SeriMalaysiaWishesModal';
+} from './RpgTamanCharacterSelector';
+import { RpgTamanAudioPlayer } from './RpgTamanAudioPlayer';
+import { RpgTamanQuickDock } from './RpgTamanQuickDock';
+import { RpgTamanCoupleModal } from './modals/RpgTamanCoupleModal';
+import { RpgTamanEventModal } from './modals/RpgTamanEventModal';
+import { RpgTamanStoryModal } from './modals/RpgTamanStoryModal';
+import { RpgTamanGalleryModal } from './modals/RpgTamanGalleryModal';
+import { RpgTamanGiftModal } from './modals/RpgTamanGiftModal';
+import { RpgTamanWishesModal } from './modals/RpgTamanWishesModal';
 
-interface SeriMalaysiaWeddingViewProps {
+interface RpgTamanWeddingViewProps {
   data?: FullInvitationData | null;
   wedding?: WeddingInvitation | null;
   guest?: Guest | null;
@@ -26,7 +26,7 @@ interface SeriMalaysiaWeddingViewProps {
   onRefreshData?: () => void;
 }
 
-export const SeriMalaysiaWeddingView: React.FC<SeriMalaysiaWeddingViewProps> = ({
+export const RpgTamanWeddingView: React.FC<RpgTamanWeddingViewProps> = ({
   data,
   wedding: directWedding,
   guestName = 'Tamu Undangan',
@@ -82,9 +82,22 @@ export const SeriMalaysiaWeddingView: React.FC<SeriMalaysiaWeddingViewProps> = (
     CHARACTER_OPTIONS[0]
   );
   const [showCharacterSelector, setShowCharacterSelector] = useState(false);
+  const [spawnTrigger, setSpawnTrigger] = useState(0);
   const [activeModal, setActiveModal] = useState<
     'couple' | 'event' | 'story' | 'gallery' | 'gift' | 'wishes' | null
   >(null);
+
+  // Desktop keyboard shortcut: ESC to close any station modal or character selector
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' || e.code === 'Escape') {
+        setActiveModal(null);
+        setShowCharacterSelector(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Compute enabled sections dynamically based on admin sections
   const enabledSections = useMemo(() => {
@@ -104,40 +117,48 @@ export const SeriMalaysiaWeddingView: React.FC<SeriMalaysiaWeddingViewProps> = (
 
   const handleOpenCover = () => {
     setIsOpen(true);
-    // Open character selection first time entering the garden
+    // Open character selection modal on top of game world
     setShowCharacterSelector(true);
+  };
+
+  const handleConfirmCharacter = (char: CharacterOption) => {
+    setSelectedCharacter(char);
+    setShowCharacterSelector(false);
+    // Trigger animated character spawn sequence on canvas!
+    setSpawnTrigger(Date.now());
   };
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-[#1A1015]">
-      {/* 1. Cover Opening Screen */}
+      {/* 1. Main Exploration Game Canvas (Always mounted and live in background) */}
+      <div className="w-full h-full">
+        <RpgTamanCanvas
+          character={selectedCharacter}
+          guestName={guestName}
+          enabledSections={enabledSections}
+          spawnTrigger={spawnTrigger}
+          onOpenModal={(type) => setActiveModal(type)}
+        />
+      </div>
+
+      {/* 2. Opening Cover Screen (Popup Modal over live game canvas) */}
       {!isOpen && (
-        <SeriMalaysiaCover
+        <RpgTamanCover
           wedding={wedding}
           guestName={guestName}
           onOpen={handleOpenCover}
         />
       )}
 
-      {/* 2. Audio Player */}
-      <SeriMalaysiaAudioPlayer
+      {/* 3. Audio Player */}
+      <RpgTamanAudioPlayer
         musicUrl={wedding.music_url}
         autoPlay={isOpen}
       />
 
-      {/* 3. Main Exploration Game Canvas */}
-      <div className="w-full h-full">
-        <SeriMalaysiaCanvas
-          character={selectedCharacter}
-          guestName={guestName}
-          enabledSections={enabledSections}
-          onOpenModal={(type) => setActiveModal(type)}
-        />
-      </div>
-
       {/* 4. Bottom Quick Dock */}
       {isOpen && (
-        <SeriMalaysiaQuickDock
+        <RpgTamanQuickDock
           enabledSections={enabledSections}
           onOpenModal={(type) => setActiveModal(type)}
           onOpenCharacterSelect={() => setShowCharacterSelector(true)}
@@ -146,57 +167,63 @@ export const SeriMalaysiaWeddingView: React.FC<SeriMalaysiaWeddingViewProps> = (
 
       {/* 5. Modals for Wedding Stations */}
       {activeModal === 'couple' && (
-        <SeriMalaysiaCoupleModal
+        <RpgTamanCoupleModal
           wedding={wedding}
           onClose={() => setActiveModal(null)}
         />
       )}
 
       {activeModal === 'event' && (
-        <SeriMalaysiaEventModal
+        <RpgTamanEventModal
           wedding={wedding}
           onClose={() => setActiveModal(null)}
         />
       )}
 
       {activeModal === 'story' && (
-        <SeriMalaysiaStoryModal
+        <RpgTamanStoryModal
           wedding={wedding}
           onClose={() => setActiveModal(null)}
         />
       )}
 
       {activeModal === 'gallery' && (
-        <SeriMalaysiaGalleryModal
+        <RpgTamanGalleryModal
           wedding={wedding}
           onClose={() => setActiveModal(null)}
         />
       )}
 
       {activeModal === 'gift' && (
-        <SeriMalaysiaGiftModal
+        <RpgTamanGiftModal
           wedding={wedding}
           onClose={() => setActiveModal(null)}
         />
       )}
 
       {activeModal === 'wishes' && (
-        <SeriMalaysiaWishesModal
+        <RpgTamanWishesModal
           wedding={wedding}
           guestName={guestName}
           onClose={() => setActiveModal(null)}
         />
       )}
 
-      {/* 6. Character Selector Dialog */}
+      {/* 6. Character Selector Dialog (2-Column Pria vs Wanita) */}
       {showCharacterSelector && (
-        <SeriMalaysiaCharacterSelector
+        <RpgTamanCharacterSelector
           selectedId={selectedCharacter.id}
           onSelect={(char) => setSelectedCharacter(char)}
-          onClose={() => setShowCharacterSelector(false)}
+          onConfirm={handleConfirmCharacter}
+          onClose={() => {
+            setShowCharacterSelector(false);
+            setSpawnTrigger(Date.now());
+          }}
         />
       )}
     </div>
   );
 };
-export default SeriMalaysiaWeddingView;
+
+export const SeriMalaysiaWeddingView = RpgTamanWeddingView;
+export default RpgTamanWeddingView;

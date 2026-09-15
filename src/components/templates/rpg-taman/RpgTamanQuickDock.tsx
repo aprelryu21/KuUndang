@@ -79,3 +79,5 @@ export const SeriMalaysiaQuickDock: React.FC<SeriMalaysiaQuickDockProps> = ({
     </div>
   );
 };
+export const RpgTamanQuickDock = SeriMalaysiaQuickDock;
+export default SeriMalaysiaQuickDock;

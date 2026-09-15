@@ -20,14 +20,19 @@ export const SeriMalaysiaCoupleModal: React.FC<SeriMalaysiaCoupleModalProps> = (
         className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#FFFCF3] border-4 border-[#D7BB83] shadow-2xl p-6 sm:p-8 text-[#2A1713]"
         style={{ fontFamily: "'Poppins', sans-serif" }}
       >
-        {/* Header Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-10 p-2 text-[#4C030A] hover:bg-[#4C030A]/10 rounded-full transition-colors"
-          aria-label="Tutup Modal"
-        >
-          <X className="w-6 h-6" />
-        </button>
+        {/* Header Close Button & ESC hint */}
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+          <span className="hidden sm:inline-block text-[10px] text-[#7A634F] bg-[#4C030A]/5 px-2 py-1 rounded border border-[#D7BB83]/40">
+            Tekan ESC untuk tutup
+          </span>
+          <button
+            onClick={onClose}
+            className="p-2 text-[#4C030A] hover:bg-[#4C030A]/10 rounded-full transition-colors"
+            aria-label="Tutup Modal"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
 
         {/* Modal Title & Malay Ornamental Border */}
         <div className="text-center mb-6">
@@ -189,3 +194,5 @@ export const SeriMalaysiaCoupleModal: React.FC<SeriMalaysiaCoupleModalProps> = (
     </div>
   );
 };
+export const RpgTamanCoupleModal = SeriMalaysiaCoupleModal;
+export default SeriMalaysiaCoupleModal;

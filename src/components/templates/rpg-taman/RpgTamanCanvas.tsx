@@ -125,19 +125,28 @@ export const ALL_HOTSPOTS: Hotspot[] = [
   },
 ];
 
-// Additional static environmental solid obstacles (Fountain, Pond water, Trees)
+// Additional static environmental solid obstacles (Lake, Pond, Fountain, Altar, Gazebo)
 const ENVIRONMENT_OBSTACLES = [
-  // Garden fountain on left
-  { minX: 275, maxX: 345, minY: 515, maxY: 575 },
-  // Pond water boundary (except bridge area x:650..800, y:510..570)
-  { minX: 620, maxX: 848, minY: 430, maxY: 505 },
-  { minX: 560, maxX: 848, minY: 575, maxY: 760 },
+  // 1. Garden fountain on the left
+  { minX: 230, maxX: 340, minY: 600, maxY: 690 },
+  // 2. Large gazebo on the left (flower gazebo)
+  { minX: 130, maxX: 300, minY: 750, maxY: 920 },
+  // 3. Top wedding altar / pelaminan
+  { minX: 340, maxX: 510, minY: 150, maxY: 240 },
+  // 4. Upper pond above the bridge (two fishermen)
+  { minX: 570, maxX: 848, minY: 520, maxY: 645 },
+  // 5. Lower main lake below the wooden bridge (with water lilies & rocks)
+  // The wooden bridge is at Y: 645..730, X: 610..800 - leaving it fully OPEN & WALKABLE!
+  { minX: 510, maxX: 848, minY: 730, maxY: 940 },
+  // West shoreline curve of lower lake
+  { minX: 470, maxX: 530, minY: 770, maxY: 860 },
 ];
 
 interface SeriMalaysiaCanvasProps {
   character: CharacterOption;
   guestName?: string;
   enabledSections?: string[];
+  spawnTrigger?: number;
   onOpenModal: (modalType: 'couple' | 'event' | 'story' | 'gallery' | 'gift' | 'wishes') => void;
   onToggleMusic?: () => void;
 }
@@ -146,6 +155,7 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
   character,
   guestName = 'Tamu Undangan',
   enabledSections = ['couple', 'events', 'story', 'gallery', 'gifts', 'wishes', 'rsvp'],
+  spawnTrigger = 0,
   onOpenModal,
   onToggleMusic,
 }) => {
@@ -230,6 +240,23 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
     },
 
     activeHotspotId: null as string | null,
+
+    // Spawn burst animation state
+    spawnAnim: {
+      active: false,
+      startTime: 0,
+      duration: 2.2,
+      particles: [] as Array<{
+        x: number;
+        y: number;
+        vx: number;
+        vy: number;
+        size: number;
+        color: string;
+        alpha: number;
+        rot: number;
+      }>,
+    },
   });
 
   // Advanced sprite normalization (matches Inveet's frameNormalization pipeline)
@@ -517,6 +544,37 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
     };
   }, []);
 
+  // Trigger spawn animation (burst of stars & golden aura) when character is chosen/confirmed
+  useEffect(() => {
+    if (spawnTrigger && spawnTrigger > 0) {
+      const state = stateRef.current;
+      const px = state.player.x;
+      const py = state.player.y;
+      const colors = ['#FFD700', '#FFF8DC', '#FF69B4', '#FFA07A', '#00FFFF', '#FFFFFF', '#D7BB83'];
+      const particles = Array.from({ length: 36 }).map(() => {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 45 + Math.random() * 120;
+        return {
+          x: px,
+          y: py - 18,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 30,
+          size: 3.5 + Math.random() * 4.5,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          alpha: 1,
+          rot: Math.random() * Math.PI * 2,
+        };
+      });
+
+      state.spawnAnim = {
+        active: true,
+        startTime: performance.now(),
+        duration: 2.2,
+        particles,
+      };
+    }
+  }, [spawnTrigger]);
+
   // Hotspot trigger action
   const triggerHotspot = useCallback(
     (hotspotId: string) => {
@@ -716,26 +774,25 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
         setActiveHotspot(nearestHotspot);
       }
 
-      // 3. UPDATE CAMERA
+      // 3. UPDATE CAMERA (Desktop & Mobile Full-Screen Cover)
       const isPortrait = cw < ch;
+      // Minimum zoom required so that map width & height fully cover viewport without any black bar
+      const minZoomToCover = Math.max(cw / state.mapWidth, ch / state.mapHeight);
       const targetZoom = isPortrait
-        ? Math.max(cw / 520, 1.05)
-        : Math.min(cw / 848, ch / 880) * 1.18;
+        ? Math.max(minZoomToCover, 1.15)
+        : Math.max(minZoomToCover, 1.25);
 
       state.camera.zoom = targetZoom;
 
       const viewW = cw / targetZoom;
       const viewH = ch / targetZoom;
 
-      // Smooth camera follow player
-      const targetCamX = Math.max(
-        0,
-        Math.min(state.mapWidth - viewW, player.x - viewW / 2)
-      );
-      const targetCamY = Math.max(
-        0,
-        Math.min(state.mapHeight - viewH, player.y - viewH / 2)
-      );
+      // Keep camera viewport smoothly inside map boundaries
+      const maxCamX = Math.max(0, state.mapWidth - viewW);
+      const maxCamY = Math.max(0, state.mapHeight - viewH);
+
+      const targetCamX = Math.max(0, Math.min(maxCamX, player.x - viewW / 2));
+      const targetCamY = Math.max(0, Math.min(maxCamY, player.y - viewH / 2));
 
       state.camera.x += (targetCamX - state.camera.x) * 0.1;
       state.camera.y += (targetCamY - state.camera.y) * 0.1;
@@ -846,17 +903,123 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
         const destW = isFemale ? 64 : 62;
         const destH = isFemale ? 64 : 62;
 
+        // Draw Spawn Aura Rings if active
+        if (state.spawnAnim.active) {
+          const t = (performance.now() - state.spawnAnim.startTime) / (state.spawnAnim.duration * 1000);
+          if (t < 1) {
+            const ringRadius = 14 + t * 45;
+            const ringAlpha = Math.max(0, 1 - t);
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(player.x, player.y + 12, ringRadius, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(255, 215, 0, ${ringAlpha * 0.9})`;
+            ctx.lineWidth = 3 * (1 - t * 0.5);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(player.x, player.y + 12, ringRadius * 0.55, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(255, 255, 255, ${ringAlpha * 0.8})`;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+
+        // Elastic scale-in bounce during spawn
+        let scaleMultiplier = 1;
+        if (state.spawnAnim.active) {
+          const t = (performance.now() - state.spawnAnim.startTime) / (state.spawnAnim.duration * 1000);
+          if (t < 0.22) {
+            scaleMultiplier = Math.sin((t / 0.22) * Math.PI * 0.5) * 1.36;
+          } else if (t < 0.44) {
+            scaleMultiplier = 1.36 - ((t - 0.22) / 0.22) * 0.36;
+          } else {
+            scaleMultiplier = 1;
+          }
+        }
+
+        const renderW = destW * scaleMultiplier;
+        const renderH = destH * scaleMultiplier;
+
         ctx.drawImage(
           state.images.player,
           sx,
           sy,
           frameW,
           frameH,
-          player.x - destW / 2,
-          player.y - destH / 2,
-          destW,
-          destH
+          player.x - renderW / 2,
+          player.y - renderH / 2,
+          renderW,
+          renderH
         );
+      }
+
+      // Draw Spawn Burst Particles & Floating Banner
+      if (state.spawnAnim.active) {
+        const t = (performance.now() - state.spawnAnim.startTime) / (state.spawnAnim.duration * 1000);
+        if (t < 1) {
+          // Particles
+          for (const sp of state.spawnAnim.particles) {
+            sp.x += sp.vx * dt;
+            sp.y += sp.vy * dt;
+            sp.vy += 35 * dt;
+            sp.vx *= 0.97;
+            sp.rot += 3 * dt;
+            const pAlpha = Math.max(0, (1 - t) * 0.95);
+
+            ctx.save();
+            ctx.translate(sp.x, sp.y);
+            ctx.rotate(sp.rot);
+            ctx.globalAlpha = pAlpha;
+            ctx.fillStyle = sp.color;
+
+            const s = sp.size;
+            ctx.beginPath();
+            ctx.moveTo(0, -s);
+            ctx.lineTo(s * 0.3, -s * 0.3);
+            ctx.lineTo(s, 0);
+            ctx.lineTo(s * 0.3, s * 0.3);
+            ctx.lineTo(0, s);
+            ctx.lineTo(-s * 0.3, s * 0.3);
+            ctx.lineTo(-s, 0);
+            ctx.lineTo(-s * 0.3, -s * 0.3);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+          }
+
+          // Floating welcome banner above player
+          if (t < 0.85) {
+            const bannerAlpha = t < 0.2 ? t / 0.2 : 1 - (t - 0.2) / 0.65;
+            const bannerOffsetY = -58 - t * 24;
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, Math.min(1, bannerAlpha));
+            ctx.font = 'bold 11px "Poppins", sans-serif';
+            const bText = `✨ Selamat Datang di Taman, ${guestName}! ✨`;
+            const bWidth = ctx.measureText(bText).width;
+            const bBoxW = bWidth + 20;
+            const bBoxH = 22;
+            const bBoxX = player.x - bBoxW / 2;
+            const bBoxY = player.y + bannerOffsetY;
+
+            ctx.fillStyle = 'rgba(76, 3, 10, 0.92)';
+            ctx.beginPath();
+            ctx.roundRect(bBoxX, bBoxY, bBoxW, bBoxH, 11);
+            ctx.fill();
+
+            ctx.strokeStyle = '#D7BB83';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            ctx.fillStyle = '#FFD700';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(bText, player.x, bBoxY + bBoxH / 2);
+            ctx.restore();
+          }
+        } else {
+          state.spawnAnim.active = false;
+        }
       }
 
       // E. Draw Player Name Tag above head
@@ -1027,10 +1190,12 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
         <div className="px-3.5 py-1.5 rounded-full bg-[#FFFCF3]/90 backdrop-blur-md border border-[#D7BB83] shadow-md flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
           <span className="text-xs font-bold text-[#4C030A] font-serif tracking-wide">
-            Laman Seri Taman Pengantin
+            2D RPG Taman Pengantin
           </span>
         </div>
       </div>
     </div>
   );
 };
+export const RpgTamanCanvas = SeriMalaysiaCanvas;
+export default SeriMalaysiaCanvas;

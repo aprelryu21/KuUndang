@@ -22,7 +22,7 @@ import { JavaneseWeddingView } from '../components/templates/javanese/JavaneseWe
 import { CuteFloralWeddingView } from '../components/templates/cute-floral/CuteFloralWeddingView';
 import { MarioWeddingView } from '../components/templates/mario/MarioWeddingView';
 import { FleurBotanicaWeddingView } from '../components/templates/fleur-botanica/FleurBotanicaWeddingView';
-import { SeriMalaysiaWeddingView } from '../components/templates/seri-malaysia/SeriMalaysiaWeddingView';
+import { RpgTamanWeddingView } from '../components/templates/rpg-taman/RpgTamanWeddingView';
 import { LanguageSwitcher } from '../components/common/LanguageSwitcher';
 import { AdminLoginModal } from '../components/admin/AdminLoginModal';
 import { Heart, ArrowLeft, Eye, RefreshCw } from 'lucide-react';
@@ -362,7 +362,7 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
           </div>
         )}
 
-        <SeriMalaysiaWeddingView
+        <RpgTamanWeddingView
           data={data}
           guest={guest}
           guestName={guestName}

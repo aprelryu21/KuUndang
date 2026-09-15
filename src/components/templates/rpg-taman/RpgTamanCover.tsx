@@ -20,28 +20,17 @@ export const SeriMalaysiaCover: React.FC<SeriMalaysiaCoverProps> = ({
   const groomName = groom?.nickname || groom?.name || 'April';
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center overflow-hidden bg-[#1A1015]">
-      {/* Garden Sunset Background */}
-      <div className="absolute inset-0">
-        <img
-          src="/templates/seri-malaysia/cover-garden.jpg"
-          alt="Laman Seri Taman Pernikahan"
-          className="w-full h-full object-cover object-center filter brightness-90 transform scale-105 animate-subtleZoom"
-        />
-        {/* Soft Vignette & Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-[#1A1015]/90" />
-      </div>
-
-      {/* Floating Petals / Sparkles Accent */}
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
+      {/* Soft Vignette & Floating Sparkles */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-10 left-10 w-2 h-2 rounded-full bg-[#D7BB83] animate-ping opacity-60" />
         <div className="absolute top-1/4 right-12 w-3 h-3 rounded-full bg-[#FFF] animate-pulse opacity-40" />
         <div className="absolute bottom-1/3 left-16 w-2 h-2 rounded-full bg-[#D7BB83] animate-ping delay-1000 opacity-50" />
       </div>
 
-      {/* Content Card */}
+      {/* Content Card Pop-up Modal */}
       <div 
-        className="relative z-10 max-w-md w-full mx-4 p-6 sm:p-8 rounded-3xl bg-[#FFFCF3]/90 backdrop-blur-md border-4 border-[#D7BB83] shadow-2xl text-center text-[#2A1713]"
+        className="relative z-10 max-w-md w-full p-6 sm:p-8 rounded-3xl bg-[#FFFCF3]/95 backdrop-blur-md border-4 border-[#D7BB83] shadow-2xl text-center text-[#2A1713] animate-scaleUp"
         style={{ fontFamily: "'Poppins', sans-serif" }}
       >
         {/* Bismillah Header */}
@@ -113,3 +102,5 @@ export const SeriMalaysiaCover: React.FC<SeriMalaysiaCoverProps> = ({
     </div>
   );
 };
+export const RpgTamanCover = SeriMalaysiaCover;
+export default SeriMalaysiaCover;
