@@ -41,7 +41,7 @@ export const SeriMalaysiaWishesModal: React.FC<SeriMalaysiaWishesModalProps> = (
       await weddingService.submitRSVP({
         invitation_id: wedding.id,
         guest_name: name.trim(),
-        attendance_status: status,
+        attendance: status,
         guest_count: guestCount,
         message: message.trim(),
       });
@@ -49,9 +49,12 @@ export const SeriMalaysiaWishesModal: React.FC<SeriMalaysiaWishesModalProps> = (
       const newWish: Wish = {
         id: 'wish-' + Date.now(),
         invitation_id: wedding.id,
+        guest_name: name.trim(),
         sender_name: name.trim(),
+        name: name.trim(),
         message: message.trim(),
         attendance_status: status,
+        status: 'approved',
         created_at: new Date().toISOString(),
       };
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Sparkles, Compass } from 'lucide-react';
-import { CharacterOption } from './SeriMalaysiaCharacterSelector';
+import { CharacterOption } from './RpgTamanCharacterSelector';
 
 export interface Hotspot {
   id: string;

@@ -140,10 +140,43 @@ export interface Wish {
   invitation_id: string;
   guest_id?: string | null;
   guest_name?: string;
+  sender_name?: string;
   name?: string;
   message: string;
-  status: 'approved' | 'pending' | 'hidden';
+  attendance_status?: string;
+  status?: 'approved' | 'pending' | 'hidden';
   created_at: string;
+}
+
+export interface WeddingInvitation {
+  id: string;
+  title: string;
+  wedding_date?: string;
+  music_url?: string;
+  couples?: Array<{
+    role: 'bride' | 'groom';
+    name: string;
+    nickname?: string;
+    photo?: string;
+    instagram?: string;
+    address?: string;
+    father_name?: string;
+    mother_name?: string;
+    child_order?: string;
+  }>;
+  events?: WeddingEvent[];
+  stories?: StoryItem[];
+  galleries?: GalleryItem[];
+  wishes?: Wish[];
+  gift_info?: {
+    bank_accounts?: Array<{
+      bank_name: string;
+      account_number: string;
+      account_name: string;
+    }>;
+    address?: string;
+  };
+  [key: string]: any;
 }
 
 export type TemplateId =

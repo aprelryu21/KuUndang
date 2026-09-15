@@ -1002,7 +1002,7 @@ export const weddingService = {
         const { error: giftErr } = await client.from('gifts').upsert(newGifts.map(cleanGiftForSupabase));
         if (giftErr) console.warn('Supabase gifts upsert warning:', giftErr.message);
 
-        const { error: secErr } = await client.from('sections').upsert(newSections.map(cleanSectionForSupabase));
+        const { error: secErr } = await client.from('sections').upsert(newSections.map((s) => cleanSectionForSupabase(s)));
         if (secErr) console.warn('Supabase sections upsert warning:', secErr.message);
 
         supabaseStatus.synced = true;
@@ -1376,7 +1376,7 @@ export const weddingService = {
               account_number: g.account_number || '',
               account_name: g.account_name || (g as any).account_holder || '',
               sort_order: g.sort_order || 0,
-            }));
+            })) as any;
             const retry = await client.from('gifts').upsert(cleanGifts);
             error = retry.error;
           }
@@ -1833,7 +1833,7 @@ export const weddingService = {
       const cleanStories = stories.map(cleanStoryForSupabase);
       const cleanGallery = gallery.map(cleanGalleryForSupabase);
       const cleanGifts = gifts.map(cleanGiftForSupabase);
-      const cleanSections = sections.map(cleanSectionForSupabase);
+      const cleanSections = sections.map((s) => cleanSectionForSupabase(s));
       const cleanGuests = guests.map(cleanGuestForSupabase);
       const cleanRsvps = rsvps.map(cleanRsvpForSupabase);
       const cleanWishes = wishes.map(cleanWishForSupabase);
