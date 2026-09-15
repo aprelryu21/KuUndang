@@ -2,15 +2,17 @@ import React from 'react';
 import { Users, Calendar, Heart, Image as ImageIcon, Gift, MessageSquare, Shirt } from 'lucide-react';
 
 interface SeriMalaysiaQuickDockProps {
+  enabledSections?: string[];
   onOpenModal: (modalType: 'couple' | 'event' | 'story' | 'gallery' | 'gift' | 'wishes') => void;
   onOpenCharacterSelect: () => void;
 }
 
 export const SeriMalaysiaQuickDock: React.FC<SeriMalaysiaQuickDockProps> = ({
+  enabledSections = ['couple', 'events', 'story', 'gallery', 'gifts', 'wishes', 'rsvp'],
   onOpenModal,
   onOpenCharacterSelect,
 }) => {
-  const items = [
+  const allItems = [
     { type: 'couple' as const, label: 'Mempelai', icon: Users, navImg: '/templates/seri-malaysia/nav-couple.png' },
     { type: 'event' as const, label: 'Acara', icon: Calendar, navImg: '/templates/seri-malaysia/nav-event.png' },
     { type: 'story' as const, label: 'Kisah', icon: Heart, navImg: null },
@@ -18,6 +20,16 @@ export const SeriMalaysiaQuickDock: React.FC<SeriMalaysiaQuickDockProps> = ({
     { type: 'gift' as const, label: 'Hadiah', icon: Gift, navImg: '/templates/seri-malaysia/nav-gift.png' },
     { type: 'wishes' as const, label: 'Ucapan', icon: MessageSquare, navImg: '/templates/seri-malaysia/nav-wishes.png' },
   ];
+
+  const items = allItems.filter((item) => {
+    if (!enabledSections || enabledSections.length === 0) return true;
+    if (item.type === 'event') return enabledSections.includes('events');
+    if (item.type === 'gift') return enabledSections.includes('gifts');
+    if (item.type === 'wishes') {
+      return enabledSections.includes('wishes') || enabledSections.includes('rsvp');
+    }
+    return enabledSections.includes(item.type);
+  });
 
   return (
     <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-30 max-w-full px-2">

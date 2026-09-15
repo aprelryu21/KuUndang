@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { FullInvitationData, Guest, WeddingInvitation } from '../../../types/wedding';
+import { INITIAL_DEMO_DATA } from '../../../data/initialDemo';
 import { SeriMalaysiaCover } from './SeriMalaysiaCover';
 import { SeriMalaysiaCanvas } from './SeriMalaysiaCanvas';
 import {
@@ -30,47 +31,52 @@ export const SeriMalaysiaWeddingView: React.FC<SeriMalaysiaWeddingViewProps> = (
   wedding: directWedding,
   guestName = 'Tamu Undangan',
 }) => {
-  // Normalize wedding invitation data from FullInvitationData or WeddingInvitation
+  const fallbackDemo = INITIAL_DEMO_DATA;
+
+  // Normalize wedding invitation data from FullInvitationData or WeddingInvitation, strictly using standard dummy fallbacks
   const wedding: WeddingInvitation = directWedding || {
-    id: data?.invitation?.id || 'inv-demo-1',
-    title: data?.invitation?.title || 'Walimatul Ursy',
-    wedding_date: data?.invitation?.wedding_date || '2026-10-20',
-    music_url: (data?.invitation as any)?.music_url,
+    id: data?.invitation?.id || fallbackDemo.invitation.id,
+    title: data?.invitation?.title || fallbackDemo.invitation.title,
+    wedding_date: data?.invitation?.wedding_date || fallbackDemo.invitation.wedding_date,
+    music_url: data?.invitation?.music_url || fallbackDemo.invitation.music_url,
     couples: [
-      data?.bride || {
+      {
         role: 'bride',
-        name: 'Siti Fatimah',
-        nickname: 'Siti',
-        photo: 'https://lh3.googleusercontent.com/d/17Mkq-ytzCKMJSM5jYUwfosOabtLLdUJz',
-        instagram: 'este.en',
-        address: 'Jl. Melati No. 12, Jakarta',
-        father_name: 'H. Rahmat',
-        mother_name: 'Hj. Aminah',
+        name: data?.bride?.full_name || fallbackDemo.bride.full_name,
+        nickname: data?.bride?.nickname || fallbackDemo.bride.nickname,
+        photo: data?.bride?.photo_url || fallbackDemo.bride.photo_url,
+        instagram: data?.bride?.instagram || fallbackDemo.bride.instagram,
+        address: data?.bride?.address || fallbackDemo.bride.address,
+        father_name: data?.bride?.father_name || fallbackDemo.bride.father_name,
+        mother_name: data?.bride?.mother_name || fallbackDemo.bride.mother_name,
+        child_order: data?.bride?.child_order || fallbackDemo.bride.child_order,
       },
-      data?.groom || {
+      {
         role: 'groom',
-        name: 'April Rian',
-        nickname: 'April',
-        photo: 'https://lh3.googleusercontent.com/d/1qr9VPrFkya17qAU_kLtpYBLSktn3mBzG',
-        instagram: 'aprelryu',
-        address: 'Jl. Kenanga No. 8, Bandung',
-        father_name: 'H. Syamsudin',
-        mother_name: 'Hj. Siti Maryam',
+        name: data?.groom?.full_name || fallbackDemo.groom.full_name,
+        nickname: data?.groom?.nickname || fallbackDemo.groom.nickname,
+        photo: data?.groom?.photo_url || fallbackDemo.groom.photo_url,
+        instagram: data?.groom?.instagram || fallbackDemo.groom.instagram,
+        address: data?.groom?.address || fallbackDemo.groom.address,
+        father_name: data?.groom?.father_name || fallbackDemo.groom.father_name,
+        mother_name: data?.groom?.mother_name || fallbackDemo.groom.mother_name,
+        child_order: data?.groom?.child_order || fallbackDemo.groom.child_order,
       },
     ],
-    events: data?.events || [],
-    stories: data?.stories || [],
-    galleries: data?.gallery || [],
-    wishes: data?.wishes || [],
+    events: (data?.events && data.events.length > 0) ? data.events : fallbackDemo.events,
+    stories: (data?.stories && data.stories.length > 0) ? data.stories : fallbackDemo.stories,
+    galleries: (data?.gallery && data.gallery.length > 0) ? data.gallery : fallbackDemo.gallery,
+    wishes: (data?.wishes && data.wishes.length > 0) ? data.wishes : fallbackDemo.wishes,
     gift_info: {
-      bank_accounts: (data?.gifts || []).map((g) => ({
-        bank_name: g.bank_name || g.title,
+      bank_accounts: ((data?.gifts && data.gifts.length > 0) ? data.gifts : fallbackDemo.gifts).map((g) => ({
+        bank_name: g.bank_name || g.provider || (g as any).title || 'Bank Mandiri',
         account_number: g.account_number,
-        account_name: g.account_holder || g.account_name,
+        account_name: g.account_name || (g as any).account_holder || fallbackDemo.groom.full_name,
       })),
-      address: data?.location?.address || data?.events?.[0]?.address,
+      address: data?.events?.[0]?.address || fallbackDemo.events[0]?.address,
     },
   };
+
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCharacter, setSelectedCharacter] = useState<CharacterOption>(
     CHARACTER_OPTIONS[0]
@@ -79,6 +85,22 @@ export const SeriMalaysiaWeddingView: React.FC<SeriMalaysiaWeddingViewProps> = (
   const [activeModal, setActiveModal] = useState<
     'couple' | 'event' | 'story' | 'gallery' | 'gift' | 'wishes' | null
   >(null);
+
+  // Compute enabled sections dynamically based on admin sections
+  const enabledSections = useMemo(() => {
+    const list: string[] = [];
+    if (data?.sections && data.sections.length > 0) {
+      data.sections.forEach((s) => {
+        if (s.enabled) list.push(s.section_key);
+      });
+    } else {
+      list.push('couple', 'events', 'story', 'gallery', 'gifts', 'wishes', 'rsvp');
+    }
+    if (data?.invitation?.music_enabled !== false) {
+      list.push('music');
+    }
+    return list;
+  }, [data?.sections, data?.invitation?.music_enabled]);
 
   const handleOpenCover = () => {
     setIsOpen(true);
@@ -108,6 +130,7 @@ export const SeriMalaysiaWeddingView: React.FC<SeriMalaysiaWeddingViewProps> = (
         <SeriMalaysiaCanvas
           character={selectedCharacter}
           guestName={guestName}
+          enabledSections={enabledSections}
           onOpenModal={(type) => setActiveModal(type)}
         />
       </div>
@@ -115,6 +138,7 @@ export const SeriMalaysiaWeddingView: React.FC<SeriMalaysiaWeddingViewProps> = (
       {/* 4. Bottom Quick Dock */}
       {isOpen && (
         <SeriMalaysiaQuickDock
+          enabledSections={enabledSections}
           onOpenModal={(type) => setActiveModal(type)}
           onOpenCharacterSelect={() => setShowCharacterSelector(true)}
         />

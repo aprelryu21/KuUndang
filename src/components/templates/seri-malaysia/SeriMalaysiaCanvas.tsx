@@ -9,85 +9,143 @@ export interface Hotspot {
   y: number;
   radius: number;
   icon: string;
+  propKey?: string;
+  propW?: number;
+  propH?: number;
+  propOffsetY?: number;
   modalType?: 'couple' | 'event' | 'story' | 'gallery' | 'gift' | 'wishes' | 'music';
+  // Solid obstacle bounds for collision
+  obstacle?: {
+    minX: number;
+    maxX: number;
+    minY: number;
+    maxY: number;
+  };
 }
 
-interface SeriMalaysiaCanvasProps {
-  character: CharacterOption;
-  guestName?: string;
-  onOpenModal: (modalType: 'couple' | 'event' | 'story' | 'gallery' | 'gift' | 'wishes') => void;
-  onToggleMusic?: () => void;
-}
-
-export const HOTSPOTS: Hotspot[] = [
+// Master list of all hotspots on the 848 x 1264 bright wedding garden map
+export const ALL_HOTSPOTS: Hotspot[] = [
   {
     id: 'couple',
     name: 'Pelaminan Pengantin',
-    x: 360,
-    y: 215,
-    radius: 80,
+    x: 424,
+    y: 285,
+    radius: 90,
     icon: '💍',
+    propKey: 'couple',
+    propW: 76,
+    propH: 95,
+    propOffsetY: -65,
     modalType: 'couple',
+    obstacle: { minX: 320, maxX: 530, minY: 150, maxY: 250 },
   },
   {
-    id: 'event',
+    id: 'events',
     name: 'Rangkaian Acara',
-    x: 160,
-    y: 280,
-    radius: 70,
+    x: 210,
+    y: 500,
+    radius: 75,
     icon: '📜',
+    propKey: 'eventKiosk',
+    propW: 90,
+    propH: 90,
+    propOffsetY: -20,
     modalType: 'event',
+    obstacle: { minX: 165, maxX: 255, minY: 440, maxY: 500 },
   },
   {
     id: 'story',
     name: 'Kisah Kasih & Cinta',
-    x: 360,
-    y: 440,
+    x: 485,
+    y: 450,
     radius: 70,
     icon: '♥',
+    propKey: 'loveStory',
+    propW: 80,
+    propH: 80,
+    propOffsetY: -15,
     modalType: 'story',
+    obstacle: { minX: 445, maxX: 525, minY: 410, maxY: 460 },
   },
   {
     id: 'gallery',
     name: 'Gazebo Galeri Foto',
-    x: 550,
-    y: 560,
-    radius: 70,
+    x: 250,
+    y: 865,
+    radius: 80,
     icon: '📷',
+    propKey: 'gallery',
+    propW: 85,
+    propH: 85,
+    propOffsetY: -20,
     modalType: 'gallery',
+    obstacle: { minX: 160, maxX: 335, minY: 720, maxY: 835 },
+  },
+  {
+    id: 'gifts',
+    name: 'Kotak Hadiah & Berkat',
+    x: 775,
+    y: 915,
+    radius: 75,
+    icon: '🎁',
+    propKey: 'gift',
+    propW: 85,
+    propH: 75,
+    propOffsetY: -15,
+    modalType: 'gift',
+    obstacle: { minX: 730, maxX: 825, minY: 875, maxY: 935 },
   },
   {
     id: 'wishes',
     name: 'Buku Tamu & Doa',
-    x: 175,
-    y: 620,
-    radius: 65,
+    x: 345,
+    y: 1045,
+    radius: 70,
     icon: '✉️',
+    propKey: 'wishes',
+    propW: 80,
+    propH: 80,
+    propOffsetY: -15,
     modalType: 'wishes',
+    obstacle: { minX: 305, maxX: 375, minY: 1000, maxY: 1055 },
   },
   {
-    id: 'gift',
-    name: 'Kotak Hadiah & Berkat',
-    x: 360,
-    y: 800,
-    radius: 75,
-    icon: '🎁',
-    modalType: 'gift',
-  },
-  {
-    id: 'bard',
+    id: 'music',
     name: 'Musisi Taman',
-    x: 530,
-    y: 330,
+    x: 600,
+    y: 520,
     radius: 65,
     icon: '🎵',
+    propKey: 'bard',
+    propW: 75,
+    propH: 75,
+    propOffsetY: -15,
     modalType: 'music',
+    obstacle: { minX: 565, maxX: 635, minY: 480, maxY: 525 },
   },
 ];
+
+// Additional static environmental solid obstacles (Fountain, Pond water, Trees)
+const ENVIRONMENT_OBSTACLES = [
+  // Garden fountain on left
+  { minX: 275, maxX: 345, minY: 515, maxY: 575 },
+  // Pond water boundary (except bridge area x:650..800, y:510..570)
+  { minX: 620, maxX: 848, minY: 430, maxY: 505 },
+  { minX: 560, maxX: 848, minY: 575, maxY: 760 },
+];
+
+interface SeriMalaysiaCanvasProps {
+  character: CharacterOption;
+  guestName?: string;
+  enabledSections?: string[];
+  onOpenModal: (modalType: 'couple' | 'event' | 'story' | 'gallery' | 'gift' | 'wishes') => void;
+  onToggleMusic?: () => void;
+}
 
 export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
   character,
   guestName = 'Tamu Undangan',
+  enabledSections = ['couple', 'events', 'story', 'gallery', 'gifts', 'wishes', 'rsvp'],
   onOpenModal,
   onToggleMusic,
 }) => {
@@ -102,19 +160,26 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
     return typeof window !== 'undefined' && (window.innerWidth < 768 || 'ontouchstart' in window);
   });
 
+  // Filter hotspots based on enabled sections
+  const activeHotspots = ALL_HOTSPOTS.filter((h) => {
+    if (h.id === 'music') return true; // Musician always available
+    if (h.id === 'wishes') {
+      return enabledSections.includes('wishes') || enabledSections.includes('rsvp');
+    }
+    return enabledSections.includes(h.id);
+  });
+
   // Game state refs (to avoid re-renders inside 60fps loop)
   const stateRef = useRef({
-    // Map dimensions
-    mapWidth: 720,
-    mapHeight: 1080,
+    // Map dimensions (matches world-garden-bright.jpg 848 x 1264)
+    mapWidth: 848,
+    mapHeight: 1264,
 
     // Player state
     player: {
-      x: 360,
-      y: 960,
-      vx: 0,
-      vy: 0,
-      speed: 150, // px per sec
+      x: 500,
+      y: 1180,
+      speed: 155, // px per sec
       direction: 'up' as 'down' | 'left' | 'right' | 'up',
       frame: 0,
       frameTime: 0,
@@ -140,54 +205,256 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
     },
 
     // Falling petals particles
-    petals: Array.from({ length: 24 }).map((_, i) => ({
-      x: Math.random() * 720,
-      y: Math.random() * 1080,
+    petals: Array.from({ length: 28 }).map((_, i) => ({
+      x: Math.random() * 848,
+      y: Math.random() * 1264,
       size: 4 + Math.random() * 6,
-      speedY: 20 + Math.random() * 30,
-      speedX: 10 + Math.random() * 15,
+      speedY: 22 + Math.random() * 32,
+      speedX: 10 + Math.random() * 18,
       oscillation: Math.random() * Math.PI * 2,
-      color: i % 2 === 0 ? 'rgba(255, 182, 193, 0.75)' : 'rgba(255, 240, 245, 0.85)',
+      color: i % 2 === 0 ? 'rgba(255, 182, 193, 0.85)' : 'rgba(255, 240, 245, 0.9)',
     })),
 
     // Images
     images: {
       map: null as HTMLImageElement | null,
+      player: null as HTMLCanvasElement | HTMLImageElement | null,
       couple: null as HTMLImageElement | null,
-      player: null as HTMLImageElement | null,
+      eventKiosk: null as HTMLImageElement | null,
+      loveStory: null as HTMLImageElement | null,
+      gallery: null as HTMLImageElement | null,
+      gift: null as HTMLImageElement | null,
+      wishes: null as HTMLImageElement | null,
+      bard: null as HTMLImageElement | null,
       loaded: false,
     },
 
     activeHotspotId: null as string | null,
   });
 
-  // Load game assets
+  // Advanced sprite normalization (matches Inveet's frameNormalization pipeline)
+  // Extracts the character body's primary connected component, filters out stray floating pixels,
+  // normalizes vertical height to 156px across all frames, and anchors baseline at 175px & center at 96px.
+  const normalizeSpritesheet = (img: HTMLImageElement): HTMLCanvasElement => {
+    const frameW = 192;
+    const frameH = 192;
+    const cols = 4;
+    const rows = 4;
+    const alphaThreshold = 32;
+    const targetCenterX = 96;
+    const targetBaselineY = 175;
+    const targetVisibleHeight = 156;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return canvas;
+
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(img, 0, 0);
+    const imgData = ctx.getImageData(0, 0, img.width, img.height);
+    const data = imgData.data;
+
+    // Helper: Find largest connected component in frame
+    const findComponent = (startX: number, startY: number) => {
+      const grid = new Uint8Array(frameW * frameH);
+      const visited = new Uint8Array(frameW * frameH);
+
+      for (let y = 0; y < frameH; y++) {
+        for (let x = 0; x < frameW; x++) {
+          const idx = ((startY + y) * img.width + (startX + x)) * 4;
+          if (data[idx + 3] > alphaThreshold) {
+            grid[y * frameW + x] = 1;
+          }
+        }
+      }
+
+      let bestComp: {
+        pixels: { x: number; y: number }[];
+        minX: number;
+        minY: number;
+        maxX: number;
+        maxY: number;
+        count: number;
+      } | null = null;
+
+      const queue = new Int32Array(frameW * frameH);
+
+      for (let i = 0; i < grid.length; i++) {
+        if (!grid[i] || visited[i]) continue;
+
+        let head = 0;
+        let tail = 0;
+        queue[tail++] = i;
+        visited[i] = 1;
+
+        let minX = frameW, maxX = -1, minY = frameH, maxY = -1;
+        const pixels: { x: number; y: number }[] = [];
+
+        while (head < tail) {
+          const p = queue[head++];
+          const x = p % frameW;
+          const y = Math.floor(p / frameW);
+          pixels.push({ x, y });
+
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+
+          // 8-way connectivity
+          const neighbors = [
+            x > 0 ? p - 1 : -1,
+            x + 1 < frameW ? p + 1 : -1,
+            y > 0 ? p - frameW : -1,
+            y + 1 < frameH ? p + frameW : -1,
+            x > 0 && y > 0 ? p - frameW - 1 : -1,
+            x + 1 < frameW && y > 0 ? p - frameW + 1 : -1,
+            x > 0 && y + 1 < frameH ? p + frameW - 1 : -1,
+            x + 1 < frameW && y + 1 < frameH ? p + frameW + 1 : -1,
+          ];
+
+          for (const n of neighbors) {
+            if (n >= 0 && grid[n] && !visited[n]) {
+              visited[n] = 1;
+              queue[tail++] = n;
+            }
+          }
+        }
+
+        if (!bestComp || pixels.length > bestComp.count) {
+          bestComp = { pixels, minX, minY, maxX, maxY, count: pixels.length };
+        }
+      }
+
+      return bestComp;
+    };
+
+    // 1. Analyze all 16 frames
+    const components: (ReturnType<typeof findComponent>)[] = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        components.push(findComponent(c * frameW, r * frameH));
+      }
+    }
+
+    // 2. Compute median height across non-empty frames
+    const heights = components
+      .filter((comp): comp is NonNullable<typeof comp> => !!comp)
+      .map((comp) => comp.maxY - comp.minY + 1)
+      .sort((a, b) => a - b);
+
+    const medianH = heights.length > 0 ? heights[Math.floor(heights.length / 2)] : targetVisibleHeight;
+    const scale = targetVisibleHeight / Math.max(1, medianH);
+
+    // 3. Render normalized output canvas
+    const outCanvas = document.createElement('canvas');
+    outCanvas.width = img.width;
+    outCanvas.height = img.height;
+    const outCtx = outCanvas.getContext('2d');
+    if (!outCtx) return canvas;
+
+    outCtx.imageSmoothingEnabled = false;
+
+    components.forEach((comp, frameIdx) => {
+      const col = frameIdx % cols;
+      const row = Math.floor(frameIdx / cols);
+      const frameStartX = col * frameW;
+      const frameStartY = row * frameH;
+
+      if (!comp) {
+        outCtx.drawImage(
+          img,
+          frameStartX,
+          frameStartY,
+          frameW,
+          frameH,
+          frameStartX,
+          frameStartY,
+          frameW,
+          frameH
+        );
+        return;
+      }
+
+      const compW = comp.maxX - comp.minX + 1;
+      const compH = comp.maxY - comp.minY + 1;
+
+      const destW = Math.max(1, Math.round(compW * scale));
+      const destH = Math.max(1, Math.round(compH * scale));
+      const destX = frameStartX + Math.round(targetCenterX - destW / 2);
+      const destY = frameStartY + (targetBaselineY - destH);
+
+      // Create temporary component canvas
+      const compCanvas = document.createElement('canvas');
+      compCanvas.width = compW;
+      compCanvas.height = compH;
+      const compCtx = compCanvas.getContext('2d');
+      if (!compCtx) return;
+
+      const compImgData = compCtx.createImageData(compW, compH);
+      for (const p of comp.pixels) {
+        const srcIdx = ((frameStartY + p.y) * img.width + (frameStartX + p.x)) * 4;
+        const targetIdx = ((p.y - comp.minY) * compW + (p.x - comp.minX)) * 4;
+        compImgData.data[targetIdx] = data[srcIdx];
+        compImgData.data[targetIdx + 1] = data[srcIdx + 1];
+        compImgData.data[targetIdx + 2] = data[srcIdx + 2];
+        compImgData.data[targetIdx + 3] = data[srcIdx + 3];
+      }
+      compCtx.putImageData(compImgData, 0, 0);
+
+      outCtx.save();
+      outCtx.beginPath();
+      outCtx.rect(frameStartX, frameStartY, frameW, frameH);
+      outCtx.clip();
+      outCtx.drawImage(compCanvas, 0, 0, compW, compH, destX, destY, destW, destH);
+      outCtx.restore();
+    });
+
+    return outCanvas;
+  };
+
+  // Load all game assets & props
   useEffect(() => {
     let isCancelled = false;
 
-    const mapImg = new Image();
-    mapImg.src = '/templates/seri-malaysia/world-garden.jpg';
-
-    const coupleImg = new Image();
-    coupleImg.src = '/templates/seri-malaysia/wedding-couple.png';
-
-    const playerImg = new Image();
-    playerImg.src = character.spriteUrl;
-
-    let loadedCount = 0;
-    const checkLoaded = () => {
-      loadedCount++;
-      if (loadedCount >= 3 && !isCancelled) {
-        stateRef.current.images.map = mapImg;
-        stateRef.current.images.couple = coupleImg;
-        stateRef.current.images.player = playerImg;
-        stateRef.current.images.loaded = true;
-      }
+    const loadImg = (url: string): Promise<HTMLImageElement> => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.src = url;
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(img);
+      });
     };
 
-    mapImg.onload = checkLoaded;
-    coupleImg.onload = checkLoaded;
-    playerImg.onload = checkLoaded;
+    Promise.all([
+      loadImg('/templates/seri-malaysia/world-garden-bright.jpg'),
+      loadImg(character.spriteUrl),
+      loadImg('/templates/seri-malaysia/wedding-couple.png'),
+      loadImg('/templates/seri-malaysia/event-kiosk.png'),
+      loadImg('/templates/seri-malaysia/love-story-shrine.png'),
+      loadImg('/templates/seri-malaysia/gallery-pavilion.png'),
+      loadImg('/templates/seri-malaysia/gift-pavilion.png'),
+      loadImg('/templates/seri-malaysia/wishes-station.png'),
+      loadImg('/templates/seri-malaysia/bard-musician.png'),
+    ]).then(([map, playerRaw, couple, eventKiosk, loveStory, gallery, gift, wishes, bard]) => {
+      if (isCancelled) return;
+
+      // Normalize player frames to eliminate any wobbling/choppiness
+      const normalizedPlayer = normalizeSpritesheet(playerRaw);
+
+      stateRef.current.images.map = map;
+      stateRef.current.images.player = normalizedPlayer;
+      stateRef.current.images.couple = couple;
+      stateRef.current.images.eventKiosk = eventKiosk;
+      stateRef.current.images.loveStory = loveStory;
+      stateRef.current.images.gallery = gallery;
+      stateRef.current.images.gift = gift;
+      stateRef.current.images.wishes = wishes;
+      stateRef.current.images.bard = bard;
+      stateRef.current.images.loaded = true;
+    });
 
     return () => {
       isCancelled = true;
@@ -253,7 +520,7 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
   // Hotspot trigger action
   const triggerHotspot = useCallback(
     (hotspotId: string) => {
-      const h = HOTSPOTS.find((item) => item.id === hotspotId);
+      const h = ALL_HOTSPOTS.find((item) => item.id === hotspotId);
       if (!h) return;
 
       if (h.modalType === 'music') {
@@ -264,6 +531,41 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
     },
     [onOpenModal, onToggleMusic]
   );
+
+  // Collision check against all active booths & environment obstacles
+  const checkCollision = (testPX: number, testPY: number): boolean => {
+    // Player feet collision radius
+    const playerRadius = 14;
+
+    // Check all active hotspot obstacle bounding boxes
+    for (const h of activeHotspots) {
+      if (h.obstacle) {
+        const { minX, maxX, minY, maxY } = h.obstacle;
+        if (
+          testPX + playerRadius > minX &&
+          testPX - playerRadius < maxX &&
+          testPY + playerRadius > minY &&
+          testPY - playerRadius < maxY
+        ) {
+          return true; // Collision detected
+        }
+      }
+    }
+
+    // Check environment obstacles (fountain, pond)
+    for (const obs of ENVIRONMENT_OBSTACLES) {
+      if (
+        testPX + playerRadius > obs.minX &&
+        testPX - playerRadius < obs.maxX &&
+        testPY + playerRadius > obs.minY &&
+        testPY - playerRadius < obs.maxY
+      ) {
+        return true; // Collision detected
+      }
+    }
+
+    return false;
+  };
 
   // Canvas Click / Tap to Walk
   const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -282,20 +584,22 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
     const worldY = clickScreenY / zoom + state.camera.y;
 
     // Clamp inside world bounds
-    const clampedX = Math.max(60, Math.min(state.mapWidth - 60, worldX));
-    const clampedY = Math.max(180, Math.min(state.mapHeight - 80, worldY));
+    const clampedX = Math.max(50, Math.min(state.mapWidth - 50, worldX));
+    const clampedY = Math.max(260, Math.min(state.mapHeight - 60, worldY));
 
-    // Check if clicked directly on a hotspot
-    for (const h of HOTSPOTS) {
+    // Check if clicked directly on an active hotspot
+    for (const h of activeHotspots) {
       const dist = Math.hypot(clampedX - h.x, clampedY - h.y);
       if (dist <= h.radius) {
-        // Move towards hotspot and trigger it
-        state.target = { x: h.x, y: h.y + 30 };
+        state.target = { x: h.x, y: h.y + 35 };
         return;
       }
     }
 
-    state.target = { x: clampedX, y: clampedY };
+    // Avoid setting target inside a solid obstacle
+    if (!checkCollision(clampedX, clampedY)) {
+      state.target = { x: clampedX, y: clampedY };
+    }
   };
 
   // Main 60fps Animation Loop
@@ -364,8 +668,19 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
       player.isMoving = moveX !== 0 || moveY !== 0;
 
       if (player.isMoving) {
-        player.x += moveX * player.speed * dt;
-        player.y += moveY * player.speed * dt;
+        // Move with solid collision detection (X and Y axis independent sliding)
+        const nextX = player.x + moveX * player.speed * dt;
+        const nextY = player.y + moveY * player.speed * dt;
+
+        // Try moving X
+        if (!checkCollision(nextX, player.y) && nextX >= 50 && nextX <= state.mapWidth - 50) {
+          player.x = nextX;
+        }
+
+        // Try moving Y
+        if (!checkCollision(player.x, nextY) && nextY >= 260 && nextY <= state.mapHeight - 60) {
+          player.y = nextY;
+        }
 
         // Determine face direction
         if (Math.abs(moveX) > Math.abs(moveY)) {
@@ -374,9 +689,9 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
           player.direction = moveY > 0 ? 'down' : 'up';
         }
 
-        // Cycle animation frames (4 frames per direction)
+        // Cycle animation frames (4 frames per direction: 0 -> 1 -> 2 -> 3)
         player.frameTime += dt;
-        if (player.frameTime >= 0.12) {
+        if (player.frameTime >= 0.11) {
           player.frameTime = 0;
           player.frame = (player.frame + 1) % 4;
         }
@@ -384,15 +699,11 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
         player.frame = 0;
       }
 
-      // Clamp player inside map boundaries
-      player.x = Math.max(60, Math.min(state.mapWidth - 60, player.x));
-      player.y = Math.max(180, Math.min(state.mapHeight - 80, player.y));
-
       // 2. CHECK HOTSPOT PROXIMITY
       let nearestHotspot: Hotspot | null = null;
       let minDist = Infinity;
 
-      for (const h of HOTSPOTS) {
+      for (const h of activeHotspots) {
         const d = Math.hypot(player.x - h.x, player.y - h.y);
         if (d <= h.radius && d < minDist) {
           minDist = d;
@@ -406,11 +717,10 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
       }
 
       // 3. UPDATE CAMERA
-      // On mobile / portrait, zoom in ~1.35x. On desktop, fit comfortably.
       const isPortrait = cw < ch;
       const targetZoom = isPortrait
-        ? Math.max(cw / 500, 1.1)
-        : Math.min(cw / 720, ch / 800) * 1.25;
+        ? Math.max(cw / 520, 1.05)
+        : Math.min(cw / 848, ch / 880) * 1.18;
 
       state.camera.zoom = targetZoom;
 
@@ -455,42 +765,54 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
       if (state.images.map && state.images.loaded) {
         ctx.drawImage(state.images.map, 0, 0, state.mapWidth, state.mapHeight);
       } else {
-        // Fallback grass color
-        ctx.fillStyle = '#476534';
+        ctx.fillStyle = '#78AB46';
         ctx.fillRect(0, 0, state.mapWidth, state.mapHeight);
       }
 
-      // B. Draw Hotspot Ground Circles & Indicator Badges
-      for (const h of HOTSPOTS) {
+      // B. Draw Illustrated Props & Hotspot Circles
+      for (const h of activeHotspots) {
         const isNear = state.activeHotspotId === h.id;
 
-        // Ground pulse circle
+        // Ground indicator aura
         ctx.beginPath();
-        ctx.arc(h.x, h.y, h.radius * 0.6, 0, Math.PI * 2);
-        ctx.fillStyle = isNear ? 'rgba(215, 187, 131, 0.4)' : 'rgba(215, 187, 131, 0.15)';
+        ctx.arc(h.x, h.y, h.radius * 0.55, 0, Math.PI * 2);
+        ctx.fillStyle = isNear ? 'rgba(215, 187, 131, 0.4)' : 'rgba(215, 187, 131, 0.18)';
         ctx.fill();
 
         ctx.lineWidth = isNear ? 3 : 1.5;
-        ctx.strokeStyle = isNear ? '#FFFCF3' : 'rgba(215, 187, 131, 0.6)';
+        ctx.strokeStyle = isNear ? '#FFFFFF' : 'rgba(215, 187, 131, 0.65)';
         ctx.stroke();
 
-        // Hotspot floating label tag
+        // Draw Illustrated Prop Image
+        if (state.images.loaded && h.propKey) {
+          const propImg = (state.images as any)[h.propKey] as HTMLImageElement | null;
+          if (propImg && propImg.complete) {
+            const pW = h.propW || 80;
+            const pH = h.propH || 80;
+            const pX = h.x - pW / 2;
+            const pY = h.y + (h.propOffsetY || -pW / 2);
+
+            ctx.drawImage(propImg, pX, pY, pW, pH);
+          }
+        }
+
+        // Floating Illustrated Marker Pill above booth
         ctx.save();
-        ctx.font = 'bold 12px "Poppins", sans-serif';
+        ctx.font = 'bold 11px "Poppins", sans-serif';
         const text = `${h.icon} ${h.name}`;
         const textWidth = ctx.measureText(text).width;
         const boxH = 22;
         const boxW = textWidth + 18;
         const boxX = h.x - boxW / 2;
-        const boxY = h.y - h.radius * 0.5 - 18;
+        const boxY = h.y - h.radius * 0.5 - 28;
 
         // Pill background
-        ctx.fillStyle = isNear ? 'rgba(76, 3, 10, 0.92)' : 'rgba(42, 23, 19, 0.75)';
+        ctx.fillStyle = isNear ? 'rgba(76, 3, 10, 0.94)' : 'rgba(42, 23, 19, 0.78)';
         ctx.beginPath();
         ctx.roundRect(boxX, boxY, boxW, boxH, 11);
         ctx.fill();
 
-        ctx.strokeStyle = isNear ? '#D7BB83' : 'rgba(215, 187, 131, 0.4)';
+        ctx.strokeStyle = isNear ? '#D7BB83' : 'rgba(215, 187, 131, 0.45)';
         ctx.lineWidth = isNear ? 2 : 1;
         ctx.stroke();
 
@@ -502,20 +824,13 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
         ctx.restore();
       }
 
-      // C. Draw Couple Sprite on Stage (x: 360, y: 155)
-      if (state.images.couple && state.images.loaded) {
-        const cwW = 68;
-        const cwH = 85;
-        ctx.drawImage(state.images.couple, 360 - cwW / 2, 160 - cwH / 2, cwW, cwH);
-      }
-
-      // D. Draw Player Drop Shadow
+      // C. Draw Player Drop Shadow
       ctx.beginPath();
       ctx.ellipse(player.x, player.y + 24, 18, 7, 0, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(20, 9, 7, 0.35)';
+      ctx.fillStyle = 'rgba(20, 9, 7, 0.32)';
       ctx.fill();
 
-      // E. Draw Player Sprite (768x768 sheet, 192x192 frame)
+      // D. Draw Player Sprite
       if (state.images.player && state.images.loaded) {
         let row = 0; // down
         if (player.direction === 'left') row = 1;
@@ -527,8 +842,9 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
         const sx = player.frame * frameW;
         const sy = row * frameH;
 
-        const destW = 64;
-        const destH = 64;
+        const isFemale = character.id.includes('female');
+        const destW = isFemale ? 64 : 62;
+        const destH = isFemale ? 64 : 62;
 
         ctx.drawImage(
           state.images.player,
@@ -541,25 +857,19 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
           destW,
           destH
         );
-      } else {
-        // Fallback dot
-        ctx.beginPath();
-        ctx.arc(player.x, player.y, 14, 0, Math.PI * 2);
-        ctx.fillStyle = '#8A1B26';
-        ctx.fill();
       }
 
-      // F. Draw Player Name Tag above head
+      // E. Draw Player Name Tag above head
       ctx.save();
       ctx.font = 'bold 10px "Poppins", sans-serif';
       const pText = guestName;
       const pWidth = ctx.measureText(pText).width;
-      const pBoxW = pWidth + 12;
+      const pBoxW = pWidth + 14;
       const pBoxH = 16;
       const pBoxX = player.x - pBoxW / 2;
       const pBoxY = player.y - 42;
 
-      ctx.fillStyle = 'rgba(76, 3, 10, 0.85)';
+      ctx.fillStyle = 'rgba(76, 3, 10, 0.88)';
       ctx.beginPath();
       ctx.roundRect(pBoxX, pBoxY, pBoxW, pBoxH, 8);
       ctx.fill();
@@ -574,18 +884,18 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
       ctx.fillText(pText, player.x, pBoxY + pBoxH / 2);
       ctx.restore();
 
-      // G. Draw Target Destination Marker (if walking towards target)
+      // F. Draw Target Destination Marker (if walking towards target)
       if (state.target) {
         ctx.beginPath();
         ctx.arc(state.target.x, state.target.y, 6, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(215, 187, 131, 0.8)';
+        ctx.fillStyle = 'rgba(215, 187, 131, 0.85)';
         ctx.fill();
         ctx.strokeStyle = '#FFFFFF';
         ctx.lineWidth = 1.5;
         ctx.stroke();
       }
 
-      // H. Draw Falling Petal Particles
+      // G. Draw Falling Petal Particles
       for (const p of state.petals) {
         ctx.save();
         ctx.translate(p.x, p.y);
@@ -604,7 +914,7 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
 
     animationFrameId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [guestName]);
+  }, [guestName, activeHotspots]);
 
   return (
     <div
@@ -644,7 +954,7 @@ export const SeriMalaysiaCanvas: React.FC<SeriMalaysiaCanvasProps> = ({
       {/* Mobile Touch D-Pad / Controller */}
       {isMobile && (
         <div className="absolute bottom-20 left-4 z-20 flex flex-col items-center">
-          <div className="grid grid-cols-3 gap-1 bg-black/40 backdrop-blur-md p-2 rounded-2xl border border-[#D7BB83]/40 shadow-lg">
+          <div className="grid grid-cols-3 gap-1 bg-black/45 backdrop-blur-md p-2 rounded-2xl border border-[#D7BB83]/40 shadow-lg">
             <div />
             <button
               onTouchStart={() => (stateRef.current.keys.up = true)}

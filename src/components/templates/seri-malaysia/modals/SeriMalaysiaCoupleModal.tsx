@@ -69,7 +69,7 @@ export const SeriMalaysiaCoupleModal: React.FC<SeriMalaysiaCoupleModalProps> = (
               className="text-xl sm:text-2xl font-bold text-[#4C030A] mt-2"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
-              {bride?.name || 'Siti Fatimah'}
+              {bride?.name || 'Siti Nurjannah'}
             </h3>
             {bride?.nickname && (
               <span className="text-sm font-medium text-[#8A1B26] mb-3">
@@ -79,11 +79,13 @@ export const SeriMalaysiaCoupleModal: React.FC<SeriMalaysiaCoupleModalProps> = (
 
             {/* 3. Putri dari Pasangan Orang Tua */}
             <div className="text-xs text-[#5A3F30] leading-relaxed my-2 px-2">
-              <p className="font-semibold text-[#4C030A]">Putri tercinta dari pasangan:</p>
+              <p className="font-semibold text-[#4C030A]">
+                {bride?.child_order ? `${bride.child_order} dari pasangan:` : 'Putri tercinta dari pasangan:'}
+              </p>
               <p className="mt-0.5 text-sm font-medium">
                 {bride?.father_name && bride?.mother_name
                   ? `Bpk. ${bride.father_name} & Ibu ${bride.mother_name}`
-                  : 'Bpk. H. Rahmat & Ibu Hj. Aminah'}
+                  : 'Bpk. Poniman & Ibu Ngatenah'}
               </p>
             </div>
 
@@ -132,7 +134,7 @@ export const SeriMalaysiaCoupleModal: React.FC<SeriMalaysiaCoupleModalProps> = (
               className="text-xl sm:text-2xl font-bold text-[#4C030A] mt-2"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
-              {groom?.name || 'April Rian'}
+              {groom?.name || 'Apriliyanto Ratih Sukarno'}
             </h3>
             {groom?.nickname && (
               <span className="text-sm font-medium text-[#8A1B26] mb-3">
@@ -142,11 +144,13 @@ export const SeriMalaysiaCoupleModal: React.FC<SeriMalaysiaCoupleModalProps> = (
 
             {/* 3. Putra dari Pasangan Orang Tua */}
             <div className="text-xs text-[#5A3F30] leading-relaxed my-2 px-2">
-              <p className="font-semibold text-[#4C030A]">Putra tercinta dari pasangan:</p>
+              <p className="font-semibold text-[#4C030A]">
+                {groom?.child_order ? `${groom.child_order} dari pasangan:` : 'Putra tercinta dari pasangan:'}
+              </p>
               <p className="mt-0.5 text-sm font-medium">
                 {groom?.father_name && groom?.mother_name
                   ? `Bpk. ${groom.father_name} & Ibu ${groom.mother_name}`
-                  : 'Bpk. H. Syamsudin & Ibu Hj. Siti Maryam'}
+                  : 'Bpk. Imam Sodik & Ibu Rofiatin'}
               </p>
             </div>
 
