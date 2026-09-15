@@ -22,6 +22,7 @@ import { JavaneseWeddingView } from '../components/templates/javanese/JavaneseWe
 import { CuteFloralWeddingView } from '../components/templates/cute-floral/CuteFloralWeddingView';
 import { MarioWeddingView } from '../components/templates/mario/MarioWeddingView';
 import { FleurBotanicaWeddingView } from '../components/templates/fleur-botanica/FleurBotanicaWeddingView';
+import { SeriMalaysiaWeddingView } from '../components/templates/seri-malaysia/SeriMalaysiaWeddingView';
 import { LanguageSwitcher } from '../components/common/LanguageSwitcher';
 import { AdminLoginModal } from '../components/admin/AdminLoginModal';
 import { Heart, ArrowLeft, Eye, RefreshCw } from 'lucide-react';
@@ -319,6 +320,12 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
         templateQuery === 'fleur' ||
         templateQuery === 'fleur-de-brume'
       ? 'fleur-botanica'
+      : templateQuery === 'seri-malaysia' ||
+        templateQuery === 'malaysia' ||
+        templateQuery === 'laman-seri' ||
+        templateQuery === 'garden-quest' ||
+        templateQuery === 'pixel-quest'
+      ? 'seri-malaysia'
       : templateQuery;
 
   const activeTemplate =
@@ -327,6 +334,40 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
     (data as any).theme?.template_id ||
     (data as any).template_id ||
     'royal-arch';
+
+  // Render Seri Malaysia (Interactive 2D Wedding Garden Quest) Template
+  if (activeTemplate === 'seri-malaysia') {
+    return (
+      <div className="relative min-h-screen bg-[#1A1015]">
+        {/* Admin Preview Mode Floating Bar */}
+        {isPreview && (
+          <div className="fixed top-0 inset-x-0 z-50 bg-[#4C030A] text-[#D7BB83] border-b border-[#D7BB83]/40 px-4 py-2 flex items-center justify-between text-xs shadow-md font-serif">
+            <div className="flex items-center gap-2">
+              <Eye className="w-4 h-4 text-[#D7BB83]" />
+              <span>
+                PREVIEW [LAMAN SERI MELAYU 2D GARDEN QUEST] — {invitation.title} ({(invitation.status || 'published').toUpperCase()})
+              </span>
+            </div>
+            <Link
+              to={`/admin/invitations/${invitation.id}/edit`}
+              className="flex items-center gap-1.5 px-3 py-1 bg-[#D7BB83] text-[#4C030A] rounded-md font-serif font-bold text-[11px] hover:bg-[#C4A76E] transition-colors"
+            >
+              <ArrowLeft className="w-3 h-3" />
+              <span>Pengaturan Undangan</span>
+            </Link>
+          </div>
+        )}
+
+        <SeriMalaysiaWeddingView
+          data={data}
+          guest={guest}
+          guestName={guestName}
+          isPreview={isPreview}
+          onRefreshData={loadData}
+        />
+      </div>
+    );
+  }
 
   // Render Fleur Botanica (Modern Botanical Conservatory) Template
   if (activeTemplate === 'fleur-botanica') {

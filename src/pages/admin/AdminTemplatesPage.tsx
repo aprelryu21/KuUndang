@@ -139,6 +139,27 @@ const TEMPLATES: TemplateOption[] = [
     ],
     tags: ['Botanical', 'Conservatory', 'Wax Seal', 'Eucalyptus', 'Editorial'],
   },
+  {
+    id: 'seri-malaysia',
+    name: 'Laman Seri Melayu (Interactive Wedding Garden Quest)',
+    tagline: 'Petualangan 2D RPG Eksplorasi Taman Pernikahan, Pilihan Busana Karakter & Stan Interaktif',
+    badge: 'PETUALANGAN 2D RPG',
+    accentColor: '#D7BB83',
+    bgGradient: 'from-[#4C030A] via-[#8A1B26] to-[#FFFCF3]',
+    borderColor: 'border-[#D7BB83]',
+    description:
+      'Konsep inovatif petualangan 2D RPG taman pernikahan. Tamu undangan dapat memilih busana karakter (Batik, Kebaya, Jas Formal, Hijab), lalu menjelajahi peta taman berhias lentera dan bunga dengan stan-stan interaktif: pelaminan, acara, galeri foto, buku tamu & doa restu, serta kotak hadiah.',
+    highlights: [
+      'Pemilihan Karakter Tamu Undangan (Pria Batik, Kebaya Hijab, Kebaya Klasik, Jas Formal, Gaun Pesta)',
+      'Engine HTML5 Canvas 2D 60 FPS dengan animasi jalan 4-arah & partikel kelopak bunga melayang',
+      'Kontrol Navigasi Ganda: Keyboard WASD/Panah di Desktop & Virtual Touch Joystick di Mobile',
+      'Fitur Ketuk/Klik Tanah untuk berjalan otomatis ke lokasi tujuan (Click-to-Walk)',
+      'Stan Pelaminan Pengantin megah sesuai urutan standar: Foto, Nama, Orang Tua, Alamat, Instagram',
+      'Stan Acara, Galeri Gazebo, Linimasa Kisah Cinta, Buku Tamu RSVP & Amplop Digital',
+      'Quick Navigation Dock di bagian bawah layar untuk teleportasi instan ke setiap pos',
+    ],
+    tags: ['2D RPG', 'Laman Seri', 'Taman Pernikahan', 'Avatar Karakter', 'Canvas 60FPS'],
+  },
 ];
 
 export const AdminTemplatesPage: React.FC = () => {
@@ -258,6 +279,8 @@ export const AdminTemplatesPage: React.FC = () => {
                     ? 'Bunga Lucu (Pink)'
                     : inv.template_id === 'fleur-botanica'
                     ? 'Fleur Botanica'
+                    : inv.template_id === 'seri-malaysia'
+                    ? 'Laman Seri Melayu (2D RPG)'
                     : 'Royal Arch'}
                   )
                 </option>
@@ -295,7 +318,7 @@ export const AdminTemplatesPage: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* 5 Templates Grid */}
+      {/* Templates Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {TEMPLATES.map((tmpl) => {
           const isCurrentActive = activeTemplate === tmpl.id;
@@ -304,6 +327,7 @@ export const AdminTemplatesPage: React.FC = () => {
           const isCute = tmpl.id === 'cute-pink-floral';
           const isMario = tmpl.id === 'super-mario';
           const isBotanica = tmpl.id === 'fleur-botanica';
+          const isSeri = tmpl.id === 'seri-malaysia';
 
           return (
             <div
@@ -320,6 +344,8 @@ export const AdminTemplatesPage: React.FC = () => {
                     ? 'bg-[#FFF0F5] border-[#FF5C8D] shadow-xl text-[#4A2E35]'
                     : isBotanica
                     ? 'bg-[#1E2A20] border-[#BDA06C] shadow-xl text-[#FAF8F5]'
+                    : isSeri
+                    ? 'bg-[#3A0207] border-[#D7BB83] shadow-xl text-[#FFFCF3]'
                     : 'bg-[#F7F2EA] border-[#C2A56B] shadow-xl text-[#283D52]'
                   : isMario
                   ? 'bg-[#182635] border-[#5C94FC]/40 hover:border-[#5C94FC] shadow-xs text-[#E0EFFF]'
@@ -329,6 +355,8 @@ export const AdminTemplatesPage: React.FC = () => {
                   ? 'bg-[#FFF5F8] border-[#FFA3B8]/40 hover:border-[#FF5C8D]/60 shadow-xs text-[#4A2E35]'
                   : isBotanica
                   ? 'bg-[#243326] border-[#BDA06C]/40 hover:border-[#BDA06C]/70 shadow-xs text-[#FAF8F5]'
+                  : isSeri
+                  ? 'bg-[#4C030A] border-[#D7BB83]/40 hover:border-[#D7BB83] shadow-xs text-[#FFFCF3]'
                   : 'bg-[#FFFCF7] border-[#283D52]/10 hover:border-[#283D52]/30 shadow-xs text-[#283D52]'
               }`}
             >

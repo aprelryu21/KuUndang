@@ -1038,6 +1038,81 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                     )}
                   </div>
                 </div>
+
+                {/* Template 7: Laman Seri Melayu (Interactive 2D Wedding Garden Quest) */}
+                <div
+                  onClick={() => {
+                    const preset = getTemplatePreset('seri-malaysia');
+                    setInvitation({
+                      ...invitation,
+                      template_id: 'seri-malaysia',
+                      theme_config: {
+                        ...preset.theme_config,
+                        ...invitation.theme_config,
+                        primary_color: preset.theme_config.primary_color,
+                        secondary_color: preset.theme_config.secondary_color,
+                        accent_color: preset.theme_config.accent_color,
+                        background_color: preset.theme_config.background_color,
+                        font_heading: preset.theme_config.font_heading,
+                        font_body: preset.theme_config.font_body,
+                      },
+                    });
+                    markDirty();
+                  }}
+                  className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                    invitation.template_id === 'seri-malaysia'
+                      ? 'bg-[#4C030A]/10 border-[#D7BB83] shadow-md ring-2 ring-[#D7BB83]/40'
+                      : 'bg-white border-[#283D52]/15 hover:border-[#D7BB83]/40'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-serif font-bold bg-[#D7BB83] text-[#4C030A] border border-[#FFF9F4]">
+                      2D GARDEN QUEST
+                    </span>
+                    <div className="w-6 h-6 rounded-full bg-[#FFFCF3] border border-[#D7BB83] flex items-center justify-center text-xs">
+                      👑
+                    </div>
+                  </div>
+
+                  {/* Mockup Preview Box */}
+                  <div className="w-full h-24 rounded-xl bg-[#4C030A] border-2 border-[#D7BB83]/60 p-2 flex flex-col justify-between mb-3 relative overflow-hidden">
+                    <div className="flex items-center justify-between font-serif text-[9px] text-[#D7BB83] tracking-wider">
+                      <span>LAMAN SERI</span>
+                      <span>17.09.2021</span>
+                    </div>
+                    <div className="text-center my-auto">
+                      <p className="text-[8px] uppercase tracking-widest text-[#D7BB83]/80">Walimatul 'Ursy</p>
+                      <p className="font-serif font-bold text-xs text-[#FFFCF3]">April &amp; Siti</p>
+                    </div>
+                    <div className="flex items-center justify-center">
+                      <span className="px-2 py-0.5 rounded-full bg-[#D7BB83] text-[#4C030A] text-[8px] font-bold font-serif shadow-xs">
+                        🏰 Eksplorasi 2D RPG
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3
+                        className={`font-serif font-bold text-sm ${
+                          invitation.template_id === 'seri-malaysia' ? 'text-[#8A1B26]' : 'text-[#283D52]'
+                        }`}
+                      >
+                        Laman Seri Melayu
+                      </h3>
+                      <p
+                        className={`text-[11px] mt-0.5 ${
+                          invitation.template_id === 'seri-malaysia' ? 'text-stone-800' : 'text-[#768692]'
+                        }`}
+                      >
+                        Petualangan 2D RPG: pilih karakter tamu, jelajahi taman pelaminan &amp; stan interaktif.
+                      </p>
+                    </div>
+                    {invitation.template_id === 'seri-malaysia' && (
+                      <CheckCircle2 className="w-5 h-5 text-[#8A1B26] shrink-0" />
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Quick Preview Button */}
@@ -1055,6 +1130,8 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                       ? '8-Bit Retro Platformer (Super Mario Bros)'
                       : invitation.template_id === 'fleur-botanica'
                       ? 'Fleur Botanica & Conservatory Glasshouse'
+                      : invitation.template_id === 'seri-malaysia'
+                      ? 'Laman Seri Melayu (Interactive Wedding Garden Quest)'
                       : 'The Royal Navy & Gold Arch'}
                   </strong>
                 </span>

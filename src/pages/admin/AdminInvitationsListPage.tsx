@@ -364,6 +364,8 @@ export const AdminInvitationsListPage: React.FC = () => {
                         ? 'bg-[#FF5C8D] text-white'
                         : inv.template_id === 'fleur-botanica'
                         ? 'bg-[#293522] text-[#BDA06C] border border-[#BDA06C]/40'
+                        : inv.template_id === 'seri-malaysia'
+                        ? 'bg-[#4C030A] text-[#D7BB83] border border-[#D7BB83]/40'
                         : 'bg-[#283D52] text-[#FFFCF7]'
                     }`}
                   >
@@ -377,6 +379,8 @@ export const AdminInvitationsListPage: React.FC = () => {
                       ? 'Pastel Bloom Pink'
                       : inv.template_id === 'fleur-botanica'
                       ? 'Fleur Botanica'
+                      : inv.template_id === 'seri-malaysia'
+                      ? 'Laman Seri Melayu (2D RPG)'
                       : 'The Royal Arch'}
                   </span>
                 </div>
@@ -556,6 +560,7 @@ export const AdminInvitationsListPage: React.FC = () => {
                   <option value="cute-pink-floral">Pastel Bloom & Bunga Lucu (Pink Manis)</option>
                   <option value="super-mario">8-Bit Retro Platformer (Super Mario Bros)</option>
                   <option value="fleur-botanica">Fleur Botanica & Conservatory Glasshouse (Segel Lilin)</option>
+                  <option value="seri-malaysia">Laman Seri Melayu (Interactive 2D Wedding Garden Quest)</option>
                 </select>
               </div>
 
