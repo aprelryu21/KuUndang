@@ -1,7 +1,7 @@
 import React from 'react';
 import { Couple } from '../../../types/wedding';
 import { EucalyptusStem, MagnoliaBranch, HeirloomDivider } from './fleurBotanicaAssets';
-import { Instagram, Heart } from 'lucide-react';
+import { Instagram, Heart, MapPin } from 'lucide-react';
 
 interface FleurBotanicaCoupleSectionProps {
   bride: Couple;
@@ -44,7 +44,7 @@ export const FleurBotanicaCoupleSection: React.FC<FleurBotanicaCoupleSectionProp
                 <img
                   src={
                     bride.photo_url ||
-                    'https://assets-staging.inveet.id/weddings/dias-azalia/couples/photos/bride_1787506074_SGiAMsD48d.jpg?width=400&height=400&quality=90'
+                    'https://lh3.googleusercontent.com/d/17Mkq-ytzCKMJSM5jYUwfosOabtLLdUJz'
                   }
                   alt={bride.full_name}
                   className="w-full h-full object-cover"
@@ -55,23 +55,35 @@ export const FleurBotanicaCoupleSection: React.FC<FleurBotanicaCoupleSectionProp
               </span>
             </div>
 
-            <div className="space-y-1.5">
+            {/* 2. Nama Mempelai */}
+            <div className="space-y-1">
               <h3 className="font-serif text-2xl sm:text-3xl font-bold text-[#293522]">
                 {bride.full_name}
               </h3>
+              {bride.nickname && (
+                <p className="text-xs font-serif text-[#80683E]">({bride.nickname})</p>
+              )}
+            </div>
+
+            {/* 3. Putri dari Pasangan */}
+            <div className="space-y-0.5">
               <p className="text-xs sm:text-sm font-serif text-[#66705A] leading-relaxed">
-                Putri dari Pasangan:
+                {bride.child_order ? `${bride.child_order} dari Pasangan:` : 'Putri dari Pasangan:'}
                 <br />
                 <strong className="text-[#293522]">{bride.father_name}</strong> &amp;{' '}
                 <strong className="text-[#293522]">{bride.mother_name}</strong>
               </p>
-              {bride.child_order && (
-                <span className="text-[11px] font-serif text-[#80683E] block">
-                  Anak ke-{bride.child_order}
-                </span>
-              )}
             </div>
 
+            {/* 4. Alamat Mempelai */}
+            {(bride.address || bride.description) && (
+              <div className="flex items-center justify-center gap-1.5 text-xs font-serif text-[#66705A] max-w-xs">
+                <MapPin className="w-3.5 h-3.5 text-[#BDA06C] shrink-0" />
+                <span>{bride.address || bride.description}</span>
+              </div>
+            )}
+
+            {/* 5. Akun IG */}
             {bride.instagram && (
               <a
                 href={`https://instagram.com/${bride.instagram.replace('@', '')}`}
@@ -93,7 +105,7 @@ export const FleurBotanicaCoupleSection: React.FC<FleurBotanicaCoupleSectionProp
                 <img
                   src={
                     groom.photo_url ||
-                    'https://assets-staging.inveet.id/weddings/dias-azalia/couples/photos/groom_1787506073_aVeBMpHeLs.jpg?width=400&height=400&quality=90'
+                    'https://lh3.googleusercontent.com/d/1qr9VPrFkya17qAU_kLtpYBLSktn3mBzG'
                   }
                   alt={groom.full_name}
                   className="w-full h-full object-cover"
@@ -104,23 +116,35 @@ export const FleurBotanicaCoupleSection: React.FC<FleurBotanicaCoupleSectionProp
               </span>
             </div>
 
-            <div className="space-y-1.5">
+            {/* 2. Nama Mempelai */}
+            <div className="space-y-1">
               <h3 className="font-serif text-2xl sm:text-3xl font-bold text-[#293522]">
                 {groom.full_name}
               </h3>
+              {groom.nickname && (
+                <p className="text-xs font-serif text-[#80683E]">({groom.nickname})</p>
+              )}
+            </div>
+
+            {/* 3. Putra dari Pasangan */}
+            <div className="space-y-0.5">
               <p className="text-xs sm:text-sm font-serif text-[#66705A] leading-relaxed">
-                Putra dari Pasangan:
+                {groom.child_order ? `${groom.child_order} dari Pasangan:` : 'Putra dari Pasangan:'}
                 <br />
                 <strong className="text-[#293522]">{groom.father_name}</strong> &amp;{' '}
                 <strong className="text-[#293522]">{groom.mother_name}</strong>
               </p>
-              {groom.child_order && (
-                <span className="text-[11px] font-serif text-[#80683E] block">
-                  Anak ke-{groom.child_order}
-                </span>
-              )}
             </div>
 
+            {/* 4. Alamat Mempelai */}
+            {(groom.address || groom.description) && (
+              <div className="flex items-center justify-center gap-1.5 text-xs font-serif text-[#66705A] max-w-xs">
+                <MapPin className="w-3.5 h-3.5 text-[#BDA06C] shrink-0" />
+                <span>{groom.address || groom.description}</span>
+              </div>
+            )}
+
+            {/* 5. Akun IG */}
             {groom.instagram && (
               <a
                 href={`https://instagram.com/${groom.instagram.replace('@', '')}`}

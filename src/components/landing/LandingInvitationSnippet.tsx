@@ -200,7 +200,7 @@ export const LandingInvitationSnippet: React.FC = () => {
                   <div className="rounded-3xl p-3 bg-[#EFE8DE] border border-[#C2A56B]/30 text-center">
                     <div className="w-24 h-24 mx-auto rounded-full overflow-hidden border-2 border-[#C2A56B] mb-2 shadow-md">
                       <img
-                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop"
+                        src="https://lh3.googleusercontent.com/d/1qr9VPrFkya17qAU_kLtpYBLSktn3mBzG"
                         alt="Groom"
                         className="w-full h-full object-cover"
                       />
@@ -213,7 +213,7 @@ export const LandingInvitationSnippet: React.FC = () => {
                   <div className="rounded-3xl p-3 bg-[#EFE8DE] border border-[#C2A56B]/30 text-center">
                     <div className="w-24 h-24 mx-auto rounded-full overflow-hidden border-2 border-[#C2A56B] mb-2 shadow-md">
                       <img
-                        src="https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?q=80&w=400&auto=format&fit=crop"
+                        src="https://lh3.googleusercontent.com/d/17Mkq-ytzCKMJSM5jYUwfosOabtLLdUJz"
                         alt="Bride"
                         className="w-full h-full object-cover"
                       />

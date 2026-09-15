@@ -11,7 +11,7 @@ import {
   CuteFloralDivider,
 } from './cuteFloralAssets';
 import { CuteFloralParticles } from './CuteFloralParticles';
-import { Heart, Instagram } from 'lucide-react';
+import { Heart, Instagram, MapPin } from 'lucide-react';
 import { CoupleAvatar } from '../../common/CoupleAvatar';
 
 interface CuteCoupleSectionProps {
@@ -99,7 +99,7 @@ export const CuteCoupleSection: React.FC<CuteCoupleSectionProps> = ({ bride, gro
 
             {(bride.father_name || bride.mother_name) ? (
               <p className="text-xs sm:text-sm font-sans text-[#6B3E48] mt-3 leading-relaxed">
-                Putri tercinta dari pasangan:
+                {bride.child_order ? `${bride.child_order} tercinta dari pasangan:` : 'Putri tercinta dari pasangan:'}
                 <br />
                 <strong className="text-[#4A2E35]">
                   {bride.father_name || 'Bpk. Orang Tua'}
@@ -111,13 +111,22 @@ export const CuteCoupleSection: React.FC<CuteCoupleSectionProps> = ({ bride, gro
               </p>
             ) : null}
 
+            {/* 4. Alamat Mempelai */}
+            {(bride.address || bride.description) && (
+              <div className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#FFF0F5] border border-[#FFA3B8]/60 text-xs font-sans text-[#6B3E48]">
+                <MapPin className="w-3.5 h-3.5 text-[#FF5C8D] shrink-0" />
+                <span>{bride.address || bride.description}</span>
+              </div>
+            )}
+
+            {/* 5. Akun IG */}
             {bride.instagram && (
               <div className="mt-4">
                 <a
                   href={`https://instagram.com/${bride.instagram.replace('@', '')}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#FFF0F5] hover:bg-[#FFE4EC] border border-[#FFA3B8] text-xs font-sans font-bold text-[#FF5C8D] transition-all hover:scale-105"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#FFF0F5] hover:bg-[#FFE4EC] border border-[#FFA3B8] text-xs font-sans font-bold text-[#FF5C8D] transition-all hover:scale-105 shadow-xs"
                 >
                   <Instagram className="w-3.5 h-3.5" />
                   <span>@{bride.instagram.replace('@', '')}</span>
@@ -171,7 +180,7 @@ export const CuteCoupleSection: React.FC<CuteCoupleSectionProps> = ({ bride, gro
 
             {(groom.father_name || groom.mother_name) ? (
               <p className="text-xs sm:text-sm font-sans text-[#6B3E48] mt-3 leading-relaxed">
-                Putra tercinta dari pasangan:
+                {groom.child_order ? `${groom.child_order} tercinta dari pasangan:` : 'Putra tercinta dari pasangan:'}
                 <br />
                 <strong className="text-[#4A2E35]">
                   {groom.father_name || 'Bpk. Orang Tua'}
@@ -183,13 +192,22 @@ export const CuteCoupleSection: React.FC<CuteCoupleSectionProps> = ({ bride, gro
               </p>
             ) : null}
 
+            {/* 4. Alamat Mempelai */}
+            {(groom.address || groom.description) && (
+              <div className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#FFF0F5] border border-[#FFA3B8]/60 text-xs font-sans text-[#6B3E48]">
+                <MapPin className="w-3.5 h-3.5 text-[#FF5C8D] shrink-0" />
+                <span>{groom.address || groom.description}</span>
+              </div>
+            )}
+
+            {/* 5. Akun IG */}
             {groom.instagram && (
               <div className="mt-4">
                 <a
                   href={`https://instagram.com/${groom.instagram.replace('@', '')}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#FFF0F5] hover:bg-[#FFE4EC] border border-[#FFA3B8] text-xs font-sans font-bold text-[#FF5C8D] transition-all hover:scale-105"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#FFF0F5] hover:bg-[#FFE4EC] border border-[#FFA3B8] text-xs font-sans font-bold text-[#FF5C8D] transition-all hover:scale-105 shadow-xs"
                 >
                   <Instagram className="w-3.5 h-3.5" />
                   <span>@{groom.instagram.replace('@', '')}</span>

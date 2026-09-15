@@ -1379,6 +1379,22 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                   />
                 </div>
 
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#283D52] mb-1">
+                    Alamat Mempelai Wanita
+                  </label>
+                  <input
+                    type="text"
+                    value={bride.address || ''}
+                    onChange={(e) => {
+                      setBride({ ...bride, address: e.target.value, description: e.target.value });
+                      markDirty();
+                    }}
+                    placeholder="Contoh: Desa Balonggarut, Krembung, Sidoarjo"
+                    className="w-full px-3 py-2 bg-[#FFFCF7] border border-[#283D52]/15 rounded-xl text-xs"
+                  />
+                </div>
+
                 <DriveUploader
                   label="Foto Portrait Mempelai Wanita"
                   value={bride.photo_url}
@@ -1502,6 +1518,22 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                       markDirty();
                     }}
                     placeholder="shofwan.ahmad"
+                    className="w-full px-3 py-2 bg-[#FFFCF7] border border-[#283D52]/15 rounded-xl text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#283D52] mb-1">
+                    Alamat Mempelai Pria
+                  </label>
+                  <input
+                    type="text"
+                    value={groom.address || ''}
+                    onChange={(e) => {
+                      setGroom({ ...groom, address: e.target.value, description: e.target.value });
+                      markDirty();
+                    }}
+                    placeholder="Contoh: Jl. Jombang, Kandangan, Kediri, Jawa Timur"
                     className="w-full px-3 py-2 bg-[#FFFCF7] border border-[#283D52]/15 rounded-xl text-xs"
                   />
                 </div>

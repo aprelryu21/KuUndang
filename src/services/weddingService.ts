@@ -172,7 +172,7 @@ export function cleanCoupleForSupabase(couple: Couple) {
     child_order: couple.child_order || '',
     instagram: couple.instagram || '',
     photo_url: couple.photo_url || '',
-    description: couple.description || '',
+    description: couple.address || couple.description || '',
   };
 }
 
@@ -478,10 +478,14 @@ export const weddingService = {
       }
     }
 
-    // If this is the demo invitation and missing, use demo couples
+    // If this is the demo invitation, ensure updated demo couples photos, instagram, and address
     if (isDemo) {
-      if (!bride) bride = INITIAL_DEMO_DATA.bride;
-      if (!groom) groom = INITIAL_DEMO_DATA.groom;
+      if (!bride || !bride.photo_url || bride.photo_url.includes('unsplash') || bride.instagram === 'sitinurjannah') {
+        bride = { ...(bride || {}), ...INITIAL_DEMO_DATA.bride };
+      }
+      if (!groom || !groom.photo_url || groom.photo_url.includes('unsplash') || groom.instagram === 'apriliyanto.ratih') {
+        groom = { ...(groom || {}), ...INITIAL_DEMO_DATA.groom };
+      }
     } else {
       // For any user-created invitation, NEVER use Siti & April's data!
       const preset = getTemplatePreset(invitation.template_id || 'royal-arch');

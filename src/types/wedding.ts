@@ -53,6 +53,7 @@ export interface Couple {
   instagram?: string;
   photo_url: string;
   description?: string;
+  address?: string;
 }
 
 export interface WeddingEvent {

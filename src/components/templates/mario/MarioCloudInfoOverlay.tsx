@@ -16,6 +16,7 @@ import {
   MessageSquareHeart,
   Image as ImageIcon,
   Eye,
+  Instagram,
 } from 'lucide-react';
 import { FullInvitationData, Guest } from '../../../types/wedding';
 import { weddingService } from '../../../services/weddingService';
@@ -248,62 +249,118 @@ export const MarioCloudInfoOverlay: React.FC<MarioCloudInfoOverlayProps> = ({
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {/* Bride Card */}
+                      {/* Bride Card: Foto -> Nama -> Orang Tua -> Alamat -> Akun IG */}
                       <div className="bg-[#1E293B]/80 border-2 border-[#FF85A2] rounded-2xl p-3 text-center flex flex-col justify-between">
                         <div>
+                          {/* 1. Foto Mempelai */}
+                          {bride.photo_url && (
+                            <div className="mx-auto w-20 h-24 rounded-xl overflow-hidden border-2 border-[#FF85A2] mb-2 bg-stone-900 shadow-xs relative group cursor-pointer"
+                              onClick={() => handleOpenPhoto(bride.photo_url, `Foto ${bride.full_name}`)}
+                            >
+                              <img
+                                src={bride.photo_url}
+                                alt={bride.full_name}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                              />
+                            </div>
+                          )}
+
                           <span className="inline-block px-2 py-0.5 bg-[#FF85A2] text-white text-[10px] font-mono font-bold rounded-md mb-1">
                             MEMPELAI WANITA
                           </span>
+
+                          {/* 2. Nama Mempelai */}
                           <h4 className="font-bold text-sm text-[#FF85A2]">{bride.full_name}</h4>
-                          <p className="text-[11px] text-stone-300 mt-0.5">
-                            Putri dari {bride.father_name} &amp; {bride.mother_name}
+                          {bride.nickname && (
+                            <p className="text-[10px] text-stone-400 font-mono">({bride.nickname})</p>
+                          )}
+
+                          {/* 3. Putri dari Pasangan */}
+                          <p className="text-[11px] text-stone-300 mt-1 leading-snug">
+                            {bride.child_order ? `${bride.child_order} dari:` : 'Putri dari:'}
+                            <br />
+                            <strong className="text-white">{bride.father_name}</strong> &amp; <strong className="text-white">{bride.mother_name}</strong>
                           </p>
-                          {bride.child_order && (
-                            <p className="text-[10px] text-stone-400 font-mono">
-                              Anak ke-{bride.child_order}
-                            </p>
+
+                          {/* 4. Alamat Mempelai */}
+                          {(bride.address || bride.description) && (
+                            <div className="mt-2 flex items-center justify-center gap-1 text-[10px] text-stone-400 font-mono">
+                              <MapPin className="w-3 h-3 text-[#FF85A2] shrink-0" />
+                              <span>{bride.address || bride.description}</span>
+                            </div>
                           )}
                         </div>
 
-                        {bride.photo_url && (
-                          <div className="mt-2.5">
-                            <button
-                              onClick={() => handleOpenPhoto(bride.photo_url, `Foto ${bride.full_name}`)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#FF85A2] hover:bg-[#E04877] text-white rounded-lg text-[11px] font-mono font-bold border border-white shadow-xs cursor-pointer"
+                        {/* 5. Akun IG */}
+                        {bride.instagram && (
+                          <div className="mt-3">
+                            <a
+                              href={`https://instagram.com/${bride.instagram.replace('@', '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#FF85A2] hover:bg-[#E04877] text-white rounded-lg text-[10px] font-mono font-bold border border-white shadow-xs"
                             >
-                              <Eye className="w-3 h-3" />
-                              <span>Lihat Foto Mempelai</span>
-                            </button>
+                              <Instagram className="w-3 h-3" />
+                              <span>@{bride.instagram.replace('@', '')}</span>
+                            </a>
                           </div>
                         )}
                       </div>
 
-                      {/* Groom Card */}
+                      {/* Groom Card: Foto -> Nama -> Orang Tua -> Alamat -> Akun IG */}
                       <div className="bg-[#1E293B]/80 border-2 border-[#5C94FC] rounded-2xl p-3 text-center flex flex-col justify-between">
                         <div>
+                          {/* 1. Foto Mempelai */}
+                          {groom.photo_url && (
+                            <div className="mx-auto w-20 h-24 rounded-xl overflow-hidden border-2 border-[#5C94FC] mb-2 bg-stone-900 shadow-xs relative group cursor-pointer"
+                              onClick={() => handleOpenPhoto(groom.photo_url, `Foto ${groom.full_name}`)}
+                            >
+                              <img
+                                src={groom.photo_url}
+                                alt={groom.full_name}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                              />
+                            </div>
+                          )}
+
                           <span className="inline-block px-2 py-0.5 bg-[#5C94FC] text-white text-[10px] font-mono font-bold rounded-md mb-1">
                             MEMPELAI PRIA
                           </span>
+
+                          {/* 2. Nama Mempelai */}
                           <h4 className="font-bold text-sm text-[#5C94FC]">{groom.full_name}</h4>
-                          <p className="text-[11px] text-stone-300 mt-0.5">
-                            Putra dari {groom.father_name} &amp; {groom.mother_name}
+                          {groom.nickname && (
+                            <p className="text-[10px] text-stone-400 font-mono">({groom.nickname})</p>
+                          )}
+
+                          {/* 3. Putra dari Pasangan */}
+                          <p className="text-[11px] text-stone-300 mt-1 leading-snug">
+                            {groom.child_order ? `${groom.child_order} dari:` : 'Putra dari:'}
+                            <br />
+                            <strong className="text-white">{groom.father_name}</strong> &amp; <strong className="text-white">{groom.mother_name}</strong>
                           </p>
-                          {groom.child_order && (
-                            <p className="text-[10px] text-stone-400 font-mono">
-                              Anak ke-{groom.child_order}
-                            </p>
+
+                          {/* 4. Alamat Mempelai */}
+                          {(groom.address || groom.description) && (
+                            <div className="mt-2 flex items-center justify-center gap-1 text-[10px] text-stone-400 font-mono">
+                              <MapPin className="w-3 h-3 text-[#5C94FC] shrink-0" />
+                              <span>{groom.address || groom.description}</span>
+                            </div>
                           )}
                         </div>
 
-                        {groom.photo_url && (
-                          <div className="mt-2.5">
-                            <button
-                              onClick={() => handleOpenPhoto(groom.photo_url, `Foto ${groom.full_name}`)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#5C94FC] hover:bg-[#467DE0] text-white rounded-lg text-[11px] font-mono font-bold border border-white shadow-xs cursor-pointer"
+                        {/* 5. Akun IG */}
+                        {groom.instagram && (
+                          <div className="mt-3">
+                            <a
+                              href={`https://instagram.com/${groom.instagram.replace('@', '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#5C94FC] hover:bg-[#467DE0] text-white rounded-lg text-[10px] font-mono font-bold border border-white shadow-xs"
                             >
-                              <Eye className="w-3 h-3" />
-                              <span>Lihat Foto Mempelai</span>
-                            </button>
+                              <Instagram className="w-3 h-3" />
+                              <span>@{groom.instagram.replace('@', '')}</span>
+                            </a>
                           </div>
                         )}
                       </div>

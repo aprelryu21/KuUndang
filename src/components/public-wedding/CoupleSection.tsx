@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Instagram, Heart } from 'lucide-react';
+import { Instagram, Heart, MapPin } from 'lucide-react';
 import { Couple, SectionSetting } from '../../types/wedding';
 import { useLanguage } from '../../context/LanguageContext';
 import {
@@ -23,35 +23,24 @@ export const CoupleSection: React.FC<CoupleSectionProps> = ({ bride, groom, sect
   return (
     <section id="couple" className="py-20 px-6 bg-[#F7F2EA] text-[#24313A] relative overflow-hidden">
       {/* Background Falling Petals & Hearts - Strictly Behind Couple Content */}
-      <FloatingPetalsOverlay className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none" />
+      <FloatingPetalsOverlay count={12} className="opacity-35 pointer-events-none" />
 
-      <div className="relative z-10 max-w-4xl mx-auto text-center">
-        {/* Section Header with Floral Wreath */}
-        <div className="mb-14 flex flex-col items-center">
-          <motion.div
-            initial={{ scale: 0.85, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-            className="mb-2"
-          >
-            <FloralWreathIllustration className="w-20 h-20 sm:w-24 sm:h-24" />
-          </motion.div>
-
-          <p className="font-accent text-3xl sm:text-4xl text-[#C2A56B]">
-            {section?.title || t.theCoupleTitle}
-          </p>
-          <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl tracking-wide uppercase text-[#283D52] font-semibold mt-1">
-            {groom.nickname} & {bride.nickname}
+      <div className="max-w-4xl mx-auto text-center relative z-10">
+        {/* Section Header */}
+        <div className="flex flex-col items-center mb-16">
+          <FloralWreathIllustration className="w-12 h-12 text-[#C2A56B] mb-3" />
+          <h2 className="font-heading text-3xl sm:text-4xl text-[#283D52] font-normal tracking-wide">
+            {section?.title || t.coupleTitle}
           </h2>
-          <p className="mt-3 max-w-md mx-auto text-xs sm:text-sm text-[#768692] leading-relaxed">
-            {section?.subtitle || t.weAreGettingMarried}
+          <p className="mt-2 text-xs sm:text-sm text-[#768692] max-w-lg font-light tracking-wide">
+            {section?.subtitle || t.coupleSubtitle}
           </p>
+          <div className="w-12 h-0.5 bg-[#C2A56B] mt-4" />
         </div>
 
-        {/* Profiles Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 sm:gap-16 items-start">
-          {/* Bride Profile */}
+        {/* Couples Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-start">
+          {/* 1. Bride Profile: Foto -> Nama -> Orang Tua -> Alamat -> Akun IG */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -59,7 +48,7 @@ export const CoupleSection: React.FC<CoupleSectionProps> = ({ bride, groom, sect
             transition={{ duration: 0.8 }}
             className="flex flex-col items-center text-center group"
           >
-            {/* Elegant Arch Portrait */}
+            {/* 1. Foto Mempelai */}
             <div className="relative mb-6">
               <div className="w-52 h-72 sm:w-60 sm:h-80 rounded-t-full rounded-b-2xl overflow-hidden border-4 border-[#FFFCF7] shadow-xl p-1 bg-[#FFFCF7]">
                 <CoupleAvatar
@@ -75,35 +64,41 @@ export const CoupleSection: React.FC<CoupleSectionProps> = ({ bride, groom, sect
               </div>
             </div>
 
+            {/* 2. Nama Mempelai */}
             <h3 className="font-heading text-2xl sm:text-3xl text-[#283D52] font-semibold tracking-wide">
               {bride.full_name}
             </h3>
-
-            <p className="font-accent text-2xl text-[#C2A56B] mt-0.5">
-              ({bride.nickname})
-            </p>
-
-            <div className="mt-3 text-xs sm:text-sm text-[#768692] leading-relaxed max-w-xs">
-              <p className="font-medium text-[#24313A]">
-                {bride.child_order || t.content?.bride?.childOrder}
-              </p>
-              <p className="mt-1">
-                {t.daughterOf} {bride.father_name} & {bride.mother_name}
-              </p>
-            </div>
-
-            {(bride.description || t.content?.bride?.bio) && (
-              <p className="mt-4 text-xs italic text-[#768692] max-w-xs leading-relaxed">
-                "{bride.description || t.content?.bride?.bio}"
+            {bride.nickname && (
+              <p className="font-accent text-2xl text-[#C2A56B] mt-0.5">
+                ({bride.nickname})
               </p>
             )}
 
+            {/* 3. Putri dari Pasangan */}
+            <div className="mt-3 text-xs sm:text-sm text-[#768692] leading-relaxed max-w-xs">
+              <p className="font-medium text-[#24313A]">
+                {bride.child_order || t.content?.bride?.childOrder || 'Putri Tercinta'}
+              </p>
+              <p className="mt-1">
+                {t.daughterOf} <strong className="text-[#24313A]">{bride.father_name || 'Bpk. Orang Tua'}</strong> &amp; <strong className="text-[#24313A]">{bride.mother_name || 'Ibu Orang Tua'}</strong>
+              </p>
+            </div>
+
+            {/* 4. Alamat Mempelai */}
+            {(bride.address || bride.description) && (
+              <div className="mt-3 flex items-start justify-center gap-1.5 text-xs text-[#768692] max-w-xs leading-relaxed">
+                <MapPin className="w-3.5 h-3.5 text-[#C2A56B] shrink-0 mt-0.5" />
+                <span>{bride.address || bride.description}</span>
+              </div>
+            )}
+
+            {/* 5. Akun IG */}
             {bride.instagram && (
               <a
                 href={`https://instagram.com/${bride.instagram.replace('@', '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FFFCF7] border border-[#283D52]/15 text-xs text-[#283D52] hover:border-[#C2A56B] hover:text-[#C2A56B] transition-colors"
+                className="mt-4 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#FFFCF7] border border-[#283D52]/15 text-xs text-[#283D52] hover:border-[#C2A56B] hover:text-[#C2A56B] transition-colors shadow-xs"
               >
                 <Instagram className="w-3.5 h-3.5 text-[#C2A56B]" />
                 <span>@{bride.instagram.replace('@', '')}</span>
@@ -111,7 +106,7 @@ export const CoupleSection: React.FC<CoupleSectionProps> = ({ bride, groom, sect
             )}
           </motion.div>
 
-          {/* Groom Profile */}
+          {/* 2. Groom Profile: Foto -> Nama -> Orang Tua -> Alamat -> Akun IG */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -119,7 +114,7 @@ export const CoupleSection: React.FC<CoupleSectionProps> = ({ bride, groom, sect
             transition={{ duration: 0.8, delay: 0.2 }}
             className="flex flex-col items-center text-center group"
           >
-            {/* Elegant Arch Portrait */}
+            {/* 1. Foto Mempelai */}
             <div className="relative mb-6">
               <div className="w-52 h-72 sm:w-60 sm:h-80 rounded-t-full rounded-b-2xl overflow-hidden border-4 border-[#FFFCF7] shadow-xl p-1 bg-[#FFFCF7]">
                 <CoupleAvatar
@@ -135,35 +130,41 @@ export const CoupleSection: React.FC<CoupleSectionProps> = ({ bride, groom, sect
               </div>
             </div>
 
+            {/* 2. Nama Mempelai */}
             <h3 className="font-heading text-2xl sm:text-3xl text-[#283D52] font-semibold tracking-wide">
               {groom.full_name}
             </h3>
-
-            <p className="font-accent text-2xl text-[#C2A56B] mt-0.5">
-              ({groom.nickname})
-            </p>
-
-            <div className="mt-3 text-xs sm:text-sm text-[#768692] leading-relaxed max-w-xs">
-              <p className="font-medium text-[#24313A]">
-                {groom.child_order || t.content?.groom?.childOrder}
-              </p>
-              <p className="mt-1">
-                {t.sonOf} {groom.father_name} & {groom.mother_name}
-              </p>
-            </div>
-
-            {(groom.description || t.content?.groom?.bio) && (
-              <p className="mt-4 text-xs italic text-[#768692] max-w-xs leading-relaxed">
-                "{groom.description || t.content?.groom?.bio}"
+            {groom.nickname && (
+              <p className="font-accent text-2xl text-[#C2A56B] mt-0.5">
+                ({groom.nickname})
               </p>
             )}
 
+            {/* 3. Putra dari Pasangan */}
+            <div className="mt-3 text-xs sm:text-sm text-[#768692] leading-relaxed max-w-xs">
+              <p className="font-medium text-[#24313A]">
+                {groom.child_order || t.content?.groom?.childOrder || 'Putra Tercinta'}
+              </p>
+              <p className="mt-1">
+                {t.sonOf} <strong className="text-[#24313A]">{groom.father_name || 'Bpk. Orang Tua'}</strong> &amp; <strong className="text-[#24313A]">{groom.mother_name || 'Ibu Orang Tua'}</strong>
+              </p>
+            </div>
+
+            {/* 4. Alamat Mempelai */}
+            {(groom.address || groom.description) && (
+              <div className="mt-3 flex items-start justify-center gap-1.5 text-xs text-[#768692] max-w-xs leading-relaxed">
+                <MapPin className="w-3.5 h-3.5 text-[#C2A56B] shrink-0 mt-0.5" />
+                <span>{groom.address || groom.description}</span>
+              </div>
+            )}
+
+            {/* 5. Akun IG */}
             {groom.instagram && (
               <a
                 href={`https://instagram.com/${groom.instagram.replace('@', '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FFFCF7] border border-[#283D52]/15 text-xs text-[#283D52] hover:border-[#C2A56B] hover:text-[#C2A56B] transition-colors"
+                className="mt-4 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#FFFCF7] border border-[#283D52]/15 text-xs text-[#283D52] hover:border-[#C2A56B] hover:text-[#C2A56B] transition-colors shadow-xs"
               >
                 <Instagram className="w-3.5 h-3.5 text-[#C2A56B]" />
                 <span>@{groom.instagram.replace('@', '')}</span>

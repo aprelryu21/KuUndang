@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Heart, Instagram, Sparkles, Star, Smile, Crown } from 'lucide-react';
+import { Heart, Instagram, Sparkles, Star, Smile, Crown, MapPin } from 'lucide-react';
 import { Couple } from '../../../types/wedding';
 import { CoupleAvatar } from '../../common/CoupleAvatar';
 
@@ -123,9 +123,17 @@ export const PastelPopCoupleSection: React.FC<PastelPopCoupleSectionProps> = ({ 
               </p>
             </div>
 
-            {/* Instagram Link */}
+            {/* 4. Alamat Mempelai */}
+            {(bride.address || bride.description) && (
+              <div className="mt-3 inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-[#FF6B8B]/40 text-xs font-bold text-[#2B2D42]/90 shadow-xs max-w-xs">
+                <MapPin className="w-3.5 h-3.5 text-[#FF6B8B] shrink-0" />
+                <span>{bride.address || bride.description}</span>
+              </div>
+            )}
+
+            {/* 5. Instagram Link */}
             {bride.instagram && (
-              <div className="mt-5">
+              <div className="mt-4">
                 <a
                   href={`https://instagram.com/${bride.instagram.replace('@', '')}`}
                   target="_blank"
@@ -198,9 +206,17 @@ export const PastelPopCoupleSection: React.FC<PastelPopCoupleSectionProps> = ({ 
               </p>
             </div>
 
-            {/* Instagram Link */}
+            {/* 4. Alamat Mempelai */}
+            {(groom.address || groom.description) && (
+              <div className="mt-3 inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-[#4D96FF]/40 text-xs font-bold text-[#2B2D42]/90 shadow-xs max-w-xs">
+                <MapPin className="w-3.5 h-3.5 text-[#4D96FF] shrink-0" />
+                <span>{groom.address || groom.description}</span>
+              </div>
+            )}
+
+            {/* 5. Instagram Link */}
             {groom.instagram && (
-              <div className="mt-5">
+              <div className="mt-4">
                 <a
                   href={`https://instagram.com/${groom.instagram.replace('@', '')}`}
                   target="_blank"

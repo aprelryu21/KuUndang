@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Calendar, MapPin, ExternalLink, Copy, Check, Heart } from 'lucide-react';
+import { X, Calendar, MapPin, ExternalLink, Copy, Check, Heart, Instagram } from 'lucide-react';
 import { FullInvitationData } from '../../../types/wedding';
 import { useToast } from '../../../context/ToastContext';
 
@@ -87,30 +87,86 @@ export const MarioFullBookModal: React.FC<MarioFullBookModalProps> = ({
                   {getSec('couple')?.title || 'KEDUA MEMPELAI'}
                 </h5>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="bg-[#FFF0F5] border border-[#FF85A2] rounded-xl p-3">
-                    <span className="text-[10px] font-mono font-bold text-[#E03164]">
-                      MEMPELAI WANITA
-                    </span>
-                    <h6 className="font-bold text-sm text-[#283D52]">{bride.full_name}</h6>
-                    <p className="text-xs text-stone-600 mt-0.5">
-                      Putri dari Bpk. {bride.father_name} &amp; Ibu {bride.mother_name}
-                    </p>
-                    <p className="text-[11px] text-stone-500 font-mono mt-1">
-                      📍 Balonggarut, Krembung, Sidoarjo
-                    </p>
+                  {/* Bride: Foto -> Nama -> Orang Tua -> Alamat -> Akun IG */}
+                  <div className="bg-[#FFF0F5] border border-[#FF85A2] rounded-xl p-3 text-center flex flex-col justify-between">
+                    <div>
+                      {bride.photo_url && (
+                        <div className="mx-auto w-16 h-20 rounded-lg overflow-hidden border-2 border-[#FF85A2] mb-2 bg-stone-100 shadow-xs">
+                          <img
+                            src={bride.photo_url}
+                            alt={bride.full_name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <span className="text-[10px] font-mono font-bold text-[#E03164]">
+                        MEMPELAI WANITA
+                      </span>
+                      <h6 className="font-bold text-sm text-[#283D52]">{bride.full_name}</h6>
+                      <p className="text-xs text-stone-600 mt-0.5">
+                        {bride.child_order ? `${bride.child_order} dari:` : 'Putri dari:'} Bpk. {bride.father_name} &amp; Ibu {bride.mother_name}
+                      </p>
+                      {(bride.address || bride.description) && (
+                        <p className="text-[11px] text-stone-500 font-mono mt-1 flex items-center justify-center gap-1">
+                          <MapPin className="w-3 h-3 text-[#FF85A2] shrink-0" />
+                          <span>{bride.address || bride.description}</span>
+                        </p>
+                      )}
+                    </div>
+                    {bride.instagram && (
+                      <div className="mt-2.5">
+                        <a
+                          href={`https://instagram.com/${bride.instagram.replace('@', '')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#FF85A2] hover:bg-[#E03164] text-white rounded-md text-[10px] font-mono font-bold shadow-xs"
+                        >
+                          <Instagram className="w-3 h-3" />
+                          <span>@{bride.instagram.replace('@', '')}</span>
+                        </a>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="bg-[#EBF4FF] border border-[#5C94FC] rounded-xl p-3">
-                    <span className="text-[10px] font-mono font-bold text-[#1D4ED8]">
-                      MEMPELAI PRIA
-                    </span>
-                    <h6 className="font-bold text-sm text-[#283D52]">{groom.full_name}</h6>
-                    <p className="text-xs text-stone-600 mt-0.5">
-                      Putra dari Bpk. {groom.father_name} &amp; Ibu {groom.mother_name}
-                    </p>
-                    <p className="text-[11px] text-stone-500 font-mono mt-1">
-                      📍 Kandangan, Kediri, Jawa Timur
-                    </p>
+                  {/* Groom: Foto -> Nama -> Orang Tua -> Alamat -> Akun IG */}
+                  <div className="bg-[#EBF4FF] border border-[#5C94FC] rounded-xl p-3 text-center flex flex-col justify-between">
+                    <div>
+                      {groom.photo_url && (
+                        <div className="mx-auto w-16 h-20 rounded-lg overflow-hidden border-2 border-[#5C94FC] mb-2 bg-stone-100 shadow-xs">
+                          <img
+                            src={groom.photo_url}
+                            alt={groom.full_name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <span className="text-[10px] font-mono font-bold text-[#1D4ED8]">
+                        MEMPELAI PRIA
+                      </span>
+                      <h6 className="font-bold text-sm text-[#283D52]">{groom.full_name}</h6>
+                      <p className="text-xs text-stone-600 mt-0.5">
+                        {groom.child_order ? `${groom.child_order} dari:` : 'Putra dari:'} Bpk. {groom.father_name} &amp; Ibu {groom.mother_name}
+                      </p>
+                      {(groom.address || groom.description) && (
+                        <p className="text-[11px] text-stone-500 font-mono mt-1 flex items-center justify-center gap-1">
+                          <MapPin className="w-3 h-3 text-[#5C94FC] shrink-0" />
+                          <span>{groom.address || groom.description}</span>
+                        </p>
+                      )}
+                    </div>
+                    {groom.instagram && (
+                      <div className="mt-2.5">
+                        <a
+                          href={`https://instagram.com/${groom.instagram.replace('@', '')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#5C94FC] hover:bg-[#1D4ED8] text-white rounded-md text-[10px] font-mono font-bold shadow-xs"
+                        >
+                          <Instagram className="w-3 h-3" />
+                          <span>@{groom.instagram.replace('@', '')}</span>
+                        </a>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

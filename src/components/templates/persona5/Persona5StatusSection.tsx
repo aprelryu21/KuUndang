@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Zap, Star, Instagram } from 'lucide-react';
+import { Zap, Star, Instagram, MapPin } from 'lucide-react';
 import { Couple } from '../../../types/wedding';
 import { useLanguage } from '../../../context/LanguageContext';
 
@@ -168,21 +168,33 @@ export const Persona5StatusSection: React.FC<Persona5StatusSectionProps> = ({ br
                 </div>
               </div>
 
-              {/* Parents Lineage Details */}
-              <div className="bg-black/60 border border-white/20 p-4 text-xs font-mono text-left space-y-1.5">
-                <p className="text-[#FFF000] font-bold uppercase tracking-wider">
+              {/* 3. Parents Lineage Details */}
+              <div className="bg-black/60 border border-white/20 p-4 text-xs font-mono text-left space-y-1.5 -skew-x-2">
+                <p className="text-[#FFF000] font-bold uppercase tracking-wider skew-x-2">
                   {p5Translations?.familyLineage || 'SILSILAH KELUARGA:'}
                 </p>
-                <p className="text-white">
-                  {currentPerson.child_order || (activeTab === 'groom' ? t.sonOf : t.daughterOf)}:
+                <p className="text-white skew-x-2">
+                  {currentPerson.child_order || (activeTab === 'groom' ? 'Putra Tercinta' : 'Putri Tercinta')} dari:
                 </p>
-                <p className="text-white font-bold text-sm">
-                  {currentPerson.father_name} & {currentPerson.mother_name}
-                </p>
-                <p className="text-[#FFFFFF]/70 text-[11px] pt-1 border-t border-white/10">
-                  {currentPerson.description}
+                <p className="text-white font-bold text-sm skew-x-2">
+                  {currentPerson.father_name} &amp; {currentPerson.mother_name}
                 </p>
               </div>
+
+              {/* 4. Alamat Mempelai */}
+              {(currentPerson.address || currentPerson.description) && (
+                <div className="bg-black/60 border border-white/20 p-3.5 text-xs font-mono text-left flex items-start gap-2 -skew-x-2">
+                  <MapPin className="w-4 h-4 text-[#FFF000] shrink-0 mt-0.5 skew-x-2" />
+                  <div className="skew-x-2">
+                    <span className="text-[10px] text-[#FFF000] font-bold uppercase tracking-wider block">
+                      TARGET BASE / ALAMAT:
+                    </span>
+                    <span className="text-white text-xs leading-relaxed">
+                      {currentPerson.address || currentPerson.description}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* Instagram link */}
               {currentPerson.instagram && (
