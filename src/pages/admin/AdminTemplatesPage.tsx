@@ -119,6 +119,26 @@ const TEMPLATES: TemplateOption[] = [
     ],
     tags: ['Super Mario', '8-Bit Retro', 'HTML5 Canvas', 'Game Platformer', 'Chiptune'],
   },
+  {
+    id: 'fleur-botanica',
+    name: 'Fleur Botanica & Conservatory Glasshouse',
+    tagline: 'Estetika Botanical Heirloom Eropa, Daun Eucalyptus & Segel Lilin Wax Seal',
+    badge: 'BOTANICAL & WAX SEAL',
+    accentColor: '#BDA06C',
+    bgGradient: 'from-[#1E2A20] via-[#293522] to-[#FAF8F5]',
+    borderColor: 'border-[#BDA06C]',
+    description:
+      'Desain botani editorial mewah terinspirasi arsitektur Conservatory Glasshouse Eropa. Dilengkapi amplop pembuka vintage interaktif dengan segel lilin wax seal, aksen daun eucalyptus perunggu, frame polaroid renda, dan alunan melodi romantis.',
+    highlights: [
+      'Amplop Surat Lipat Interaktif dengan animasi kupas segel lilin (Wax Seal)',
+      'Ornamen Botani Eksklusif (Eucalyptus, Ranting Magnolia, & flourish sudut emas)',
+      'Profil Mempelai berbingkai polaroid renda botani & info orang tua terhormat',
+      'Jadwal Acara Akad & Resepsi lengkap dengan petunjuk Google Maps & Kalender',
+      'Galeri Foto Masonry Romantis dengan viewer lightbox layar penuh',
+      'Buku Tamu RSVP & Tali Asih (Amplop Digital) dengan salin rekening instan',
+    ],
+    tags: ['Botanical', 'Conservatory', 'Wax Seal', 'Eucalyptus', 'Editorial'],
+  },
 ];
 
 export const AdminTemplatesPage: React.FC = () => {
@@ -204,13 +224,13 @@ export const AdminTemplatesPage: React.FC = () => {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EFE8DE] text-xs font-semibold text-[#C2A56B] mb-2">
             <Palette className="w-3.5 h-3.5" />
-            <span>Koleksi 5 Tema Undangan</span>
+            <span>Koleksi 6 Tema Undangan</span>
           </div>
           <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#283D52]">
             Katalog Tema Desain Undangan
           </h1>
           <p className="text-xs sm:text-sm text-[#768692] mt-1 max-w-xl">
-            Pilih antara sakralnya Adat Jawa Kasultanan &amp; Gamelan, manisnya nuansa merah muda bunga lucu, keanggunan klasik Royal Arch bangsawan, gaya cyber-RPG Persona 5, atau tema platformer interaktif Super Mario 8-Bit.
+            Pilih antara sakralnya Adat Jawa Kasultanan &amp; Gamelan, cantiknya Botanical Conservatory &amp; Segel Lilin, manisnya nuansa merah muda bunga lucu, keanggunan klasik Royal Arch bangsawan, gaya cyber-RPG Persona 5, atau tema platformer interaktif Super Mario 8-Bit.
           </p>
         </div>
 
@@ -236,6 +256,8 @@ export const AdminTemplatesPage: React.FC = () => {
                     ? 'Adat Jawa'
                     : inv.template_id === 'cute-pink-floral'
                     ? 'Bunga Lucu (Pink)'
+                    : inv.template_id === 'fleur-botanica'
+                    ? 'Fleur Botanica'
                     : 'Royal Arch'}
                   )
                 </option>
@@ -281,6 +303,7 @@ export const AdminTemplatesPage: React.FC = () => {
           const isJawa = tmpl.id === 'javanese-royal';
           const isCute = tmpl.id === 'cute-pink-floral';
           const isMario = tmpl.id === 'super-mario';
+          const isBotanica = tmpl.id === 'fleur-botanica';
 
           return (
             <div
@@ -295,6 +318,8 @@ export const AdminTemplatesPage: React.FC = () => {
                     ? 'bg-[#24160E] border-[#D4AF37] shadow-xl text-[#FAF6EE]'
                     : isCute
                     ? 'bg-[#FFF0F5] border-[#FF5C8D] shadow-xl text-[#4A2E35]'
+                    : isBotanica
+                    ? 'bg-[#1E2A20] border-[#BDA06C] shadow-xl text-[#FAF8F5]'
                     : 'bg-[#F7F2EA] border-[#C2A56B] shadow-xl text-[#283D52]'
                   : isMario
                   ? 'bg-[#182635] border-[#5C94FC]/40 hover:border-[#5C94FC] shadow-xs text-[#E0EFFF]'
@@ -302,6 +327,8 @@ export const AdminTemplatesPage: React.FC = () => {
                   ? 'bg-[#1A1009] border-[#D4AF37]/30 hover:border-[#D4AF37]/60 shadow-xs text-[#FAF6EE]'
                   : isCute
                   ? 'bg-[#FFF5F8] border-[#FFA3B8]/40 hover:border-[#FF5C8D]/60 shadow-xs text-[#4A2E35]'
+                  : isBotanica
+                  ? 'bg-[#243326] border-[#BDA06C]/40 hover:border-[#BDA06C]/70 shadow-xs text-[#FAF8F5]'
                   : 'bg-[#FFFCF7] border-[#283D52]/10 hover:border-[#283D52]/30 shadow-xs text-[#283D52]'
               }`}
             >
@@ -310,7 +337,9 @@ export const AdminTemplatesPage: React.FC = () => {
                 <div className="flex items-center justify-between mb-4">
                   <span
                     className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full ${
-                      isMario
+                      isBotanica
+                        ? 'bg-[#BDA06C] text-[#1E2A20] font-serif'
+                        : isMario
                         ? 'bg-[#5C94FC] text-white font-mono'
                         : isP5
                         ? 'bg-[#E60012] text-white -skew-x-6'
@@ -407,6 +436,8 @@ export const AdminTemplatesPage: React.FC = () => {
                   className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                     isCurrentActive
                       ? 'bg-emerald-600 text-white cursor-default'
+                      : isBotanica
+                      ? 'bg-[#293522] hover:bg-[#1E2A20] text-[#FAF8F5] border border-[#BDA06C] shadow-md'
                       : isMario
                       ? 'bg-[#E60012] hover:bg-[#CC0010] text-white font-mono shadow-md border border-white/40'
                       : isP5

@@ -659,7 +659,7 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Template 1: Royal Arch */}
                 <div
                   onClick={() => {
@@ -963,6 +963,81 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                     )}
                   </div>
                 </div>
+
+                {/* Template 6: Fleur Botanica & Conservatory Glasshouse */}
+                <div
+                  onClick={() => {
+                    const preset = getTemplatePreset('fleur-botanica');
+                    setInvitation({
+                      ...invitation,
+                      template_id: 'fleur-botanica',
+                      theme_config: {
+                        ...preset.theme_config,
+                        ...invitation.theme_config,
+                        primary_color: preset.theme_config.primary_color,
+                        secondary_color: preset.theme_config.secondary_color,
+                        accent_color: preset.theme_config.accent_color,
+                        background_color: preset.theme_config.background_color,
+                        font_heading: preset.theme_config.font_heading,
+                        font_body: preset.theme_config.font_body,
+                      },
+                    });
+                    markDirty();
+                  }}
+                  className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                    invitation.template_id === 'fleur-botanica'
+                      ? 'bg-[#1E2A20]/10 border-[#BDA06C] shadow-md ring-2 ring-[#BDA06C]/40'
+                      : 'bg-white border-[#283D52]/15 hover:border-[#BDA06C]/40'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-serif font-bold bg-[#BDA06C] text-[#1E2A20] border border-[#E0D0B5]">
+                      BOTANICAL CONSERVATORY
+                    </span>
+                    <div className="w-6 h-6 rounded-full bg-[#EAE5D9] border border-[#BDA06C] flex items-center justify-center text-xs">
+                      🌿
+                    </div>
+                  </div>
+
+                  {/* Mockup Preview Box */}
+                  <div className="w-full h-24 rounded-xl bg-[#1E2A20] border-2 border-[#BDA06C]/60 p-2 flex flex-col justify-between mb-3 relative overflow-hidden">
+                    <div className="flex items-center justify-between font-serif text-[9px] text-[#BDA06C] tracking-wider">
+                      <span>THE BOTANICAL</span>
+                      <span>17.09.2021</span>
+                    </div>
+                    <div className="text-center my-auto">
+                      <p className="text-[8px] uppercase tracking-widest text-[#BDA06C]/70">The Wedding Of</p>
+                      <p className="font-serif font-bold text-xs text-[#FAF8F5]">April &amp; Siti</p>
+                    </div>
+                    <div className="flex items-center justify-center">
+                      <span className="px-2 py-0.5 rounded-full bg-[#BDA06C] text-[#1E2A20] text-[8px] font-bold font-serif shadow-xs">
+                        💌 Segel Lilin Interaktif
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3
+                        className={`font-serif font-bold text-sm ${
+                          invitation.template_id === 'fleur-botanica' ? 'text-[#BDA06C]' : 'text-[#283D52]'
+                        }`}
+                      >
+                        Fleur Botanica
+                      </h3>
+                      <p
+                        className={`text-[11px] mt-0.5 ${
+                          invitation.template_id === 'fleur-botanica' ? 'text-stone-800' : 'text-[#768692]'
+                        }`}
+                      >
+                        Botanical conservatory: amplop vintage lipat, segel lilin wax seal &amp; eucalyptus.
+                      </p>
+                    </div>
+                    {invitation.template_id === 'fleur-botanica' && (
+                      <CheckCircle2 className="w-5 h-5 text-[#BDA06C] shrink-0" />
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Quick Preview Button */}
@@ -978,6 +1053,8 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                       ? 'Pastel Bloom & Bunga Lucu (Pink)'
                       : invitation.template_id === 'super-mario'
                       ? '8-Bit Retro Platformer (Super Mario Bros)'
+                      : invitation.template_id === 'fleur-botanica'
+                      ? 'Fleur Botanica & Conservatory Glasshouse'
                       : 'The Royal Navy & Gold Arch'}
                   </strong>
                 </span>

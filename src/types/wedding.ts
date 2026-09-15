@@ -151,7 +151,8 @@ export type TemplateId =
   | 'pastel-pop'
   | 'javanese-royal'
   | 'cute-pink-floral'
-  | 'super-mario';
+  | 'super-mario'
+  | 'fleur-botanica';
 
 export interface Invitation {
   id: string;

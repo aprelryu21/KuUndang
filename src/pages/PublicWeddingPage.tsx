@@ -21,6 +21,7 @@ import { Persona5WeddingView } from '../components/templates/persona5/Persona5We
 import { JavaneseWeddingView } from '../components/templates/javanese/JavaneseWeddingView';
 import { CuteFloralWeddingView } from '../components/templates/cute-floral/CuteFloralWeddingView';
 import { MarioWeddingView } from '../components/templates/mario/MarioWeddingView';
+import { FleurBotanicaWeddingView } from '../components/templates/fleur-botanica/FleurBotanicaWeddingView';
 import { LanguageSwitcher } from '../components/common/LanguageSwitcher';
 import { AdminLoginModal } from '../components/admin/AdminLoginModal';
 import { Heart, ArrowLeft, Eye, RefreshCw } from 'lucide-react';
@@ -312,6 +313,12 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
         templateQuery === '8bit' ||
         templateQuery === 'pixel'
       ? 'super-mario'
+      : templateQuery === 'fleur-botanica' ||
+        templateQuery === 'botanica' ||
+        templateQuery === 'botanical' ||
+        templateQuery === 'fleur' ||
+        templateQuery === 'fleur-de-brume'
+      ? 'fleur-botanica'
       : templateQuery;
 
   const activeTemplate =
@@ -320,6 +327,40 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
     (data as any).theme?.template_id ||
     (data as any).template_id ||
     'royal-arch';
+
+  // Render Fleur Botanica (Modern Botanical Conservatory) Template
+  if (activeTemplate === 'fleur-botanica') {
+    return (
+      <div className="relative min-h-screen bg-[#FAF8F5]">
+        {/* Admin Preview Mode Floating Bar */}
+        {isPreview && (
+          <div className="fixed top-0 inset-x-0 z-50 bg-[#293522] text-[#BDA06C] border-b border-[#BDA06C]/40 px-4 py-2 flex items-center justify-between text-xs shadow-md font-serif">
+            <div className="flex items-center gap-2">
+              <Eye className="w-4 h-4 text-[#BDA06C]" />
+              <span>
+                PREVIEW [FLEUR BOTANICA CONSERVATORY] — {invitation.title} ({(invitation.status || 'published').toUpperCase()})
+              </span>
+            </div>
+            <Link
+              to={`/admin/invitations/${invitation.id}/edit`}
+              className="flex items-center gap-1.5 px-3 py-1 bg-[#BDA06C] text-[#293522] rounded-md font-serif font-bold text-[11px] hover:bg-[#A88B57] transition-colors"
+            >
+              <ArrowLeft className="w-3 h-3" />
+              <span>Pengaturan Undangan</span>
+            </Link>
+          </div>
+        )}
+
+        <FleurBotanicaWeddingView
+          data={data}
+          guest={guest}
+          guestName={guestName}
+          isPreview={isPreview}
+          onRefreshData={loadData}
+        />
+      </div>
+    );
+  }
 
   // Render Super Mario 8-Bit Platformer Template
   if (activeTemplate === 'super-mario') {

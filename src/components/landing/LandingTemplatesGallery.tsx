@@ -62,6 +62,17 @@ export const LandingTemplatesGallery: React.FC = () => {
       liveUrl: '/april-siti?template=super-mario',
       previewBtnText: 'Demo 8-Bit Mario',
     },
+    {
+      id: 'fleur-botanica',
+      name: 'Fleur Botanica & Conservatory Glasshouse',
+      category: 'Botanical Conservatory Edition',
+      tag: 'Botanical & Segel Lilin',
+      accentColor: '#BDA06C',
+      bgColor: '#1E2A20',
+      desc: 'Desain botani editorial mewah ala conservatory eropa: ornamen daun eucalyptus perunggu, sampul vintage beramplop dengan segel lilin wax seal interaktif, dan palet forest sage.',
+      liveUrl: '/april-siti?template=fleur-botanica',
+      previewBtnText: 'Demo Fleur Botanica',
+    },
   ];
 
   return (
@@ -80,21 +91,22 @@ export const LandingTemplatesGallery: React.FC = () => {
             <span>Koleksi Estetika Eksklusif</span>
           </div>
           <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-[#283D52] tracking-tight">
-            5 Pilihan Tema Eksklusif Undangan
+            6 Pilihan Tema Eksklusif Undangan
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#768692] font-sans">
-            Pilih antara sakralnya Adat Jawa Kasultanan &amp; Gamelan, manisnya nuansa merah muda bunga lucu, keanggunan klasik Royal Arch bangsawan, gaya energik Persona 5, atau tema petualangan platformer Super Mario 8-Bit. Coba demonya secara langsung!
+            Pilih antara sakralnya Adat Jawa Kasultanan &amp; Gamelan, cantiknya nuansa Botanical Conservatory &amp; Segel Lilin, manisnya nuansa merah muda bunga lucu, keanggunan klasik Royal Arch bangsawan, gaya energik Persona 5, atau tema petualangan platformer Super Mario 8-Bit. Coba demonya secara langsung!
           </p>
         </motion.div>
 
-        {/* Templates Grid - 5 Columns on XL */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 max-w-7xl mx-auto">
+        {/* Templates Grid - 3 Columns on LG/XL */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
           {themes.map((theme, idx) => {
             const isSelected = selectedTheme === theme.id;
             const isP5 = theme.id === 'persona-5';
             const isJawa = theme.id === 'javanese-royal';
             const isCute = theme.id === 'cute-pink-floral';
             const isMario = theme.id === 'super-mario';
+            const isBotanica = theme.id === 'fleur-botanica';
 
             return (
               <motion.div
@@ -115,6 +127,8 @@ export const LandingTemplatesGallery: React.FC = () => {
                       ? 'bg-[#24160E] border-[#D4AF37] shadow-2xl scale-[1.02] text-[#FAF6EE]'
                       : isCute
                       ? 'bg-[#FFF0F5] border-[#FF5C8D] shadow-2xl scale-[1.02] text-[#4A2E35]'
+                      : isBotanica
+                      ? 'bg-[#1E2A20] border-[#BDA06C] shadow-2xl scale-[1.02] text-[#FAF8F5]'
                       : 'bg-[#F7F2EA] border-[#C2A56B] shadow-2xl scale-[1.02]'
                     : isMario
                     ? 'bg-[#132030] border-[#5C94FC]/40 hover:border-[#5C94FC] shadow-sm text-[#E0EFFF]'
@@ -122,6 +136,8 @@ export const LandingTemplatesGallery: React.FC = () => {
                     ? 'bg-[#1A1009] border-[#D4AF37]/30 hover:border-[#D4AF37]/60 shadow-sm text-[#FAF6EE]'
                     : isCute
                     ? 'bg-[#FFF5F8] border-[#FFA3B8]/40 hover:border-[#FF5C8D]/60 shadow-sm text-[#4A2E35]'
+                    : isBotanica
+                    ? 'bg-[#243326] border-[#BDA06C]/30 hover:border-[#BDA06C]/70 shadow-sm text-[#FAF8F5]'
                     : 'bg-[#FFFCF7] border-[#C2A56B]/20 hover:border-[#C2A56B]/60 shadow-sm'
                 }`}
               >
@@ -131,7 +147,18 @@ export const LandingTemplatesGallery: React.FC = () => {
                   style={{ backgroundColor: theme.bgColor }}
                 >
                   {/* Decorative Graphics per theme */}
-                  {isMario ? (
+                  {isBotanica ? (
+                    /* Botanical leaf & wax seal emblem */
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden flex items-center justify-center opacity-30">
+                      <svg viewBox="0 0 120 120" className="w-36 h-36 stroke-[#BDA06C] fill-none" strokeWidth="1.2">
+                        <circle cx="60" cy="60" r="50" strokeDasharray="4 3" />
+                        <circle cx="60" cy="60" r="42" />
+                        <path d="M60 22 C65 38 75 52 60 68 C45 52 55 38 60 22 Z" fill="#BDA06C" opacity="0.3" />
+                        <path d="M38 65 C54 60 68 70 58 84 C48 76 38 74 38 65 Z" fill="#BDA06C" opacity="0.3" />
+                        <path d="M82 65 C66 60 52 70 62 84 C72 76 82 74 82 65 Z" fill="#BDA06C" opacity="0.3" />
+                      </svg>
+                    </div>
+                  ) : isMario ? (
                     /* 8-Bit Pixel Cloud, Question Mark Blocks & Pipe */
                     <div className="absolute inset-0 pointer-events-none overflow-hidden font-mono">
                       {/* Pixel Clouds */}
@@ -208,7 +235,9 @@ export const LandingTemplatesGallery: React.FC = () => {
                   <div className="relative z-10 flex justify-between items-center">
                     <span
                       className={`text-[9px] uppercase font-black tracking-widest px-2 py-0.5 rounded-full ${
-                        isMario
+                        isBotanica
+                          ? 'bg-[#BDA06C] text-[#1E2A20] font-serif border border-[#E0D0B5]'
+                          : isMario
                           ? 'bg-[#E60012] text-white font-mono border border-white'
                           : isP5
                           ? 'bg-[#E60012] text-white -skew-x-6 border border-white'
@@ -221,7 +250,9 @@ export const LandingTemplatesGallery: React.FC = () => {
                     >
                       {theme.tag}
                     </span>
-                    {isMario ? (
+                    {isBotanica ? (
+                      <span className="text-xs">🌿</span>
+                    ) : isMario ? (
                       <Gamepad2 className="w-4 h-4 text-[#FFE082]" />
                     ) : isP5 ? (
                       <Flame className="w-4 h-4 text-[#FFF000]" />
@@ -234,7 +265,9 @@ export const LandingTemplatesGallery: React.FC = () => {
                   <div className="relative z-10 text-center my-auto px-1">
                     <p
                       className={`text-[8px] uppercase tracking-[0.2em] font-mono mb-1 ${
-                        isMario
+                        isBotanica
+                          ? 'text-[#BDA06C] font-serif'
+                          : isMario
                           ? 'text-[#FFE082] font-black'
                           : isP5
                           ? 'text-[#FFF000] font-black'
@@ -245,11 +278,13 @@ export const LandingTemplatesGallery: React.FC = () => {
                           : 'text-[#FFFCF7]/70'
                       }`}
                     >
-                      {isMario ? '★ WORLD 1-1 QUEST ★' : isP5 ? '★ CALLING CARD ★' : isJawa ? 'ꦱꦼꦫꦠ꧀ꦲꦸꦊꦩ꧀' : isCute ? '🌸 UNDANGAN MANIS 🌸' : 'The Wedding Of'}
+                      {isBotanica ? 'BOTANICAL CONSERVATORY' : isMario ? '★ WORLD 1-1 QUEST ★' : isP5 ? '★ CALLING CARD ★' : isJawa ? 'ꦱꦼꦫꦠ꧀ꦲꦸꦊꦩ꧀' : isCute ? '🌸 UNDANGAN MANIS 🌸' : 'The Wedding Of'}
                     </p>
                     <h4
                       className={`text-lg font-bold leading-tight ${
-                        isMario
+                        isBotanica
+                          ? 'font-serif text-[#FAF8F5]'
+                          : isMario
                           ? 'font-mono text-white font-black tracking-tight'
                           : isP5
                           ? 'font-black uppercase italic tracking-tighter text-[#FFFCF7]'
@@ -264,7 +299,7 @@ export const LandingTemplatesGallery: React.FC = () => {
                     </h4>
                     <p
                       className={`text-[9px] mt-1 font-mono ${
-                        isMario ? 'text-[#FFE082]' : isP5 ? 'text-[#FFF000]' : isJawa ? 'text-[#D4AF37] font-serif' : isCute ? 'text-[#8A505F]' : 'text-[#FFFCF7]/80'
+                        isBotanica ? 'text-[#BDA06C]' : isMario ? 'text-[#FFE082]' : isP5 ? 'text-[#FFF000]' : isJawa ? 'text-[#D4AF37] font-serif' : isCute ? 'text-[#8A505F]' : 'text-[#FFFCF7]/80'
                       }`}
                     >
                       17 . 09 . 2021
@@ -272,7 +307,9 @@ export const LandingTemplatesGallery: React.FC = () => {
 
                     <div
                       className={`mt-3 p-2 rounded-xl border text-[9px] ${
-                        isMario
+                        isBotanica
+                          ? 'bg-[#1E2A20]/90 border-[#BDA06C]/60 text-[#FAF8F5]'
+                          : isMario
                           ? 'bg-black/75 border-white/70 font-mono text-white'
                           : isP5
                           ? 'bg-black/80 border-[#E60012] -skew-x-2 text-[#FFFCF7]'
@@ -285,10 +322,10 @@ export const LandingTemplatesGallery: React.FC = () => {
                     >
                       <p
                         className={`text-[7px] uppercase font-mono ${
-                          isMario ? 'text-[#FFE082]' : isCute ? 'text-[#FF5C8D]' : 'text-[#FFFCF7]/60'
+                          isBotanica ? 'text-[#BDA06C]' : isMario ? 'text-[#FFE082]' : isCute ? 'text-[#FF5C8D]' : 'text-[#FFFCF7]/60'
                         }`}
                       >
-                        {isMario ? 'PLAYER 1 INVITEE:' : isP5 ? 'TARGET INVITEE:' : isJawa ? 'Katur Dhumateng:' : 'Kepada Yth:'}
+                        {isBotanica ? 'DEAR HONORED GUEST:' : isMario ? 'PLAYER 1 INVITEE:' : isP5 ? 'TARGET INVITEE:' : isJawa ? 'Katur Dhumateng:' : 'Kepada Yth:'}
                       </p>
                       <p className="font-bold truncate">Tamu Terhormat</p>
                     </div>
@@ -298,7 +335,9 @@ export const LandingTemplatesGallery: React.FC = () => {
                   <div className="relative z-10 text-center">
                     <div
                       className={`w-full py-1.5 text-[9px] font-black uppercase tracking-wider shadow-md flex items-center justify-center gap-1 ${
-                        isMario
+                        isBotanica
+                          ? 'rounded-xl text-[#1E2A20] font-serif font-bold bg-[#BDA06C] border border-[#E0D0B5]'
+                          : isMario
                           ? 'bg-[#E60012] text-white font-mono border border-white'
                           : isP5
                           ? 'bg-[#E60012] text-white -skew-x-6 border border-white'
@@ -306,12 +345,13 @@ export const LandingTemplatesGallery: React.FC = () => {
                           ? 'rounded-xl text-[#1A1009] font-serif font-bold bg-[#D4AF37]'
                           : 'rounded-xl text-[#1C2D27]'
                       }`}
-                      style={!isP5 && !isJawa && !isMario ? { backgroundColor: theme.accentColor } : {}}
+                      style={!isP5 && !isJawa && !isMario && !isBotanica ? { backgroundColor: theme.accentColor } : {}}
                     >
+                      {isBotanica && <span className="text-[10px]">💌</span>}
                       {isMario && <span className="text-[10px]">🍄</span>}
                       {isP5 && <Zap className="w-3 h-3 text-[#FFF000] skew-x-6" />}
                       <span className={isP5 ? 'skew-x-6' : ''}>
-                        {isMario ? 'START GAME' : isJawa ? 'Bikak Ulem' : 'Buka Undangan'}
+                        {isBotanica ? 'Buka Surat Undangan' : isMario ? 'START GAME' : isJawa ? 'Bikak Ulem' : 'Buka Undangan'}
                       </span>
                     </div>
                   </div>
@@ -327,14 +367,14 @@ export const LandingTemplatesGallery: React.FC = () => {
                   </span>
                   <h3
                     className={`font-heading text-base sm:text-lg font-bold mt-1 leading-snug ${
-                      isSelected && (isP5 || isMario) ? 'text-white' : 'text-[#283D52]'
+                      isSelected && (isP5 || isMario || isBotanica) ? 'text-white' : 'text-[#283D52]'
                     }`}
                   >
                     {theme.name}
                   </h3>
                   <p
                     className={`text-xs mt-1.5 line-clamp-2 leading-relaxed ${
-                      isSelected && (isP5 || isMario) ? 'text-white/70' : 'text-[#768692]'
+                      isSelected && (isP5 || isMario || isBotanica) ? 'text-white/70' : 'text-[#768692]'
                     }`}
                   >
                     {theme.desc}
@@ -344,7 +384,7 @@ export const LandingTemplatesGallery: React.FC = () => {
                 {/* Card Footer Link - Direct live demo without login */}
                 <div
                   className={`mt-4 pt-3 border-t flex items-center justify-between ${
-                    isSelected && (isP5 || isMario) ? 'border-white/20' : 'border-[#C2A56B]/20'
+                    isSelected && (isP5 || isMario || isBotanica) ? 'border-white/20' : 'border-[#C2A56B]/20'
                   }`}
                 >
                   <Link
@@ -354,6 +394,8 @@ export const LandingTemplatesGallery: React.FC = () => {
                         ? 'text-[#FFE082] hover:text-white font-mono'
                         : isSelected && isP5
                         ? 'text-[#FFF000] hover:text-white'
+                        : isSelected && isBotanica
+                        ? 'text-[#BDA06C] hover:text-[#E0D0B5]'
                         : 'text-[#283D52] hover:text-[#C2A56B]'
                     }`}
                   >
@@ -365,7 +407,7 @@ export const LandingTemplatesGallery: React.FC = () => {
                   {isSelected && (
                     <span
                       className={`w-5 h-5 rounded-full flex items-center justify-center text-white ${
-                        isMario ? 'bg-[#5C94FC]' : isP5 ? 'bg-[#E60012]' : 'bg-[#283D52]'
+                        isBotanica ? 'bg-[#BDA06C] text-[#1E2A20]' : isMario ? 'bg-[#5C94FC]' : isP5 ? 'bg-[#E60012]' : 'bg-[#283D52]'
                       }`}
                     >
                       <Check className="w-3 h-3 text-white" />

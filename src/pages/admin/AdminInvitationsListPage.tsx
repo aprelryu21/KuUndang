@@ -362,6 +362,8 @@ export const AdminInvitationsListPage: React.FC = () => {
                         ? 'bg-[#D4AF37] text-[#1A1009]'
                         : inv.template_id === 'cute-pink-floral'
                         ? 'bg-[#FF5C8D] text-white'
+                        : inv.template_id === 'fleur-botanica'
+                        ? 'bg-[#293522] text-[#BDA06C] border border-[#BDA06C]/40'
                         : 'bg-[#283D52] text-[#FFFCF7]'
                     }`}
                   >
@@ -373,6 +375,8 @@ export const AdminInvitationsListPage: React.FC = () => {
                       ? 'Adat Jawa Sakral'
                       : inv.template_id === 'cute-pink-floral'
                       ? 'Pastel Bloom Pink'
+                      : inv.template_id === 'fleur-botanica'
+                      ? 'Fleur Botanica'
                       : 'The Royal Arch'}
                   </span>
                 </div>
@@ -551,6 +555,7 @@ export const AdminInvitationsListPage: React.FC = () => {
                   <option value="javanese-royal">Adat Jawa Keraton & Gamelan Sakral</option>
                   <option value="cute-pink-floral">Pastel Bloom & Bunga Lucu (Pink Manis)</option>
                   <option value="super-mario">8-Bit Retro Platformer (Super Mario Bros)</option>
+                  <option value="fleur-botanica">Fleur Botanica & Conservatory Glasshouse (Segel Lilin)</option>
                 </select>
               </div>
 
