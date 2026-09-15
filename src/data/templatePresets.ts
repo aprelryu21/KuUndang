@@ -242,8 +242,8 @@ export const TEMPLATE_PRESETS: Record<TemplateId, TemplatePreset> = {
   },
   'seri-malaysia': {
     id: 'seri-malaysia',
-    name: 'Laman Seri Melayu (Interactive Wedding Garden Quest)',
-    badge: 'PETUALANGAN 2D TAMAN PERNIKAHAN',
+    name: '2D RPG Taman (Interactive Wedding Garden Quest)',
+    badge: 'PETUALANGAN 2D RPG TAMAN',
     accentColor: '#D7BB83',
     theme_config: {
       primary_color: '#4C030A',

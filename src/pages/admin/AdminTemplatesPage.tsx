@@ -141,9 +141,9 @@ const TEMPLATES: TemplateOption[] = [
   },
   {
     id: 'seri-malaysia',
-    name: 'Laman Seri Melayu (Interactive Wedding Garden Quest)',
+    name: '2D RPG Taman (Interactive Wedding Garden Quest)',
     tagline: 'Petualangan 2D RPG Eksplorasi Taman Pernikahan, Pilihan Busana Karakter & Stan Interaktif',
-    badge: 'PETUALANGAN 2D RPG',
+    badge: 'PETUALANGAN 2D RPG TAMAN',
     accentColor: '#D7BB83',
     bgGradient: 'from-[#4C030A] via-[#8A1B26] to-[#FFFCF3]',
     borderColor: 'border-[#D7BB83]',
@@ -158,7 +158,7 @@ const TEMPLATES: TemplateOption[] = [
       'Stan Acara, Galeri Gazebo, Linimasa Kisah Cinta, Buku Tamu RSVP & Amplop Digital',
       'Quick Navigation Dock di bagian bawah layar untuk teleportasi instan ke setiap pos',
     ],
-    tags: ['2D RPG', 'Laman Seri', 'Taman Pernikahan', 'Avatar Karakter', 'Canvas 60FPS'],
+    tags: ['2D RPG Taman', 'Taman Pernikahan', 'Avatar Karakter', 'Canvas 60FPS', 'Eksplorasi'],
   },
 ];
 

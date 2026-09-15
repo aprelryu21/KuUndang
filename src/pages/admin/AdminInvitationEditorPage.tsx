@@ -474,7 +474,7 @@ ${invitation.groom_nickname} & ${invitation.bride_nickname}`;
                     <option value="cute-pink-floral">Pastel Bloom & Bunga Lucu (Pink & Floral Style)</option>
                     <option value="super-mario">8-Bit Retro Platformer (Super Wedding Bros - Game Mario)</option>
                     <option value="fleur-botanica">Fleur Botanica & Conservatory Glasshouse (Botanical & Wax Seal)</option>
-                    <option value="seri-malaysia">Laman Seri Melayu (Interactive 2D Wedding Garden Quest)</option>
+                    <option value="seri-malaysia">2D RPG Taman (Interactive 2D Wedding Garden Quest)</option>
                   </select>
                 </div>
               </div>

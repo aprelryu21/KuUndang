@@ -321,6 +321,10 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
         templateQuery === 'fleur-de-brume'
       ? 'fleur-botanica'
       : templateQuery === 'seri-malaysia' ||
+        templateQuery === '2d-rpg-taman' ||
+        templateQuery === 'rpg-taman' ||
+        templateQuery === '2d-rpg' ||
+        templateQuery === 'taman' ||
         templateQuery === 'malaysia' ||
         templateQuery === 'laman-seri' ||
         templateQuery === 'garden-quest' ||
@@ -335,7 +339,7 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
     (data as any).template_id ||
     'royal-arch';
 
-  // Render Seri Malaysia (Interactive 2D Wedding Garden Quest) Template
+  // Render 2D RPG Taman (Interactive 2D Wedding Garden Quest) Template
   if (activeTemplate === 'seri-malaysia') {
     return (
       <div className="relative min-h-screen bg-[#1A1015]">
@@ -345,7 +349,7 @@ export const PublicWeddingPage: React.FC<PublicWeddingPageProps> = ({ isPreview 
             <div className="flex items-center gap-2">
               <Eye className="w-4 h-4 text-[#D7BB83]" />
               <span>
-                PREVIEW [LAMAN SERI MELAYU 2D GARDEN QUEST] — {invitation.title} ({(invitation.status || 'published').toUpperCase()})
+                PREVIEW [2D RPG TAMAN WEDDING QUEST] — {invitation.title} ({(invitation.status || 'published').toUpperCase()})
               </span>
             </div>
             <Link
